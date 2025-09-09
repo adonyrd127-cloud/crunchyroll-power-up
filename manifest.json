@@ -1,0 +1,75 @@
+{
+  "manifest_version": 3,
+  "name": "Crunchyroll Power Up",
+  "version": "1.6.32",
+  "description": "Enhanced Crunchyroll experience with Mini Player, skip buttons, and advanced features",
+  "default_locale": "en",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.crunchyroll.com/*",
+    "*://crunchyroll.com/*",
+    "*://beta.crunchyroll.com/*",
+    "*://graphql.anilist.co/*",
+    "*://localhost:*/*"
+  ],
+  "icons": {
+    "16": "icons/nuevo.png",
+    "48": "icons/nuevo.png",
+    "128": "icons/nuevo.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Crunchyroll Power Up",
+    "default_icon": {
+      "16": "icons/nuevo.png",
+      "48": "icons/nuevo.png",
+      "128": "icons/nuevo.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.crunchyroll.com/*", "*://crunchyroll.com/*", "*://beta.crunchyroll.com/*", "*://localhost:*/*", "file://*/*"],
+      "exclude_matches": ["*://sso.crunchyroll.com/*"],
+            "js": [
+                "episodeAirDate.js",
+                "content.js",
+                "features/miniplayer.js",
+                "features/pipControl.js",
+                "features/screenSizeButtons.js",
+                "content_scripts/calendarFilter.js"
+            ],
+      "css": ["content.css", "nextEpisode.css", "css/calendarFilter.css", "css/screenSizeButtons.css"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "popup.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content.css",
+        "nextEpisode.css",
+        "css/calendarFilter.css",
+        "css/screenSizeButtons.css",
+        "episodeAirDate.js",
+        "content_scripts/calendarFilter.js",
+        "features/miniplayer.js",
+        "features/pipControl.js",
+        "features/screenSizeButtons.js",
+        "icons/nuevo.png"
+      ],
+      "matches": [ "*://*.crunchyroll.com/*", "*://crunchyroll.com/*", "*://beta.crunchyroll.com/*" ]
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+
+{
+  "ext_name": {
+    "message": "Crunchyroll Power Up"
+  },
+  "ext_description": {
+    "message": "V1.6.17 Moderno: Botones flotantes estilo YouTube con diseño píldora, gradiente naranja, texto multiidioma, efectos hover, visibilidad temporal de 5 segundos, filtrado avanzado de calendario y Mini Reproductor Picture-in-Picture mejorado con detección robusta. Autor: ING, Adony R."
+  },
+  "popup_title": {
+    "message": "Configuración de Crunchyroll Power Up"
+  },
+  "app_title": {
+    "message": "Crunchyroll Power Up"
+  },
+  "app_subtitle": {
+    "message": "Mejora tu experiencia en Crunchyroll Power Up"
+  },
+  "core_features": {
+    "message": "Características Principales"
+  },
+  "auto_skip_title": {
+    "message": "Salto Automático"
+  },
+  "auto_skip_description": {
+    "message": "Saltar automáticamente intros, resúmenes y finales."
+  },
+  "intro_label": {
+    "message": "Intro"
+  },
+  "recap_label": {
+    "message": "Resumen"
+  },
+  "ending_label": {
+    "message": "Final"
+  },
+  "theater_mode_title": {
+    "message": "Modos de Pantalla"
+  },
+  "theater_mode_description": {
+    "message": "Activar botones para cambiar el tamaño del reproductor de video."
+  },
+  "enable_theater_mode": {
+    "message": "Activar Modos de Pantalla"
+  },
+  "next_episode_title": {
+    "message": "Fecha del Próximo Episodio"
+  },
+  "next_episode_description": {
+    "message": "Mostrar cuándo estará disponible el próximo episodio."
+  },
+  "show_next_episode": {
+    "message": "Mostrar Fecha del Próximo Episodio"
+  },
+  "calendar_filter_title": {
+    "message": "Filtro de Calendario"
+  },
+  "calendar_filter_description": {
+    "message": "Filtrado avanzado para el calendario de lanzamientos de Crunchyroll."
+  },
+  "enable_calendar_filter": {
+    "message": "Activar Filtro de Calendario"
+  },
+  "calendar_filter_ui_title": {
+    "message": "Filtro de Calendario"
+  },
+  "show_filters": {
+    "message": "Mostrar Filtros"
+  },
+  "hide_filters": {
+    "message": "Ocultar Filtros"
+  },
+  "dubbed_filter": {
+    "message": "Episodios Doblados"
+  },
+  "dubbed_only": {
+    "message": "Solo"
+  },
+  "dubbed_show": {
+    "message": "Mostrar"
+  },
+  "dubbed_hide": {
+    "message": "Ocultar"
+  },
+  "language_filter": {
+    "message": "Idiomas"
+  },
+  "lang_english": {
+    "message": "Inglés"
+  },
+  "lang_spanish": {
+    "message": "Español"
+  },
+  "lang_french": {
+    "message": "Francés"
+  },
+  "lang_german": {
+    "message": "Alemán"
+  },
+  "lang_others": {
+    "message": "Otros"
+  },
+  "queue_filter": {
+    "message": "En Cola"
+  },
+  "queue_only": {
+    "message": "Solo"
+  },
+  "queue_show": {
+    "message": "Mostrar"
+  },
+  "queue_hide": {
+    "message": "Ocultar"
+  },
+  "premiere_filter": {
+    "message": "Estrenos"
+  },
+  "premiere_only": {
+    "message": "Solo"
+  },
+  "premiere_show": {
+    "message": "Mostrar"
+  },
+  "premiere_hide": {
+    "message": "Ocultar"
+  },
+  "reset_filters": {
+    "message": "Restablecer Filtros"
+  },
+  "hidden": {
+    "message": "Ocultos"
+  },
+  "nextEpisodeAirsAt": {
+    "message": "El próximo episodio se emite el $date$ a $time$",
+    "placeholders": {
+      "date": {
+        "content": "$1"
+      },
+      "time": {
+        "content": "$2"
+      }
+    }
+  },
+  "showEpisodeAirDate": {
+    "message": "Mostrar fecha de emisión del próximo episodio"
+  },
+  "mini_player_title": {
+    "message": "Mini Reproductor"
+  },
+  "mini_player_description": {
+    "message": "Activar Picture-in-Picture para ver videos en una ventana flotante."
+  },
+  "enable_mini_player": {
+    "message": "Activar Mini Reproductor"
+  },
+  "footer_text": {
+    "message": "Experiencia mejorada con características esenciales - ING, Adony R."
+  }
+}

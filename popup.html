@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>__MSG_popup_title__</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 380px;
+            min-height: 520px;
+            background: #0b1120;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+        }
+
+        .header {
+            padding: 24px 20px 20px 20px;
+            text-align: center;
+            background: #0b1120;
+        }
+
+                .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .logo-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #8b9dc3;
+            margin-top: 4px;
+        }
+
+        .content {
+            padding: 0 20px 20px 20px;
+        }
+
+        .section-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff6b35;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .feature-card {
+            background: #1a2332;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #2a3441;
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            color: #ff6b35;
+            flex-shrink: 0;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            flex: 1;
+        }
+
+        .feature-description {
+            font-size: 12px;
+            color: #8b9dc3;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            margin-left: 32px;
+        }
+
+        .feature-controls {
+            margin-left: 32px;
+        }
+
+        .pill-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pill-button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #2a3441;
+            border: 1px solid #3a4551;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #8b9dc3;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .pill-button:hover {
+            background: #3a4551;
+            border-color: #4a5561;
+        }
+
+        .pill-button.active {
+            background: #ff6b35;
+            border-color: #ff6b35;
+            color: #ffffff;
+        }
+
+        .pill-button input[type="checkbox"] {
+            display: none;
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .switch-label {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #2a3441;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .switch.active {
+            background: #ff6b35;
+        }
+
+        .switch-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .switch.active .switch-thumb {
+            transform: translateX(20px);
+        }
+
+        .switch input[type="checkbox"] {
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 16px 20px;
+            color: #8b9dc3;
+            font-size: 11px;
+            border-top: 1px solid #2a3441;
+            background: #0b1120;
+        }
+
+        .version {
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        /* Icons using CSS */
+        .icon-play::before {
+            content: "▶";
+        }
+
+        .icon-theater::before {
+            content: "⛶";
+        }
+
+        .icon-calendar::before {
+            content: "📅";
+        }
+
+        .icon-filter::before {
+            content: "🔍";
+        }
+
+        .icon-pip::before {
+            content: "📺";
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            body {
+                width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <img src="icons/nuevo.png" alt="logo" class="logo-img">
+            <div>
+                <div class="title">__MSG_app_title__</div>
+                <div class="subtitle">__MSG_app_subtitle__</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section-header">__MSG_core_features__</div>
+        
+        <div class="feature-card">
+            <div class="feature-header">
+                <div class="feature-icon icon-play">▶</div>
+                <div class="feature-title">__MSG_auto_skip_title__</div>
+            </div>
+            <div class="feature-description">
+                __MSG_auto_skip_description__
+            </div>
+            <div class="feature-controls">
+                <div class="pill-buttons">
+                    <label class="pill-button" id="intro-pill">
+                        <input type="checkbox" id="skipIntro" />
+                        <span>🟠</span>
+                        <span>__MSG_intro_label__</span>
+                    </label>
+                    <label class="pill-button" id="recap-pill">
+                        <input type="checkbox" id="skipRecap" />
+                        <span>🔄</span>
+                        <span>__MSG_recap_label__</span>
+                    </label>
+                    <label class="pill-button" id="ending-pill">
+                        <input type="checkbox" id="skipEnding" />
+                        <span>🔚</span>
+                        <span>__MSG_ending_label__</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-header">
+                <div class="feature-icon icon-theater">⛶</div>
+                <div class="feature-title">__MSG_theater_mode_title__</div>
+            </div>
+            <div class="feature-description">
+                __MSG_theater_mode_description__
+            </div>
+            <div class="feature-controls">
+                <div class="switch-container">
+                    <span class="switch-label">__MSG_enable_theater_mode__</span>
+                    <label class="switch" id="theater-switch">
+                        <input type="checkbox" id="theaterMode" />
+                        <div class="switch-thumb"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-header">
+                <div class="feature-icon icon-calendar">📅</div>
+                <div class="feature-title">__MSG_next_episode_title__</div>
+            </div>
+            <div class="feature-description">
+                __MSG_next_episode_description__
+            </div>
+            <div class="feature-controls">
+                <div class="switch-container">
+                    <span class="switch-label">__MSG_show_next_episode__</span>
+                    <label class="switch" id="episode-switch">
+                        <input type="checkbox" id="nextEpisodeDate" />
+                        <div class="switch-thumb"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-header">
+                <div class="feature-icon icon-filter">🔍</div>
+                <div class="feature-title">__MSG_calendar_filter_title__</div>
+            </div>
+            <div class="feature-description">
+                __MSG_calendar_filter_description__
+            </div>
+            <div class="feature-controls">
+                <div class="switch-container">
+                    <span class="switch-label">__MSG_enable_calendar_filter__</span>
+                    <label class="switch" id="calendar-filter-switch">
+                        <input type="checkbox" id="calendarFilter" />
+                        <div class="switch-thumb"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-header">
+                <div class="feature-icon icon-pip">📺</div>
+                <div class="feature-title">__MSG_mini_player_title__</div>
+            </div>
+            <div class="feature-description">
+                __MSG_mini_player_description__
+            </div>
+            <div class="feature-controls">
+                <div class="switch-container">
+                    <span class="switch-label">__MSG_enable_mini_player__</span>
+                    <label class="switch" id="mini-player-switch">
+                        <input type="checkbox" id="miniPlayer" />
+                        <div class="switch-thumb"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        __MSG_app_title__ <span class="version">v1.6.17</span> — __MSG_footer_text__
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

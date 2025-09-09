@@ -1,0 +1,43 @@
+/* Screen Size Buttons CSS - Exact replica of PiP repository styles */
+
+.pip-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    height: 40px;
+    width: 40px;
+}
+
+.pip-control:active {
+    opacity: 0.2;
+}
+
+.pip-control:hover {
+    background-color: #00000000;
+}
+
+/* Size-specific styles for video containers */
+.screen-size-small {
+    width: 640px !important;
+    height: 360px !important;
+    max-width: 640px !important;
+    max-height: 360px !important;
+    margin: 0 auto !important;
+}
+
+.screen-size-normal {
+    /* Default Crunchyroll styles */
+}
+
+.screen-size-theater {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 70vh !important;
+    max-height: 70vh !important;
+}
+
+.screen-size-fullscreen {
+    /* Fullscreen is handled by the browser API */
+}
+

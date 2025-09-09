@@ -1,0 +1,300 @@
+
+/* Crunchy+ Plus Calendar Filter CSS v1.6.14 */
+/* Crunchyroll Orange Theme Integration with correct hiding class */
+
+.crunchy-plus-calendar-filter {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    border-bottom: 3px solid #e55a2b;
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 0 0 16px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.crunchy-plus-filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.crunchy-plus-filter-title {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.crunchy-plus-filter-title::before {
+    content: "🔍";
+    font-size: 28px;
+}
+
+.crunchy-plus-filter-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 8px 16px;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.crunchy-plus-filter-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.crunchy-plus-filter-toggle.collapsed {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.crunchy-plus-filter-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.crunchy-plus-filter-controls.hidden {
+    display: none;
+}
+
+.crunchy-plus-filter-group {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.crunchy-plus-filter-group-title {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.crunchy-plus-filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.crunchy-plus-filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    backdrop-filter: blur(5px);
+}
+
+.crunchy-plus-filter-option:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.crunchy-plus-filter-option.active {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #ffffff;
+    color: #ff6b35;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+.crunchy-plus-filter-option input[type="checkbox"],
+.crunchy-plus-filter-option input[type="radio"] {
+    display: none;
+}
+
+.crunchy-plus-filter-option .emoji {
+    font-size: 16px;
+}
+
+/* Language specific styling */
+.crunchy-plus-filter-option[data-lang="english"] .emoji::before { content: "🇺🇸"; }
+.crunchy-plus-filter-option[data-lang="spanish"] .emoji::before { content: "🇪🇸"; }
+.crunchy-plus-filter-option[data-lang="french"] .emoji::before { content: "🇫🇷"; }
+.crunchy-plus-filter-option[data-lang="german"] .emoji::before { content: "🇩🇪"; }
+.crunchy-plus-filter-option[data-lang="others"] .emoji::before { content: "🌍"; }
+
+/* Status counters */
+.crunchy-plus-hidden-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.crunchy-plus-hidden-counter.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Day containers for counter positioning */
+.crunchy-plus-day-container {
+    position: relative;
+}
+
+/* Correct hiding class from original repository */
+.cr-rs-hide {
+    display: none !important;
+}
+
+/* Episode visibility animation */
+.crunchy-plus-episode-visible {
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.3s ease;
+}
+
+/* Reset button */
+.crunchy-plus-reset-filters {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.crunchy-plus-reset-filters:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.crunchy-plus-reset-filters::before {
+    content: "🔄";
+    font-size: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .crunchy-plus-calendar-filter {
+        padding: 16px;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    .crunchy-plus-filter-controls {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .crunchy-plus-filter-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .crunchy-plus-filter-title {
+        font-size: 20px;
+        justify-content: center;
+    }
+    
+    .crunchy-plus-filter-options {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .crunchy-plus-filter-option {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    
+    .crunchy-plus-filter-group {
+        padding: 12px;
+    }
+    
+    .crunchy-plus-filter-group-title {
+        font-size: 14px;
+    }
+}
+
+/* Animation keyframes */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.crunchy-plus-calendar-filter {
+    animation: slideDown 0.5s ease-out;
+}
+
+.crunchy-plus-filter-group {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Dark mode compatibility */
+@media (prefers-color-scheme: dark) {
+    .crunchy-plus-calendar-filter {
+        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+    }
+    
+    .crunchy-plus-filter-group {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .crunchy-plus-filter-option {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.25);
+    }
+}
