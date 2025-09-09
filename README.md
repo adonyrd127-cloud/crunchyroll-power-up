@@ -1,6 +1,10 @@
-# Crunchyroll Power Up
-
-Una extensión de navegador que mejora la experiencia de Crunchyroll con funciones avanzadas.
+<div align="center">
+  <img src="icons/nuevo.png" alt="Crunchyroll Power Up" width="128" height="128">
+  
+  # Crunchyroll Power Up
+  
+  Una extensión de navegador que mejora la experiencia de Crunchyroll con funciones avanzadas.
+</div>
 
 ## Características
 
