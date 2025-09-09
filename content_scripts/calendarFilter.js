@@ -1,9 +1,9 @@
 
-// Crunchy+ Plus Calendar Filter v1.6.14
+// Crunchyroll Power Up Calendar Filter v1.6.32
 // Advanced filtering system for Crunchyroll release calendar
 // Based on proven patterns from roshinc/release-calendar-filter-for-crunchyroll
 
-console.log("🔍 Crunchy+ Plus Calendar Filter: Script loaded");
+console.log("🔍 Crunchyroll Power Up Calendar Filter: Script loaded");
 
 // Feature flags
 const SHOW_HIDDEN_COUNT = false; // Hide counters in production
@@ -948,4 +948,4 @@ if (!window.crunchyPlusLastUrl) {
     }).observe(document, { subtree: true, childList: true });
 }
 
-console.log("🔍 Crunchy+ Plus Calendar Filter: Script initialized");
+console.log("🔍 Crunchyroll Power Up Calendar Filter: Script initialized");

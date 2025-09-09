@@ -1,6 +1,6 @@
 
-// Popup script para Crunchy+ Plus v1.6.11 - i18n SUPPORT ADDED + Calendar Filter
-console.log("🟠 Crunchy+ Plus Popup: Script loaded");
+// Popup script para Crunchyroll Power Up v1.6.32 - i18n SUPPORT ADDED + Calendar Filter
+console.log("🟠 Crunchyroll Power Up Popup: Script loaded");
 
 // i18n function to get localized messages
 function getMessage(key) {
