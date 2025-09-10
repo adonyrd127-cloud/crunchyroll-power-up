@@ -4,7 +4,7 @@
     "message": "Crunchyroll Power Up"
   },
   "ext_description": {
-    "message": "V1.6.17 Moderno: Botones flotantes estilo YouTube con diseño píldora, gradiente naranja, texto multiidioma, efectos hover, visibilidad temporal de 5 segundos, filtrado avanzado de calendario y Mini Reproductor Picture-in-Picture mejorado con detección robusta. Autor: ING, Adony R."
+    "message": "Experiencia mejorada de Crunchyroll con Mini Reproductor, botones de salto y funciones avanzadas. Autor: ING, Adony R."
   },
   "popup_title": {
     "message": "Configuración de Crunchyroll Power Up"
@@ -13,7 +13,7 @@
     "message": "Crunchyroll Power Up"
   },
   "app_subtitle": {
-    "message": "Mejora tu experiencia en Crunchyroll Power Up"
+    "message": "Mejora tu experiencia en Crunchyroll"
   },
   "core_features": {
     "message": "Características Principales"
@@ -153,6 +153,6 @@
     "message": "Activar Mini Reproductor"
   },
   "footer_text": {
-    "message": "Experiencia mejorada con características esenciales - ING, Adony R."
+    "message": "Experiencia mejorada de Crunchyroll con características esenciales - ING, Adony R."
   }
 }

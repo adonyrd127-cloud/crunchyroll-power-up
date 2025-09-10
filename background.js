@@ -24,7 +24,18 @@ const defaultSettings = {
   subtitleFont: 'Default',
   uiCustomization: true,
   marathonMode: true,
-  
+  malSync: false,
+  anilistSync: false,
+  subtitleTranslator: false,
+  targetLanguage: 'en',
+  commentTranslator: false,
+  sleepTimerEnabled: false,
+  sleepTimerMinutes: 60,
+  videoFiltersEnabled: false,
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+  nightMode: false,
   
   // New features
   communityRatings: true,

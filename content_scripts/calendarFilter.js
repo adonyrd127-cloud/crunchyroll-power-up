@@ -1,5 +1,4 @@
-
-// Crunchyroll Power Up Calendar Filter v1.6.32
+// Crunchyroll Power Up Calendar Filter v1.6.14
 // Advanced filtering system for Crunchyroll release calendar
 // Based on proven patterns from roshinc/release-calendar-filter-for-crunchyroll
 
@@ -59,7 +58,7 @@ function clearPersistedState() {
     }
 }
 
-class CrunchyPlusCalendarFilter {
+class CrunchyrollPowerUpCalendarFilter {
     constructor() {
         this.isEnabled = false;
         this.filters = {
@@ -190,7 +189,7 @@ class CrunchyPlusCalendarFilter {
     
     createFilterUI() {
         // Remove existing filter UI if present
-        const existing = document.querySelector('.crunchy-plus-calendar-filter');
+        const existing = document.querySelector('.crunchyroll-power-up-calendar-filter');
         if (existing) {
             existing.remove();
         }
@@ -204,18 +203,18 @@ class CrunchyPlusCalendarFilter {
         
         // Create main filter container
         const filterContainer = document.createElement('div');
-        filterContainer.className = 'crunchy-plus-calendar-filter';
+        filterContainer.className = 'crunchyroll-power-up-calendar-filter';
         
         // Create header
         const filterHeader = document.createElement('div');
-        filterHeader.className = 'crunchy-plus-filter-header';
+        filterHeader.className = 'crunchyroll-power-up-filter-header';
         
         const title = document.createElement('h2');
-        title.className = 'crunchy-plus-filter-title';
+        title.className = 'crunchyroll-power-up-filter-title';
         title.textContent = this.getMessage('calendar_filter_ui_title');
         
         const toggleButton = document.createElement('button');
-        toggleButton.className = 'crunchy-plus-filter-toggle';
+        toggleButton.className = 'crunchyroll-power-up-filter-toggle';
         toggleButton.textContent = this.isCollapsed ? this.getMessage('show_filters') : this.getMessage('hide_filters');
         toggleButton.addEventListener('click', () => this.toggleCollapse());
         
@@ -224,7 +223,7 @@ class CrunchyPlusCalendarFilter {
         
         // Create controls container
         const controlsContainer = document.createElement('div');
-        controlsContainer.className = `crunchy-plus-filter-controls ${this.isCollapsed ? 'hidden' : ''}`;
+        controlsContainer.className = `crunchyroll-power-up-filter-controls ${this.isCollapsed ? 'hidden' : ''}`;
         
         // Dubbed filter group
         const dubbedGroup = this.createFilterGroup('dubbed_filter', [
@@ -264,7 +263,7 @@ class CrunchyPlusCalendarFilter {
         
         // Reset button
         const resetButton = document.createElement('button');
-        resetButton.className = 'crunchy-plus-reset-filters';
+        resetButton.className = 'crunchyroll-power-up-reset-filters';
         resetButton.textContent = this.getMessage('reset_filters');
         resetButton.addEventListener('click', () => this.resetFilters());
         controlsContainer.appendChild(resetButton);
@@ -281,18 +280,18 @@ class CrunchyPlusCalendarFilter {
     
     createFilterGroup(titleKey, options, currentValue, inputType = 'radio') {
         const group = document.createElement('div');
-        group.className = 'crunchy-plus-filter-group';
+        group.className = 'crunchyroll-power-up-filter-group';
         
         const title = document.createElement('div');
-        title.className = 'crunchy-plus-filter-group-title';
+        title.className = 'crunchyroll-power-up-filter-group-title';
         title.textContent = this.getMessage(titleKey);
         
         const optionsContainer = document.createElement('div');
-        optionsContainer.className = 'crunchy-plus-filter-options';
+        optionsContainer.className = 'crunchyroll-power-up-filter-options';
         
         options.forEach(option => {
             const optionElement = document.createElement('label');
-            optionElement.className = `crunchy-plus-filter-option ${currentValue === option.value ? 'active' : ''}`;
+            optionElement.className = `crunchyroll-power-up-filter-option ${currentValue === option.value ? 'active' : ''}`;
             
             const input = document.createElement('input');
             input.type = inputType;
@@ -321,7 +320,7 @@ class CrunchyPlusCalendarFilter {
                     }
                     
                     // Update UI
-                    optionsContainer.querySelectorAll('.crunchy-plus-filter-option').forEach(el => {
+                    optionsContainer.querySelectorAll('.crunchyroll-power-up-filter-option').forEach(el => {
                         el.classList.remove('active');
                     });
                     optionElement.classList.add('active');
@@ -344,18 +343,18 @@ class CrunchyPlusCalendarFilter {
     
     createLanguageFilterGroup(options) {
         const group = document.createElement('div');
-        group.className = 'crunchy-plus-filter-group';
+        group.className = 'crunchyroll-power-up-filter-group';
         
         const title = document.createElement('div');
-        title.className = 'crunchy-plus-filter-group-title';
+        title.className = 'crunchyroll-power-up-filter-group-title';
         title.textContent = this.getMessage('language_filter');
         
         const optionsContainer = document.createElement('div');
-        optionsContainer.className = 'crunchy-plus-filter-options';
+        optionsContainer.className = 'crunchyroll-power-up-filter-options';
         
         options.forEach(option => {
             const optionElement = document.createElement('label');
-            optionElement.className = `crunchy-plus-filter-option ${this.filters.languages[option.value] ? 'active' : ''}`;
+            optionElement.className = `crunchyroll-power-up-filter-option ${this.filters.languages[option.value] ? 'active' : ''}`;
             optionElement.setAttribute('data-lang', option.lang);
             
             const input = document.createElement('input');
@@ -400,8 +399,8 @@ class CrunchyPlusCalendarFilter {
     
     toggleCollapse() {
         this.isCollapsed = !this.isCollapsed;
-        const controls = this.filterUI.querySelector('.crunchy-plus-filter-controls');
-        const toggleButton = this.filterUI.querySelector('.crunchy-plus-filter-toggle');
+        const controls = this.filterUI.querySelector('.crunchyroll-power-up-filter-controls');
+        const toggleButton = this.filterUI.querySelector('.crunchyroll-power-up-filter-toggle');
         
         if (this.isCollapsed) {
             controls.classList.add('hidden');
@@ -767,13 +766,13 @@ class CrunchyPlusCalendarFilter {
     showEpisode(episode) {
         // Remove the correct hiding class from original repository
         episode.classList.remove('cr-rs-hide');
-        episode.classList.add('crunchy-plus-episode-visible');
+        episode.classList.add('crunchyroll-power-up-episode-visible');
     }
     
     hideEpisode(episode) {
         // Use the correct hiding class from original repository
         episode.classList.add('cr-rs-hide');
-        episode.classList.remove('crunchy-plus-episode-visible');
+        episode.classList.remove('crunchyroll-power-up-episode-visible');
     }
     
     findDayContainer(episode) {
@@ -805,7 +804,7 @@ class CrunchyPlusCalendarFilter {
     
     updateHiddenCounters() {
         // Remove existing counters
-        document.querySelectorAll('.crunchy-plus-hidden-counter').forEach(counter => {
+        document.querySelectorAll('.crunchyroll-power-up-hidden-counter').forEach(counter => {
             counter.remove();
         });
         
@@ -820,13 +819,13 @@ class CrunchyPlusCalendarFilter {
                 const dayContainers = this.findDayContainersByKey(dayKey);
                 dayContainers.forEach(container => {
                     const counter = document.createElement('div');
-                    counter.className = 'crunchy-plus-hidden-counter';
+                    counter.className = 'crunchyroll-power-up-hidden-counter';
                     counter.textContent = `${count} ${this.getMessage('hidden')}`;
                     
                     if (getComputedStyle(container).position === 'static') {
                         container.style.position = 'relative';
                     }
-                    container.classList.add('crunchy-plus-day-container');
+                    container.classList.add('crunchyroll-power-up-day-container');
                     
                     container.appendChild(counter);
                     
@@ -927,22 +926,22 @@ class CrunchyPlusCalendarFilter {
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        new CrunchyPlusCalendarFilter();
+        new CrunchyrollPowerUpCalendarFilter();
     });
 } else {
-    new CrunchyPlusCalendarFilter();
+    new CrunchyrollPowerUpCalendarFilter();
 }
 
 // Also initialize on page navigation (for SPAs)
-if (!window.crunchyPlusLastUrl) {
-    window.crunchyPlusLastUrl = location.href;
+if (!window.crunchyrollPowerUpLastUrl) {
+    window.crunchyrollPowerUpLastUrl = location.href;
     new MutationObserver(() => {
         const url = location.href;
-        if (url !== window.crunchyPlusLastUrl) {
-            window.crunchyPlusLastUrl = url;
+        if (url !== window.crunchyrollPowerUpLastUrl) {
+            window.crunchyrollPowerUpLastUrl = url;
             console.log("🔍 Calendar Filter: URL changed, reinitializing");
             setTimeout(() => {
-                new CrunchyPlusCalendarFilter();
+                new CrunchyrollPowerUpCalendarFilter();
             }, 2000);
         }
     }).observe(document, { subtree: true, childList: true });

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="icons/nuevo.png" alt="Crunchyroll Power Up" width="128" height="128">
+  <img src="icons/icono chrome.png" alt="Crunchyroll Power Up" width="128" height="128">
   
   # Crunchyroll Power Up
   
@@ -25,7 +25,7 @@
 
 ## Versión
 
-**v1.6.32** - Versión actual con todas las funciones implementadas
+**v1.6.32** - Versión funcional y optimizada
 
 ## Permisos
 
@@ -46,4 +46,8 @@ Compatible con:
 
 - Inglés (English)
 - Español (Spanish)
+
+## Estado
+
+✅ **Versión Funcional** - Todas las características están operativas y probadas
 

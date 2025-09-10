@@ -18,17 +18,17 @@
     "*://localhost:*/*"
   ],
   "icons": {
-    "16": "icons/nuevo.png",
-    "48": "icons/nuevo.png",
-    "128": "icons/nuevo.png"
+    "16": "icons/icono chrome.png",
+    "48": "icons/icono chrome.png",
+    "128": "icons/icono chrome.png"
   },
   "action": {
     "default_popup": "popup.html",
     "default_title": "Crunchyroll Power Up",
     "default_icon": {
-      "16": "icons/nuevo.png",
-      "48": "icons/nuevo.png",
-      "128": "icons/nuevo.png"
+      "16": "icons/icono chrome.png",
+      "48": "icons/icono chrome.png",
+      "128": "icons/icono chrome.png"
     }
   },
   "content_scripts": [
@@ -67,7 +67,7 @@
         "features/miniplayer.js",
         "features/pipControl.js",
         "features/screenSizeButtons.js",
-        "icons/nuevo.png"
+        "icons/icono chrome.png"
       ],
       "matches": [ "*://*.crunchyroll.com/*", "*://crunchyroll.com/*", "*://beta.crunchyroll.com/*" ]
     }

@@ -4,7 +4,7 @@
     "message": "Crunchyroll Power Up"
   },
   "ext_description": {
-    "message": "V1.6.17 Modern: YouTube-style floating buttons with pill design, orange gradient, multilingual text, hover effects, 5-second temporal visibility, advanced calendar filtering, and enhanced Picture-in-Picture Mini Player with robust detection. Author: ING, Adony R."
+    "message": "Enhanced Crunchyroll experience with Mini Player, skip buttons, and advanced features. Author: ING, Adony R."
   },
   "popup_title": {
     "message": "Crunchyroll Power Up Settings"
@@ -13,7 +13,7 @@
     "message": "Crunchyroll Power Up"
   },
   "app_subtitle": {
-    "message": "Enhance your Crunchyroll Power Up experience"
+    "message": "Enhance your Crunchyroll experience"
   },
   "core_features": {
     "message": "Core Features"
@@ -153,6 +153,6 @@
     "message": "Enable Mini Player"
   },
   "footer_text": {
-    "message": "Enhanced experience with essential features - ING, Adony R."
+    "message": "Enhanced Crunchyroll experience with essential features - ING, Adony R."
   }
 }

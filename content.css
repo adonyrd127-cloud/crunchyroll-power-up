@@ -55,7 +55,7 @@
 }
 
 /* Modern YouTube-style Skip Buttons */
-.crunchy-plus-skipper {
+.crunchyroll-power-up-skipper {
   position: fixed !important;
   bottom: 80px !important;
   right: 20px !important;
@@ -83,19 +83,19 @@
   pointer-events: auto !important;
 }
 
-.crunchy-plus-skipper:hover {
+.crunchyroll-power-up-skipper:hover {
   transform: scale(1.05) translateX(0) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
   background: linear-gradient(135deg, #ff7a47, #fa9d30) !important;
 }
 
-.crunchy-plus-skipper.active {
+.crunchyroll-power-up-skipper.active {
   opacity: 1 !important;
   transform: translateX(0) !important;
 }
 
 /* Skip button icons */
-.crunchy-plus-skipper .skip-icon {
+.crunchyroll-power-up-skipper .skip-icon {
   width: 14px !important;
   height: 14px !important;
   fill: currentColor !important;
@@ -103,27 +103,27 @@
 }
 
 /* Skip button text */
-.crunchy-plus-skipper .skip-text {
+.crunchyroll-power-up-skipper .skip-text {
   font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 1 !important;
 }
 
 /* Different positions for multiple buttons (if needed) */
-.crunchy-plus-skipper.position-1 {
+.crunchyroll-power-up-skipper.position-1 {
   bottom: 80px !important;
 }
 
-.crunchy-plus-skipper.position-2 {
+.crunchyroll-power-up-skipper.position-2 {
   bottom: 120px !important;
 }
 
-.crunchy-plus-skipper.position-3 {
+.crunchyroll-power-up-skipper.position-3 {
   bottom: 160px !important;
 }
 
 /* Download button styles */
-.crunchy-plus-download-btn {
+.crunchyroll-power-up-download-btn {
   background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
   color: white !important;
   border: none !important;
@@ -140,7 +140,7 @@
   backdrop-filter: blur(10px) !important;
 }
 
-.crunchy-plus-download-btn:hover {
+.crunchyroll-power-up-download-btn:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4) !important;
 }
@@ -173,7 +173,7 @@ video {
 }
 
 /* Animation keyframes */
-@keyframes crunchyPlusSlideIn {
+@keyframes crunchyrollPowerUpSlideIn {
   from { 
     transform: translateX(100%);
     opacity: 0;
@@ -184,7 +184,7 @@ video {
   }
 }
 
-@keyframes crunchyPlusSlideOut {
+@keyframes crunchyrollPowerUpSlideOut {
   from { 
     transform: translateX(0);
     opacity: 1;
@@ -195,7 +195,7 @@ video {
   }
 }
 
-@keyframes crunchyPlusFadeIn {
+@keyframes crunchyrollPowerUpFadeIn {
   from { 
     opacity: 0;
     transform: translateY(-20px);
@@ -206,7 +206,7 @@ video {
   }
 }
 
-@keyframes crunchyPlusFadeOut {
+@keyframes crunchyrollPowerUpFadeOut {
   from { 
     opacity: 1;
     transform: translateY(0);
@@ -219,20 +219,20 @@ video {
 
 /* Ensure our elements are always on top */
 .crunchy-plus-notification,
-.crunchy-plus-skipper,
-.crunchy-plus-download-btn {
+.crunchyroll-power-up-skipper,
+.crunchyroll-power-up-download-btn {
   z-index: 999999 !important;
 }
 
 /* Fix for potential conflicts with Crunchyroll styles */
 .crunchy-plus-notification *,
-.crunchy-plus-skipper *,
-.crunchy-plus-download-btn * {
+.crunchyroll-power-up-skipper *,
+.crunchyroll-power-up-download-btn * {
   box-sizing: border-box !important;
 }
 
 .crunchy-plus-notification svg,
-.crunchy-plus-skipper svg {
+.crunchyroll-power-up-skipper svg {
   width: 16px !important;
   height: 16px !important;
   fill: currentColor !important;
@@ -241,7 +241,7 @@ video {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .crunchy-plus-skipper {
+  .crunchyroll-power-up-skipper {
     right: 10px !important;
     bottom: 60px !important;
     font-size: 12px !important;
@@ -249,12 +249,12 @@ video {
     padding: 6px 12px !important;
   }
   
-  .crunchy-plus-skipper .skip-icon {
+  .crunchyroll-power-up-skipper .skip-icon {
     width: 12px !important;
     height: 12px !important;
   }
   
-  .crunchy-plus-skipper .skip-text {
+  .crunchyroll-power-up-skipper .skip-text {
     font-size: 12px !important;
   }
 }

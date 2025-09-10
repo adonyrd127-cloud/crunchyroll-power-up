@@ -1,8 +1,7 @@
-
-/* Crunchyroll Power Up Calendar Filter CSS v1.6.32 */
+/* Crunchyroll Power Up Calendar Filter CSS v1.6.14 */
 /* Crunchyroll Orange Theme Integration with correct hiding class */
 
-.crunchy-plus-calendar-filter {
+.crunchyroll-power-up-calendar-filter {
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -15,14 +14,14 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.crunchy-plus-filter-header {
+.crunchyroll-power-up-filter-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
 }
 
-.crunchy-plus-filter-title {
+.crunchyroll-power-up-filter-title {
     color: #ffffff;
     font-size: 24px;
     font-weight: 700;
@@ -33,12 +32,12 @@
     gap: 12px;
 }
 
-.crunchy-plus-filter-title::before {
+.crunchyroll-power-up-filter-title::before {
     content: "🔍";
     font-size: 28px;
 }
 
-.crunchy-plus-filter-toggle {
+.crunchyroll-power-up-filter-toggle {
     background: rgba(255, 255, 255, 0.2);
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 25px;
@@ -50,28 +49,28 @@
     backdrop-filter: blur(10px);
 }
 
-.crunchy-plus-filter-toggle:hover {
+.crunchyroll-power-up-filter-toggle:hover {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
 }
 
-.crunchy-plus-filter-toggle.collapsed {
+.crunchyroll-power-up-filter-toggle.collapsed {
     background: rgba(0, 0, 0, 0.2);
 }
 
-.crunchy-plus-filter-controls {
+.crunchyroll-power-up-filter-controls {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
     transition: all 0.3s ease;
 }
 
-.crunchy-plus-filter-controls.hidden {
+.crunchyroll-power-up-filter-controls.hidden {
     display: none;
 }
 
-.crunchy-plus-filter-group {
+.crunchyroll-power-up-filter-group {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     padding: 16px;
@@ -79,7 +78,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.crunchy-plus-filter-group-title {
+.crunchyroll-power-up-filter-group-title {
     color: #ffffff;
     font-size: 16px;
     font-weight: 600;
@@ -89,13 +88,13 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.crunchy-plus-filter-options {
+.crunchyroll-power-up-filter-options {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.crunchy-plus-filter-option {
+.crunchyroll-power-up-filter-option {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -112,13 +111,13 @@
     backdrop-filter: blur(5px);
 }
 
-.crunchy-plus-filter-option:hover {
+.crunchyroll-power-up-filter-option:hover {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-1px);
 }
 
-.crunchy-plus-filter-option.active {
+.crunchyroll-power-up-filter-option.active {
     background: rgba(255, 255, 255, 0.9);
     border-color: #ffffff;
     color: #ff6b35;
@@ -126,24 +125,24 @@
     box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
 }
 
-.crunchy-plus-filter-option input[type="checkbox"],
-.crunchy-plus-filter-option input[type="radio"] {
+.crunchyroll-power-up-filter-option input[type="checkbox"],
+.crunchyroll-power-up-filter-option input[type="radio"] {
     display: none;
 }
 
-.crunchy-plus-filter-option .emoji {
+.crunchyroll-power-up-filter-option .emoji {
     font-size: 16px;
 }
 
 /* Language specific styling */
-.crunchy-plus-filter-option[data-lang="english"] .emoji::before { content: "🇺🇸"; }
-.crunchy-plus-filter-option[data-lang="spanish"] .emoji::before { content: "🇪🇸"; }
-.crunchy-plus-filter-option[data-lang="french"] .emoji::before { content: "🇫🇷"; }
-.crunchy-plus-filter-option[data-lang="german"] .emoji::before { content: "🇩🇪"; }
-.crunchy-plus-filter-option[data-lang="others"] .emoji::before { content: "🌍"; }
+.crunchyroll-power-up-filter-option[data-lang="english"] .emoji::before { content: "🇺🇸"; }
+.crunchyroll-power-up-filter-option[data-lang="spanish"] .emoji::before { content: "🇪🇸"; }
+.crunchyroll-power-up-filter-option[data-lang="french"] .emoji::before { content: "🇫🇷"; }
+.crunchyroll-power-up-filter-option[data-lang="german"] .emoji::before { content: "🇩🇪"; }
+.crunchyroll-power-up-filter-option[data-lang="others"] .emoji::before { content: "🌍"; }
 
 /* Status counters */
-.crunchy-plus-hidden-counter {
+.crunchyroll-power-up-hidden-counter {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -160,13 +159,13 @@
     transition: all 0.3s ease;
 }
 
-.crunchy-plus-hidden-counter.visible {
+.crunchyroll-power-up-hidden-counter.visible {
     opacity: 1;
     transform: translateY(0);
 }
 
 /* Day containers for counter positioning */
-.crunchy-plus-day-container {
+.crunchyroll-power-up-day-container {
     position: relative;
 }
 
@@ -176,14 +175,14 @@
 }
 
 /* Episode visibility animation */
-.crunchy-plus-episode-visible {
+.crunchyroll-power-up-episode-visible {
     opacity: 1;
     transform: scale(1);
     transition: all 0.3s ease;
 }
 
 /* Reset button */
-.crunchy-plus-reset-filters {
+.crunchyroll-power-up-reset-filters {
     background: rgba(255, 255, 255, 0.2);
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 20px;
@@ -199,56 +198,56 @@
     gap: 8px;
 }
 
-.crunchy-plus-reset-filters:hover {
+.crunchyroll-power-up-reset-filters:hover {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
 }
 
-.crunchy-plus-reset-filters::before {
+.crunchyroll-power-up-reset-filters::before {
     content: "🔄";
     font-size: 16px;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-    .crunchy-plus-calendar-filter {
+    .crunchyroll-power-up-calendar-filter {
         padding: 16px;
         border-radius: 0 0 12px 12px;
     }
     
-    .crunchy-plus-filter-controls {
+    .crunchyroll-power-up-filter-controls {
         grid-template-columns: 1fr;
         gap: 16px;
     }
     
-    .crunchy-plus-filter-header {
+    .crunchyroll-power-up-filter-header {
         flex-direction: column;
         gap: 12px;
         align-items: stretch;
     }
     
-    .crunchy-plus-filter-title {
+    .crunchyroll-power-up-filter-title {
         font-size: 20px;
         justify-content: center;
     }
     
-    .crunchy-plus-filter-options {
+    .crunchyroll-power-up-filter-options {
         justify-content: center;
     }
 }
 
 @media (max-width: 480px) {
-    .crunchy-plus-filter-option {
+    .crunchyroll-power-up-filter-option {
         padding: 6px 12px;
         font-size: 13px;
     }
     
-    .crunchy-plus-filter-group {
+    .crunchyroll-power-up-filter-group {
         padding: 12px;
     }
     
-    .crunchy-plus-filter-group-title {
+    .crunchyroll-power-up-filter-group-title {
         font-size: 14px;
     }
 }
@@ -274,26 +273,26 @@
     }
 }
 
-.crunchy-plus-calendar-filter {
+.crunchyroll-power-up-calendar-filter {
     animation: slideDown 0.5s ease-out;
 }
 
-.crunchy-plus-filter-group {
+.crunchyroll-power-up-filter-group {
     animation: fadeIn 0.3s ease-out;
 }
 
 /* Dark mode compatibility */
 @media (prefers-color-scheme: dark) {
-    .crunchy-plus-calendar-filter {
+    .crunchyroll-power-up-calendar-filter {
         box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
     }
     
-    .crunchy-plus-filter-group {
+    .crunchyroll-power-up-filter-group {
         background: rgba(255, 255, 255, 0.1);
         border-color: rgba(255, 255, 255, 0.15);
     }
     
-    .crunchy-plus-filter-option {
+    .crunchyroll-power-up-filter-option {
         background: rgba(255, 255, 255, 0.15);
         border-color: rgba(255, 255, 255, 0.25);
     }

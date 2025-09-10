@@ -1,6 +1,6 @@
 
-// Popup script para Crunchyroll Power Up v1.6.32 - i18n SUPPORT ADDED + Calendar Filter
-console.log("🟠 Crunchyroll Power Up Popup: Script loaded");
+// Popup script para Crunchy+ Plus v1.6.11 - i18n SUPPORT ADDED + Calendar Filter
+console.log("🟠 Crunchy+ Plus Popup: Script loaded");
 
 // i18n function to get localized messages
 function getMessage(key) {
@@ -80,13 +80,22 @@ function replaceI18nPlaceholders() {
     console.log("🌐 i18n placeholders replaced");
 }
 
+// Configuración por defecto simple - CORREGIDA + Calendar Filter + Mini Player
+const DEFAULT_CONFIG = {
+    skip_event_intro: 0,    // Desmarcado por defecto = Modo Manual
+    skip_event_recap: 0,    // Desmarcado por defecto = Modo Manual  
+    skip_event_ending: 0,   // Desmarcado por defecto = Modo Manual
+    theaterMode: false,     // Deshabilitado por defecto
+    nextEpisodeDate: true,  // Habilitado por defecto
+    calendarFilter: false,  // Deshabilitado por defecto
+    miniPlayerEnabled: false // Deshabilitado por defecto
+};
 
-
-
+// Elementos del DOM
 let skipIntroCheckbox, skipRecapCheckbox, skipEndingCheckbox;
 let theaterModeCheckbox, nextEpisodeDateCheckbox, calendarFilterCheckbox, miniPlayerCheckbox;
 
-
+// Inicializar popup
 document.addEventListener('DOMContentLoaded', function() {
     console.log("🟠 Popup: DOM loaded, initializing...");
     
@@ -102,36 +111,42 @@ document.addEventListener('DOMContentLoaded', function() {
     calendarFilterCheckbox = document.getElementById('calendarFilter');
     miniPlayerCheckbox = document.getElementById('miniPlayer');
     
-    
+    // Cargar configuración guardada
     loadConfiguration();
     
-    
+    // Agregar event listeners
     setupEventListeners();
     
     console.log("🟠 Popup: Initialization complete");
 });
 
-
+// Cargar configuración desde storage
 function loadConfiguration() {
     console.log("🟠 Popup: Loading configuration...");
     
-    chrome.storage.sync.get(null, function(result) {
+    chrome.storage.sync.get(DEFAULT_CONFIG, function(result) {
         console.log("🟠 Popup: Configuration loaded:", result);
         
+        // CORREGIDO: Para skip - checkbox marcado = auto skip (valor 1)
         skipIntroCheckbox.checked = result.skip_event_intro === 1;
         skipRecapCheckbox.checked = result.skip_event_recap === 1;
         skipEndingCheckbox.checked = result.skip_event_ending === 1;
         
+        // Para otras opciones: usar valor booleano directo
         theaterModeCheckbox.checked = result.theaterMode;
         nextEpisodeDateCheckbox.checked = result.nextEpisodeDate;
         calendarFilterCheckbox.checked = result.calendarFilter;
         miniPlayerCheckbox.checked = result.miniPlayerEnabled;
         
         console.log("🟠 Popup: Checkboxes configured");
+        console.log("🟠 ✅ LÓGICA CORREGIDA:");
+        console.log("🟠 Marcado = Auto Skip (valor 1)");
+        console.log("🟠 Desmarcado = Modo Manual (valor 0)");
+        console.log("🔍 Calendar Filter:", result.calendarFilter ? "ENABLED" : "DISABLED");
     });
 }
 
-
+// Configurar event listeners
 function setupEventListeners() {
     console.log("🟠 Popup: Setting up event listeners...");
     
@@ -186,23 +201,54 @@ function setupEventListeners() {
     
     console.log("🟠 Popup: Event listeners configured");
     
+    // Initialize UI visual state
     initializeUIState();
 }
 
-
+// Guardar configuración
 function saveConfig(key, value) {
     const config = {};
     config[key] = value;
     
     chrome.storage.sync.set(config, function() {
         console.log("🟠 Popup: Config saved:", key, "=", value);
-        
+        if (key.includes('skip_event_')) {
+            console.log("🟠", value === 1 ? "✅ AUTO SKIP activado" : "🔧 MODO MANUAL activado");
+        }
+        if (key === 'calendarFilter') {
+            console.log("🔍", value ? "✅ CALENDAR FILTER activado" : "🔧 CALENDAR FILTER desactivado");
+        }
     });
 }
 
+// Función para debugging disponible en la consola del popup
+window.crunchyPlusPopupDebug = function() {
+    console.log("🔍 DEBUGGING POPUP CONFIGURATION");
+    
+    chrome.storage.sync.get(null, function(result) {
+        console.log("📊 Storage completo:", result);
+        
+        Object.keys(result).forEach(key => {
+            if (key.includes('skip_event_')) {
+                const value = result[key];
+                const mode = value === 1 ? "AUTO SKIP" : value === 0 ? "MANUAL MODE" : "UNKNOWN";
+                console.log(`🔧 ${key}: ${value} (${mode})`);
+            }
+        });
+    });
+    
+    return {
+        skipIntro: skipIntroCheckbox?.checked,
+        skipRecap: skipRecapCheckbox?.checked,
+        skipEnding: skipEndingCheckbox?.checked,
+        theaterMode: theaterModeCheckbox?.checked,
+        nextEpisodeDate: nextEpisodeDateCheckbox?.checked,
+        calendarFilter: calendarFilterCheckbox?.checked,
+        miniPlayer: miniPlayerCheckbox?.checked
+    };
+};
 
-
-
+// UI Update functions for visual elements (moved from inline script)
 function updatePillButton(pill, checkbox) {
     if (checkbox.checked) {
         pill.classList.add('active');
@@ -219,6 +265,7 @@ function updateSwitch(switchEl, checkbox) {
     }
 }
 
+// Initialize UI visual state
 function initializeUIState() {
     // Get pill button elements
     const introPill = document.getElementById('intro-pill');
@@ -266,4 +313,4 @@ function initializeUIState() {
     }, 100);
 }
 
-
+console.log("🟠 Crunchy+ Plus Popup: Script loaded with CORRECTED LOGIC + Calendar Filter");
