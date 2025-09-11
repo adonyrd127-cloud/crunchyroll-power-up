@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Crunchyroll Power Up",
   "version": "1.6.32",
-  "description": "Enhanced Crunchyroll experience with Mini Player, skip buttons, and advanced features",
-  "default_locale": "en",
+  "description": "Mejora la experiencia en Crunchyroll con Minireproductor, botones de salto y funciones avanzadas",
+  "default_locale": "es",
   "permissions": [
     "storage",
     "scripting",

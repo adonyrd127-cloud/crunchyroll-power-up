@@ -1,25 +1,24 @@
-// Picture-in-Picture control injected into Crunchyroll's native video controls.
-// This module is copied verbatim (with minor adjustments) from the open source
-// project `picture-in-picture-extension-for-crunchyroll`.  It adds a small
-// button to the video player's control bar which toggles Chrome's built‑in
-// Picture‑in‑Picture (PiP) mode.  The feature is activated only when the
-// Mini Player option is enabled in the Crunchyroll Power Up popup.
+// Control Picture-in-Picture inyectado en los controles de vídeo nativos de Crunchyroll.
+// Este módulo se copia prácticamente igual (con pequeños ajustes) del proyecto
+// open source `picture-in-picture-extension-for-crunchyroll`. Añade un botón
+// al control del reproductor que alterna el modo Picture‑in‑Picture (PiP) de Chrome.
+// La función sólo se activa cuando la opción Mini Player está habilitada en el popup.
 
 (() => {
-    // Track whether we're currently watching the DOM for control changes.
+    // Indica si actualmente estamos observando el DOM en busca de cambios en los controles.
     let pipIsMonitoring = false;
     let pipMonitor = null;
 
-    // Remove the `disablepictureinpicture` attribute so PiP can work on Firefox.
+    // Elimina el atributo `disablepictureinpicture` para que PiP funcione en Firefox.
     function pipRemovePipAttribute(video) {
         video?.removeAttribute('disablepictureinpicture');
     }
 
-    // Build the PiP button element.  The original extension injects an SVG
-    // icon; here we preserve the structure to remain faithful to the source.
+    // Construye el elemento del botón PiP. La extensión original inyecta un
+    // icono SVG; aquí mantenemos la estructura para ser fiel al origen.
     function pipCreatePipControl() {
-        // Inline SVG for the Picture‑in‑Picture icon copied from the upstream
-        // project.  Without this graphic the control would appear blank.
+        // SVG en línea para el icono Picture‑in‑Picture copiado del proyecto original.
+        // Sin este gráfico el control aparecería vacío.
         const pipIconTag = '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e8eaed"><path d="M96-480v-72h165L71-743l50-50 191 190v-165h72v288H96Zm72 288q-29.7 0-50.85-21.15Q96-234.3 96-264v-144h72v144h336v72H168Zm624-264v-240H456v-72h336q29.7 0 50.85 21.15Q864-725.7 864-696v240h-72Zm576-192v-192H576v-72h336q29.7 0 50.85 21.15Q864-725.7 864-696v192h-72Z" /></svg>';
         const parser = new DOMParser();
         const pipIconNode = parser.parseFromString(pipIconTag, 'text/html');
@@ -31,8 +30,8 @@
         return pipControl;
     }
 
-    // Insert the PiP button before the settings (gear) control and wire up
-    // click behaviour to toggle PiP on the supplied video element.
+    // Inserta el botón PiP antes del control de configuración (engranaje) y
+    // enlaza el comportamiento de click para alternar PiP en el elemento video.
     function pipAddPipControl(settingsControl, video) {
         if (!settingsControl || !video) return;
         const videoControlsContainer = settingsControl.parentElement;
@@ -51,9 +50,9 @@
         });
     }
 
-    // Start observing the page for the video controls; when both the video and
-    // the settings control exist we insert the PiP button.  This logic is
-    // identical to the upstream project and reuses the same IDs.
+    // Empieza a observar la página en busca de los controles del vídeo; cuando
+    // tanto el vídeo como el control de configuración existen, insertamos el botón PiP.
+    // Esta lógica es idéntica al proyecto original y reutiliza los mismos IDs.
     function pipStartVideoControlsMonitor() {
         if (pipIsMonitoring) return;
         pipMonitor = new MutationObserver(() => {
@@ -69,9 +68,9 @@
         pipIsMonitoring = true;
     }
 
-    // Initialise the PiP control.  On Firefox we simply remove the disabling
-    // attribute and do not inject any controls (per upstream behaviour).  On
-    // other browsers we start monitoring for control insertion.
+    // Inicializa el control PiP. En Firefox simplemente eliminamos el atributo
+    // que lo bloquea y no inyectamos controles (comportamiento del upstream).
+    // En otros navegadores empezamos a monitorizar la inserción de controles.
     function pipInit() {
         // Avoid double initialisation.
         if (pipIsMonitoring) return;
@@ -85,8 +84,8 @@
         pipStartVideoControlsMonitor();
     }
 
-    // Destroy the PiP control: remove the injected element and disconnect
-    // observers so no further insertions occur.
+    // Destruye el control PiP: elimina el elemento inyectado y desconecta
+    // los observers para evitar nuevas inserciones.
     function pipDestroy() {
         const pipControl = document.getElementById('pipControl');
         if (pipControl) {
@@ -99,18 +98,18 @@
         pipIsMonitoring = false;
     }
 
-    // Check the current miniPlayerEnabled state from storage and initialize
-    // accordingly.  Because storage retrieval is asynchronous, we perform
-    // initialisation on completion.
+    // Comprueba el estado actual de miniPlayerEnabled en el storage e inicializa
+    // en consecuencia. Como la lectura de storage es asíncrona, inicializamos
+    // cuando la operación termina.
     chrome.storage.sync.get({ miniPlayerEnabled: true }, (result) => {
         try {
             if (result.miniPlayerEnabled) {
                 pipInit();
             }
         } catch (err) {
-            // Catch and log errors gracefully – failing silently could make
-            // debugging more difficult but should never break the page.
-            console.error('PiP control initialisation failed:', err);
+            // Capturamos y registramos errores de forma controlada — fallar en
+            // silencio dificultaría la depuración pero no debe romper la página.
+            console.error('Inicialización del control PiP fallida:', err);
         }
     });
 

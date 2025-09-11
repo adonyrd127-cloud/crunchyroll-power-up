@@ -1,8 +1,7 @@
+// Script del popup para Crunchy+ Plus v1.6.32 - soporte i18n + Filtro de calendario
+console.log("Crunchyroll Power Up Popup: Script cargado");
 
-// Popup script para Crunchy+ Plus v1.6.11 - i18n SUPPORT ADDED + Calendar Filter
-console.log("🟠 Crunchy+ Plus Popup: Script loaded");
-
-// i18n function to get localized messages
+// Función i18n para obtener mensajes localizados
 function getMessage(key) {
     try {
         if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
@@ -10,14 +9,14 @@ function getMessage(key) {
         }
         return `__MSG_${key}__`;
     } catch (error) {
-        console.warn("🟠 i18n getMessage error:", error);
+        console.warn("🟠 Error en i18n.getMessage:", error);
         return `__MSG_${key}__`;
     }
 }
 
-// Function to replace all i18n placeholders in the document
+// Función para reemplazar marcadores i18n en el documento
 function replaceI18nPlaceholders() {
-    console.log("🌐 Replacing i18n placeholders...");
+    console.log("🌐 Reemplazando marcadores i18n...");
     
     // Set the correct language attribute
     let currentLocale = 'en';
@@ -28,13 +27,13 @@ function replaceI18nPlaceholders() {
             currentLocale = navigator.language || 'en';
         }
     } catch (error) {
-        console.warn("🟠 i18n getUILanguage error:", error);
+        console.warn("🟠 Error en i18n.getUILanguage:", error);
         currentLocale = navigator.language || 'en';
     }
     document.documentElement.lang = currentLocale.startsWith('es') ? 'es' : 'en';
-    console.log("🌐 Language set to:", document.documentElement.lang, "based on locale:", currentLocale);
+    console.log("🌐 Idioma establecido en:", document.documentElement.lang, "basado en la configuración regional:", currentLocale);
     
-    // Get all text nodes and attributes that might contain __MSG_key__
+    // Obtener todos los nodos de texto y atributos que puedan contener __MSG_key__
     const walker = document.createTreeWalker(
         document.body,
         NodeFilter.SHOW_TEXT,
@@ -50,19 +49,19 @@ function replaceI18nPlaceholders() {
         }
     }
     
-    // Replace text content
+    // Reemplazar contenido de texto
     textNodes.forEach(textNode => {
         textNode.nodeValue = textNode.nodeValue.replace(/__MSG_(\w+)__/g, (match, key) => {
             return getMessage(key);
         });
     });
     
-    // Replace title attribute
+    // Reemplazar atributo title
     document.title = document.title.replace(/__MSG_(\w+)__/g, (match, key) => {
         return getMessage(key);
     });
     
-    // Replace any other attributes that might contain i18n keys
+    // Reemplazar otros atributos que puedan contener claves i18n
     const elementsWithI18n = document.querySelectorAll('[title*="__MSG_"], [alt*="__MSG_"], [placeholder*="__MSG_"]');
     elementsWithI18n.forEach(element => {
         ['title', 'alt', 'placeholder'].forEach(attr => {
@@ -77,7 +76,7 @@ function replaceI18nPlaceholders() {
         });
     });
     
-    console.log("🌐 i18n placeholders replaced");
+    console.log("🌐 Marcadores i18n reemplazados");
 }
 
 // Configuración por defecto simple - CORREGIDA + Calendar Filter + Mini Player
@@ -97,9 +96,9 @@ let theaterModeCheckbox, nextEpisodeDateCheckbox, calendarFilterCheckbox, miniPl
 
 // Inicializar popup
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("🟠 Popup: DOM loaded, initializing...");
+    console.log("🟠 Popup: DOM cargado, inicializando...");
     
-    // FIRST: Replace i18n placeholders
+    // PRIMERO: Reemplazar marcadores i18n
     replaceI18nPlaceholders();
     
     // Obtener referencias a los elementos
@@ -117,15 +116,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Agregar event listeners
     setupEventListeners();
     
-    console.log("🟠 Popup: Initialization complete");
+    console.log("🟠 Popup: Inicialización completa");
 });
 
 // Cargar configuración desde storage
 function loadConfiguration() {
-    console.log("🟠 Popup: Loading configuration...");
+    console.log("🟠 Popup: Cargando configuración...");
     
     chrome.storage.sync.get(DEFAULT_CONFIG, function(result) {
-        console.log("🟠 Popup: Configuration loaded:", result);
+        console.log("🟠 Popup: Configuración cargada:", result);
         
         // CORREGIDO: Para skip - checkbox marcado = auto skip (valor 1)
         skipIntroCheckbox.checked = result.skip_event_intro === 1;
@@ -138,59 +137,59 @@ function loadConfiguration() {
         calendarFilterCheckbox.checked = result.calendarFilter;
         miniPlayerCheckbox.checked = result.miniPlayerEnabled;
         
-        console.log("🟠 Popup: Checkboxes configured");
-        console.log("🟠 ✅ LÓGICA CORREGIDA:");
-        console.log("🟠 Marcado = Auto Skip (valor 1)");
-        console.log("🟠 Desmarcado = Modo Manual (valor 0)");
-        console.log("🔍 Calendar Filter:", result.calendarFilter ? "ENABLED" : "DISABLED");
+    console.log("🟠 Popup: Checkboxes configurados");
+    console.log("🟠 ✅ LÓGICA CORREGIDA:");
+    console.log("🟠 Marcado = Salto automático (valor 1)");
+    console.log("🟠 Desmarcado = Modo manual (valor 0)");
+    console.log("🔍 Filtro de Calendario:", result.calendarFilter ? "HABILITADO" : "DESHABILITADO");
     });
 }
 
 // Configurar event listeners
 function setupEventListeners() {
-    console.log("🟠 Popup: Setting up event listeners...");
+    console.log("🟠 Popup: Configurando listeners de eventos...");
     
     // CORREGIDO: Skip checkboxes con lógica correcta
     skipIntroCheckbox.addEventListener('change', function() {
         // CORREGIDO: checkbox marcado = 1 (auto skip), desmarcado = 0 (manual)
         const value = this.checked ? 1 : 0;
         saveConfig('skip_event_intro', value);
-        console.log("🟠 Popup: Skip Intro changed to:", value, this.checked ? "(AUTO SKIP)" : "(MANUAL MODE)");
+    console.log("🟠 Popup: Skip Intro cambiado a:", value, this.checked ? "(SALTO AUTOMÁTICO)" : "(MODO MANUAL)");
     });
     
     skipRecapCheckbox.addEventListener('change', function() {
         const value = this.checked ? 1 : 0;
         saveConfig('skip_event_recap', value);
-        console.log("🟠 Popup: Skip Recap changed to:", value, this.checked ? "(AUTO SKIP)" : "(MANUAL MODE)");
+    console.log("🟠 Popup: Skip Recap cambiado a:", value, this.checked ? "(SALTO AUTOMÁTICO)" : "(MODO MANUAL)");
     });
     
     skipEndingCheckbox.addEventListener('change', function() {
         const value = this.checked ? 1 : 0;
         saveConfig('skip_event_ending', value);
-        console.log("🟠 Popup: Skip Ending changed to:", value, this.checked ? "(AUTO SKIP)" : "(MANUAL MODE)");
+    console.log("🟠 Popup: Skip Ending cambiado a:", value, this.checked ? "(SALTO AUTOMÁTICO)" : "(MODO MANUAL)");
     });
     
-    // Other checkboxes
+    // Otras casillas
     theaterModeCheckbox.addEventListener('change', function() {
         saveConfig('theaterMode', this.checked);
-        console.log("🟠 Popup: Theater Mode changed to:", this.checked);
+        console.log("🟠 Popup: Theater Mode cambiado a:", this.checked);
     });
     
     nextEpisodeDateCheckbox.addEventListener('change', function() {
         saveConfig('nextEpisodeDate', this.checked);
-        console.log("🟠 Popup: Next Episode Date changed to:", this.checked);
+        console.log("🟠 Popup: Next Episode Date cambiado a:", this.checked);
     });
     
     // NEW: Calendar Filter checkbox
     calendarFilterCheckbox.addEventListener('change', function() {
-        saveConfig('calendarFilter', this.checked);
-        console.log("🔍 Popup: Calendar Filter changed to:", this.checked);
+    saveConfig('calendarFilter', this.checked);
+    console.log("🔍 Popup: Filtro de Calendario cambiado a:", this.checked);
     });
     
     // NEW: Mini Player checkbox
     miniPlayerCheckbox.addEventListener('change', function() {
-        saveConfig('miniPlayerEnabled', this.checked);
-        console.log("📺 Popup: Mini Player changed to:", this.checked);
+    saveConfig('miniPlayerEnabled', this.checked);
+    console.log("📺 Popup: Mini Reproductor cambiado a:", this.checked);
         
         // Enviar mensaje a content script para actualizar estado
         chrome.runtime.sendMessage({
@@ -199,7 +198,7 @@ function setupEventListeners() {
         });
     });
     
-    console.log("🟠 Popup: Event listeners configured");
+    console.log("🟠 Popup: Event listeners configurados");
     
     // Initialize UI visual state
     initializeUIState();
@@ -210,28 +209,28 @@ function saveConfig(key, value) {
     const config = {};
     config[key] = value;
     
-    chrome.storage.sync.set(config, function() {
-        console.log("🟠 Popup: Config saved:", key, "=", value);
+        chrome.storage.sync.set(config, function() {
+        console.log("🟠 Popup: Config guardada:", key, "=", value);
         if (key.includes('skip_event_')) {
-            console.log("🟠", value === 1 ? "✅ AUTO SKIP activado" : "🔧 MODO MANUAL activado");
+            console.log("🟠", value === 1 ? "✅ SALTO AUTOMÁTICO activado" : "🔧 MODO MANUAL activado");
         }
         if (key === 'calendarFilter') {
-            console.log("🔍", value ? "✅ CALENDAR FILTER activado" : "🔧 CALENDAR FILTER desactivado");
+            console.log("🔍", value ? "✅ FILTRO DE CALENDARIO activado" : "🔧 FILTRO DE CALENDARIO desactivado");
         }
     });
 }
 
-// Función para debugging disponible en la consola del popup
+// Función de depuración disponible en la consola del popup
 window.crunchyPlusPopupDebug = function() {
-    console.log("🔍 DEBUGGING POPUP CONFIGURATION");
+    console.log("🔍 DEPURANDO CONFIGURACIÓN DEL POPUP");
     
     chrome.storage.sync.get(null, function(result) {
-        console.log("📊 Storage completo:", result);
+        console.log("📊 Almacenamiento completo:", result);
         
         Object.keys(result).forEach(key => {
             if (key.includes('skip_event_')) {
                 const value = result[key];
-                const mode = value === 1 ? "AUTO SKIP" : value === 0 ? "MANUAL MODE" : "UNKNOWN";
+                const mode = value === 1 ? "SALTO AUTOMÁTICO" : value === 0 ? "MODO MANUAL" : "DESCONOCIDO";
                 console.log(`🔧 ${key}: ${value} (${mode})`);
             }
         });
@@ -248,7 +247,7 @@ window.crunchyPlusPopupDebug = function() {
     };
 };
 
-// UI Update functions for visual elements (moved from inline script)
+// Funciones para actualizar la UI de elementos visuales (movidas desde script inline)
 function updatePillButton(pill, checkbox) {
     if (checkbox.checked) {
         pill.classList.add('active');
@@ -267,18 +266,18 @@ function updateSwitch(switchEl, checkbox) {
 
 // Initialize UI visual state
 function initializeUIState() {
-    // Get pill button elements
+    // Obtener elementos de tipo 'pill' (botones)
     const introPill = document.getElementById('intro-pill');
     const recapPill = document.getElementById('recap-pill');
     const endingPill = document.getElementById('ending-pill');
     
-    // Get switch elements
+    // Obtener elementos tipo switch
     const theaterSwitch = document.getElementById('theater-switch');
     const episodeSwitch = document.getElementById('episode-switch');
     const calendarFilterSwitch = document.getElementById('calendar-filter-switch');
     const miniPlayerSwitch = document.getElementById('mini-player-switch');
     
-    // Add event listeners for UI updates
+    // Añadir listeners para actualizar la UI
     if (skipIntroCheckbox) {
         skipIntroCheckbox.addEventListener('change', () => updatePillButton(introPill, skipIntroCheckbox));
     }
@@ -301,7 +300,7 @@ function initializeUIState() {
         miniPlayerCheckbox.addEventListener('change', () => updateSwitch(miniPlayerSwitch, miniPlayerCheckbox));
     }
     
-    // Initialize visual state after configuration is loaded
+    // Inicializar el estado visual una vez cargada la configuración
     setTimeout(() => {
         if (introPill && skipIntroCheckbox) updatePillButton(introPill, skipIntroCheckbox);
         if (recapPill && skipRecapCheckbox) updatePillButton(recapPill, skipRecapCheckbox);
@@ -313,4 +312,4 @@ function initializeUIState() {
     }, 100);
 }
 
-console.log("🟠 Crunchy+ Plus Popup: Script loaded with CORRECTED LOGIC + Calendar Filter");
+console.log("Crunchyroll Power Up Popup: Script cargado con LÓGICA CORREGIDA + Calendar Filter");

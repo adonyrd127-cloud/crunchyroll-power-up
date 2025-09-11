@@ -1,158 +1,55 @@
-
 {
   "ext_name": {
     "message": "Crunchyroll Power Up"
   },
   "ext_description": {
-    "message": "Enhanced Crunchyroll experience with Mini Player, skip buttons, and advanced features. Author: ING, Adony R."
+    "message": "Experiencia mejorada de Crunchyroll con Mini Reproductor, botones de salto y funciones avanzadas"
   },
-  "popup_title": {
-    "message": "Crunchyroll Power Up Settings"
-  },
-  "app_title": {
-    "message": "Crunchyroll Power Up"
-  },
-  "app_subtitle": {
-    "message": "Enhance your Crunchyroll experience"
-  },
-  "core_features": {
-    "message": "Core Features"
-  },
-  "auto_skip_title": {
-    "message": "Auto Skip"
-  },
-  "auto_skip_description": {
-    "message": "Automatically skip intros, recaps, and endings."
-  },
-  "intro_label": {
-    "message": "Intro"
-  },
-  "recap_label": {
-    "message": "Recap"
-  },
-  "ending_label": {
-    "message": "Ending"
-  },
-  "theater_mode_title": {
-    "message": "Screen Size Modes"
-  },
-  "theater_mode_description": {
-    "message": "Enable buttons to change video player size."
-  },
-  "enable_theater_mode": {
-    "message": "Enable Screen Size Modes"
-  },
-  "next_episode_title": {
-    "message": "Next Episode Date"
-  },
-  "next_episode_description": {
-    "message": "Show when the next episode will be available."
-  },
-  "show_next_episode": {
-    "message": "Show Next Episode Date"
-  },
-  "calendar_filter_title": {
-    "message": "Calendar Filter"
-  },
-  "calendar_filter_description": {
-    "message": "Advanced filtering for the Crunchyroll release calendar."
-  },
-  "enable_calendar_filter": {
-    "message": "Enable Calendar Filter"
-  },
-  "calendar_filter_ui_title": {
-    "message": "Calendar Filter"
-  },
-  "show_filters": {
-    "message": "Show Filters"
-  },
-  "hide_filters": {
-    "message": "Hide Filters"
-  },
-  "dubbed_filter": {
-    "message": "Dubbed Episodes"
-  },
-  "dubbed_only": {
-    "message": "Only"
-  },
-  "dubbed_show": {
-    "message": "Show"
-  },
-  "dubbed_hide": {
-    "message": "Hide"
-  },
-  "language_filter": {
-    "message": "Languages"
-  },
-  "lang_english": {
-    "message": "English"
-  },
-  "lang_spanish": {
-    "message": "Spanish"
-  },
-  "lang_french": {
-    "message": "French"
-  },
-  "lang_german": {
-    "message": "German"
-  },
-  "lang_others": {
-    "message": "Others"
-  },
-  "queue_filter": {
-    "message": "In Queue"
-  },
-  "queue_only": {
-    "message": "Only"
-  },
-  "queue_show": {
-    "message": "Show"
-  },
-  "queue_hide": {
-    "message": "Hide"
-  },
-  "premiere_filter": {
-    "message": "Premieres"
-  },
-  "premiere_only": {
-    "message": "Only"
-  },
-  "premiere_show": {
-    "message": "Show"
-  },
-  "premiere_hide": {
-    "message": "Hide"
-  },
-  "reset_filters": {
-    "message": "Reset Filters"
-  },
-  "hidden": {
-    "message": "Hidden"
-  },
-  "nextEpisodeAirsAt": {
-    "message": "Next episode airs on $date$ at $time$",
-    "placeholders": {
-      "date": {
-        "content": "$1"
-      },
-      "time": {
-        "content": "$2"
-      }
-    }
-  },
-  "showEpisodeAirDate": {
-    "message": "Show next episode air date"
-  },
-  "mini_player_title": {
-    "message": "Mini Player"
-  },
-  "mini_player_description": {
-    "message": "Enable Picture-in-Picture to watch videos in a floating window."
-  },
-  "enable_mini_player": {
-    "message": "Enable Mini Player"
-  },
-  "footer_text": {
-    "message": "Enhanced Crunchyroll experience with essential features - ING, Adony R."
-  }
+  "popup_title": { "message": "Crunchyroll Power Up Settings" },
+  "app_title": { "message": "Crunchyroll Power Up" },
+  "app_subtitle": { "message": "Improve your Crunchyroll experience" },
+  "core_features": { "message": "Core Features" },
+  "auto_skip_title": { "message": "Auto Skip" },
+  "auto_skip_description": { "message": "Automatically skip intros, recaps and endings." },
+  "intro_label": { "message": "Intro" },
+  "recap_label": { "message": "Recap" },
+  "ending_label": { "message": "Ending" },
+  "theater_mode_title": { "message": "Theater Modes" },
+  "theater_mode_description": { "message": "Enable buttons to change video player sizing." },
+  "enable_theater_mode": { "message": "Enable Theater Modes" },
+  "next_episode_title": { "message": "Next Episode Date" },
+  "next_episode_description": { "message": "Show when the next episode will be available." },
+  "show_next_episode": { "message": "Show Next Episode Date" },
+  "calendar_filter_title": { "message": "Calendar Filter" },
+  "calendar_filter_description": { "message": "Advanced filtering for Crunchyroll release calendar." },
+  "enable_calendar_filter": { "message": "Enable Calendar Filter" },
+  "calendar_filter_ui_title": { "message": "Calendar Filter" },
+  "show_filters": { "message": "Show Filters" },
+  "hide_filters": { "message": "Hide Filters" },
+  "dubbed_filter": { "message": "Dubbed Episodes" },
+  "dubbed_only": { "message": "Only" },
+  "dubbed_show": { "message": "Show" },
+  "dubbed_hide": { "message": "Hide" },
+  "language_filter": { "message": "Languages" },
+  "lang_english": { "message": "English" },
+  "lang_spanish": { "message": "Spanish" },
+  "lang_french": { "message": "French" },
+  "lang_german": { "message": "German" },
+  "lang_others": { "message": "Others" },
+  "queue_filter": { "message": "In Queue" },
+  "queue_only": { "message": "Only" },
+  "queue_show": { "message": "Show" },
+  "queue_hide": { "message": "Hide" },
+  "premiere_filter": { "message": "Premieres" },
+  "premiere_only": { "message": "Only" },
+  "premiere_show": { "message": "Show" },
+  "premiere_hide": { "message": "Hide" },
+  "reset_filters": { "message": "Reset Filters" },
+  "hidden": { "message": "Hidden" },
+  "nextEpisodeAirsAt": { "message": "Next episode airs on $date$ at $time$", "placeholders": { "date": { "content": "$1" }, "time": { "content": "$2" } } },
+  "showEpisodeAirDate": { "message": "Show next episode air date" },
+  "mini_player_title": { "message": "Mini Player" },
+  "mini_player_description": { "message": "Enable Picture-in-Picture to watch videos in a floating window." },
+  "enable_mini_player": { "message": "Enable Mini Player" },
+  "footer_text": { "message": "Enhanced Crunchyroll experience with essential features" }
 }

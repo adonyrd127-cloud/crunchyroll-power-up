@@ -1,8 +1,8 @@
-// Crunchyroll Power Up Calendar Filter v1.6.14
-// Advanced filtering system for Crunchyroll release calendar
-// Based on proven patterns from roshinc/release-calendar-filter-for-crunchyroll
+// Crunchyroll Power Up Calendar Filter v1.6.32
+// Sistema de filtrado avanzado para el calendario de estrenos de Crunchyroll
 
-console.log("🔍 Crunchyroll Power Up Calendar Filter: Script loaded");
+
+console.log("🔍 Crunchyroll Power Up: Filtro de Calendario cargado");
 
 // Feature flags
 const SHOW_HIDDEN_COUNT = false; // Hide counters in production
@@ -16,7 +16,7 @@ function savePanelState(isOpen) {
     try {
         localStorage.setItem(LS_PANEL_STATE, JSON.stringify(isOpen));
     } catch (e) {
-        console.warn("🔍 Calendar Filter: Failed to save panel state", e);
+        console.warn("🔍 Filtro de Calendario: Error al guardar el estado del panel", e);
     }
 }
 
@@ -25,7 +25,7 @@ function loadPanelState() {
         const saved = localStorage.getItem(LS_PANEL_STATE);
         return saved !== null ? JSON.parse(saved) : true; // Default to open
     } catch (e) {
-        console.warn("🔍 Calendar Filter: Failed to load panel state", e);
+        console.warn("🔍 Filtro de Calendario: Error al cargar el estado del panel", e);
         return true;
     }
 }
@@ -34,7 +34,7 @@ function saveFiltersState(filters) {
     try {
         localStorage.setItem(LS_FILTERS_STATE, JSON.stringify(filters));
     } catch (e) {
-        console.warn("🔍 Calendar Filter: Failed to save filters state", e);
+        console.warn("🔍 Filtro de Calendario: Error al guardar el estado de filtros", e);
     }
 }
 
@@ -43,7 +43,7 @@ function loadFiltersState() {
         const saved = localStorage.getItem(LS_FILTERS_STATE);
         return saved !== null ? JSON.parse(saved) : null;
     } catch (e) {
-        console.warn("🔍 Calendar Filter: Failed to load filters state", e);
+        console.warn("🔍 Filtro de Calendario: Error al cargar el estado de filtros", e);
         return null;
     }
 }
@@ -52,9 +52,9 @@ function clearPersistedState() {
     try {
         localStorage.removeItem(LS_PANEL_STATE);
         localStorage.removeItem(LS_FILTERS_STATE);
-        console.log("🔍 Calendar Filter: Cleared persisted state");
+        console.log("🔍 Filtro de Calendario: Estado persistido borrado");
     } catch (e) {
-        console.warn("🔍 Calendar Filter: Failed to clear persisted state", e);
+        console.warn("🔍 Filtro de Calendario: Error al borrar el estado persistido", e);
     }
 }
 
@@ -76,15 +76,15 @@ class CrunchyrollPowerUpCalendarFilter {
         this.hiddenCounts = {};
         this.filterUI = null;
         
-        // Load persisted state early to prevent flickering
+        // Cargar estado persistido temprano para prevenir parpadeos
         this.isCollapsed = !loadPanelState(); // Panel state is inverted (true = open)
         const savedFilters = loadFiltersState();
         if (savedFilters) {
             this.filters = { ...this.filters, ...savedFilters };
-            console.log("🔍 Calendar Filter: Loaded persisted filters", this.filters);
+            console.log("🔍 Filtro de Calendario: Filtros persistidos cargados", this.filters);
         }
         
-        // Language constants from original repository
+        // Constantes de idiomas (heredadas del repositorio original)
         this.ALL_DUB_LANGUAGES = [
             "Arabic", "Castilian", "Catalan", "English", "English-IN",
             "European-Portuguese", "French", "German", "Hindi", "Italian",
@@ -98,11 +98,11 @@ class CrunchyrollPowerUpCalendarFilter {
     }
     
     async init() {
-        console.log("🔍 Calendar Filter: Initializing...");
+        console.log("🔍 Filtro de Calendario: Inicializando...");
         
         // Check if we're on the calendar page
         if (!this.isCalendarPage()) {
-            console.log("🔍 Calendar Filter: Not on calendar page, skipping");
+            console.log("🔍 Filtro de Calendario: No es la página de calendario, se omite");
             return;
         }
         
@@ -110,7 +110,7 @@ class CrunchyrollPowerUpCalendarFilter {
         await this.loadSettings();
         
         if (!this.isEnabled) {
-            console.log("🔍 Calendar Filter: Disabled in settings");
+            console.log("🔍 Filtro de Calendario: Deshabilitado en la configuración");
             return;
         }
         
@@ -129,7 +129,7 @@ class CrunchyrollPowerUpCalendarFilter {
                document.querySelector('.simulcast-calendar') ||
                document.title.toLowerCase().includes('calendar');
         
-        console.log("🔍 Calendar Filter: Calendar page check:", isCalendar, window.location.pathname);
+        console.log("🔍 Filtro de Calendario: Comprobación de página de calendario:", isCalendar, window.location.pathname);
         return isCalendar;
     }
     
@@ -141,7 +141,7 @@ class CrunchyrollPowerUpCalendarFilter {
             }, (result) => {
                 this.isEnabled = result.calendarFilter;
                 this.filters = { ...this.filters, ...result.calendarFilterSettings };
-                console.log("🔍 Calendar Filter: Settings loaded", { enabled: this.isEnabled, filters: this.filters });
+                console.log("🔍 Filtro de Calendario: Configuración cargada", { enabled: this.isEnabled, filters: this.filters });
                 resolve();
             });
         });
@@ -152,14 +152,14 @@ class CrunchyrollPowerUpCalendarFilter {
             chrome.storage.sync.set({
                 calendarFilterSettings: this.filters
             }, () => {
-                console.log("🔍 Calendar Filter: Settings saved", this.filters);
+                console.log("🔍 Filtro de Calendario: Configuración guardada", this.filters);
                 resolve();
             });
         });
     }
     
     setup() {
-        console.log("🔍 Calendar Filter: Setting up UI and observers...");
+        console.log("🔍 Filtro de Calendario: Configurando UI y observers...");
         
         // Wait for calendar header to be available
         this.waitForCalendarHeader().then(() => {
@@ -168,7 +168,7 @@ class CrunchyrollPowerUpCalendarFilter {
             this.setupMutationObserver();
         });
         
-        console.log("🔍 Calendar Filter: Setup complete");
+        console.log("🔍 Filtro de Calendario: Setup completo");
     }
     
     async waitForCalendarHeader() {
@@ -176,10 +176,10 @@ class CrunchyrollPowerUpCalendarFilter {
             const checkForHeader = () => {
                 const header = document.querySelector('header.simulcast-calendar-header');
                 if (header) {
-                    console.log("🔍 Calendar Filter: Found calendar header");
+                    console.log("🔍 Filtro de Calendario: Header del calendario encontrado");
                     resolve(header);
                 } else {
-                    console.log("🔍 Calendar Filter: Waiting for calendar header...");
+                    console.log("🔍 Filtro de Calendario: Esperando al header del calendario...");
                     setTimeout(checkForHeader, 1000);
                 }
             };
@@ -197,7 +197,7 @@ class CrunchyrollPowerUpCalendarFilter {
         // Find the correct injection point
         const header = document.querySelector('header.simulcast-calendar-header');
         if (!header) {
-            console.log("🔍 Calendar Filter: Calendar header not found, cannot inject UI");
+            console.log("🔍 Filtro de Calendario: Header del calendario no encontrado, no se puede inyectar la UI");
             return;
         }
         
@@ -275,7 +275,7 @@ class CrunchyrollPowerUpCalendarFilter {
         header.appendChild(filterContainer);
         
         this.filterUI = filterContainer;
-        console.log("🔍 Calendar Filter: UI created and injected into calendar header");
+        console.log("🔍 Filtro de Calendario: UI creada e inyectada en el header del calendario");
     }
     
     createFilterGroup(titleKey, options, currentValue, inputType = 'radio') {
@@ -414,11 +414,11 @@ class CrunchyrollPowerUpCalendarFilter {
         
         // Save panel state (inverted because true = open)
         savePanelState(!this.isCollapsed);
-        console.log("🔍 Calendar Filter: Panel state saved", !this.isCollapsed);
+        console.log("🔍 Filtro de Calendario: Estado del panel guardado", !this.isCollapsed);
     }
     
     resetFilters() {
-        console.log("🔍 Calendar Filter: Resetting filters");
+        console.log("🔍 Filtro de Calendario: Reiniciando filtros");
         
         // Clear persisted state
         clearPersistedState();
@@ -443,21 +443,21 @@ class CrunchyrollPowerUpCalendarFilter {
         this.createFilterUI();
         setTimeout(() => this.applyFilters(), 100);
         
-        console.log("🔍 Calendar Filter: Filters reset and persisted state cleared");
+        console.log("🔍 Filtro de Calendario: Filtros reiniciados y estado persistido borrado");
     }
     
     applyFilters() {
-        console.log("🔍 Calendar Filter: Applying filters...", this.filters);
+        console.log("🔍 Filtro de Calendario: Aplicando filtros...", this.filters);
         
         // Reset hidden counts
         this.hiddenCounts = {};
         
         // Find all episode elements using correct selectors
         const episodes = this.findEpisodeElements();
-        console.log(`🔍 Calendar Filter: Found ${episodes.length} episodes`);
+        console.log(`🔍 Filtro de Calendario: Encontrados ${episodes.length} episodios`);
         
         if (episodes.length === 0) {
-            console.log("🔍 Calendar Filter: No episodes found, retrying in 2 seconds");
+            console.log("🔍 Filtro de Calendario: No se encontraron episodios, reintentando en 2 segundos");
             setTimeout(() => this.applyFilters(), 2000);
             return;
         }
@@ -469,7 +469,7 @@ class CrunchyrollPowerUpCalendarFilter {
             const episodeData = this.parseEpisodeData(episode);
             const shouldShow = this.shouldShowEpisode(episodeData);
             
-            console.log(`🔍 Episode ${index + 1}:`, {
+            console.log(`🔍 Episodio ${index + 1}:`, {
                 text: episode.textContent.substring(0, 50) + '...',
                 data: episodeData,
                 shouldShow: shouldShow
@@ -493,7 +493,7 @@ class CrunchyrollPowerUpCalendarFilter {
         // Update hidden counters
         this.updateHiddenCounters();
         
-        console.log(`🔍 Calendar Filter: Filters applied - ${visibleCount} visible, ${hiddenCount} hidden`, this.hiddenCounts);
+        console.log(`🔍 Filtro de Calendario: Filtros aplicados - ${visibleCount} visibles, ${hiddenCount} ocultos`, this.hiddenCounts);
     }
     
     findEpisodeElements() {
@@ -501,7 +501,7 @@ class CrunchyrollPowerUpCalendarFilter {
         const episodes = document.querySelectorAll('article.js-release');
         
         if (episodes.length > 0) {
-            console.log(`🔍 Calendar Filter: Found ${episodes.length} episodes with article.js-release selector`);
+            console.log(`🔍 Filtro de Calendario: Encontrados ${episodes.length} episodios con el selector article.js-release`);
             return Array.from(episodes);
         }
         
@@ -518,11 +518,11 @@ class CrunchyrollPowerUpCalendarFilter {
             try {
                 const elements = document.querySelectorAll(selector);
                 if (elements.length > 0) {
-                    console.log(`🔍 Calendar Filter: Found ${elements.length} episodes with fallback selector: ${selector}`);
+                    console.log(`🔍 Filtro de Calendario: Encontrados ${elements.length} episodios con selector alternativo: ${selector}`);
                     return Array.from(elements);
                 }
             } catch (e) {
-                console.log(`🔍 Calendar Filter: Invalid selector: ${selector}`, e);
+                console.log(`🔍 Filtro de Calendario: Selector inválido: ${selector}`, e);
             }
         }
         
@@ -534,7 +534,7 @@ class CrunchyrollPowerUpCalendarFilter {
         const seasonTitleElement = episode.querySelector('h1.season-name cite');
         const seasonTitle = seasonTitleElement ? seasonTitleElement.textContent.trim() : episode.textContent.trim();
         
-        console.log("🔍 Parsing episode:", seasonTitle);
+        console.log("🔍 Analizando episodio:", seasonTitle);
         
         // Use sophisticated dub detection patterns from original repository
         const dubData = this.detectDubLanguage(seasonTitle);
@@ -560,7 +560,7 @@ class CrunchyrollPowerUpCalendarFilter {
     }
     
     detectDubLanguage(title) {
-        console.log("🔍 Detecting dub language for:", title);
+        console.log("🔍 Detectando idioma doblado para:", title);
         
         let isDub = false;
         let languages = [];
@@ -608,7 +608,7 @@ class CrunchyrollPowerUpCalendarFilter {
             if (pattern.test(title)) {
                 isDub = true;
                 languages.push('spanish');
-                console.log("✅ Spanish dub detected with pattern:", pattern);
+                console.log("✅ Doblaje en español detectado con patrón:", pattern);
                 break;
             }
         }
@@ -619,7 +619,7 @@ class CrunchyrollPowerUpCalendarFilter {
                 if (pattern.test(title)) {
                     isDub = true;
                     languages.push('english');
-                    console.log("✅ English dub detected with pattern:", pattern);
+                    console.log("✅ Doblaje en inglés detectado con patrón:", pattern);
                     break;
                 }
             }
@@ -631,7 +631,7 @@ class CrunchyrollPowerUpCalendarFilter {
                 if (pattern.test(title)) {
                     isDub = true;
                     languages.push('french');
-                    console.log("✅ French dub detected with pattern:", pattern);
+                    console.log("✅ Doblaje en francés detectado con patrón:", pattern);
                     break;
                 }
             }
@@ -643,7 +643,7 @@ class CrunchyrollPowerUpCalendarFilter {
                 if (pattern.test(title)) {
                     isDub = true;
                     languages.push('german');
-                    console.log("✅ German dub detected with pattern:", pattern);
+                    console.log("✅ Doblaje en alemán detectado con patrón:", pattern);
                     break;
                 }
             }
@@ -676,7 +676,7 @@ class CrunchyrollPowerUpCalendarFilter {
                     } else {
                         languages.push('others');
                     }
-                    console.log("✅ Language detected via fallback pattern:", lang, "->", languages);
+                    console.log("✅ Idioma detectado vía patrón alternativo:", lang, "->", languages);
                     break;
                 }
             }
@@ -690,16 +690,16 @@ class CrunchyrollPowerUpCalendarFilter {
             if (!lowerTitle.includes('español') && !lowerTitle.includes('spanish') && 
                 !lowerTitle.includes('latino') && !lowerTitle.includes('castellano')) {
                 languages.push('english');
-                console.log("✅ Generic English dub detected");
+                console.log("✅ Doblaje genérico en inglés detectado");
             }
         }
         
-        console.log("🎯 Final result - isDub:", isDub, "languages:", languages);
+        console.log("🎯 Resultado final - isDub:", isDub, "languages:", languages);
         return { isDub, languages };
     }
     
     shouldShowEpisode(episodeData) {
-        console.log("🔍 Checking if episode should show:", {
+        console.log("🔍 Comprobando si el episodio debe mostrarse:", {
             title: episodeData.title,
             isDubbed: episodeData.isDubbed,
             languages: episodeData.languages,
@@ -708,11 +708,11 @@ class CrunchyrollPowerUpCalendarFilter {
         
         // Check dubbed filter
         if (this.filters.dubbed === 'only' && !episodeData.isDubbed) {
-            console.log("❌ Hidden: dubbed filter is 'only' but episode is not dubbed");
+            console.log("❌ Oculto: el filtro de doblaje está en 'only' pero el episodio no está doblado");
             return false;
         }
         if (this.filters.dubbed === 'hide' && episodeData.isDubbed) {
-            console.log("❌ Hidden: dubbed filter is 'hide' and episode is dubbed");
+            console.log("❌ Oculto: el filtro de doblaje está en 'hide' y el episodio está doblado");
             return false;
         }
         
@@ -723,17 +723,17 @@ class CrunchyrollPowerUpCalendarFilter {
                 this.filters.languages[lang] === true
             );
             
-            console.log("🌐 Language check - Episode languages:", episodeData.languages, "Enabled languages:", enabledLanguages);
+            console.log("🌐 Comprobación de idiomas - Idiomas del episodio:", episodeData.languages, "Idiomas habilitados:", enabledLanguages);
             
             if (enabledLanguages.length > 0) {
                 const hasAllowedLanguage = episodeData.languages.some(lang => {
                     const isAllowed = this.filters.languages[lang] === true;
-                    console.log(`  - Language '${lang}' allowed:`, isAllowed);
+                    console.log(`  - Idioma '${lang}' permitido:`, isAllowed);
                     return isAllowed;
                 });
                 
                 if (!hasAllowedLanguage) {
-                    console.log("❌ Hidden: no allowed languages match episode languages");
+                    console.log("❌ Oculto: ningún idioma permitido coincide con los idiomas del episodio");
                     return false;
                 }
             }
@@ -741,25 +741,25 @@ class CrunchyrollPowerUpCalendarFilter {
         
         // Check in queue filter
         if (this.filters.inQueue === 'only' && !episodeData.inQueue) {
-            console.log("❌ Hidden: queue filter is 'only' but episode is not in queue");
+            console.log("❌ Oculto: el filtro 'en cola' está en 'only' pero el episodio no está en cola");
             return false;
         }
         if (this.filters.inQueue === 'hide' && episodeData.inQueue) {
-            console.log("❌ Hidden: queue filter is 'hide' and episode is in queue");
+            console.log("❌ Oculto: el filtro 'en cola' está en 'hide' y el episodio está en cola");
             return false;
         }
         
         // Check premiere filter
         if (this.filters.premiere === 'only' && !episodeData.isPremiere) {
-            console.log("❌ Hidden: premiere filter is 'only' but episode is not premiere");
+            console.log("❌ Oculto: el filtro 'estrenos' está en 'only' pero el episodio no es estreno");
             return false;
         }
         if (this.filters.premiere === 'hide' && episodeData.isPremiere) {
-            console.log("❌ Hidden: premiere filter is 'hide' and episode is premiere");
+            console.log("❌ Oculto: el filter 'estrenos' está en 'hide' y el episodio es estreno");
             return false;
         }
         
-        console.log("✅ Episode should be shown");
+        console.log("✅ El episodio debe mostrarse");
         return true;
     }
     
@@ -875,7 +875,7 @@ class CrunchyrollPowerUpCalendarFilter {
             });
             
             if (shouldReapply) {
-                console.log("🔍 Calendar Filter: New content detected, reapplying filters");
+                console.log("🔍 Filtro de Calendario: Nuevo contenido detectado, re-aplicando filtros");
                 setTimeout(() => this.applyFilters(), 1000);
             }
         });
@@ -885,35 +885,35 @@ class CrunchyrollPowerUpCalendarFilter {
             subtree: true
         });
         
-        console.log("🔍 Calendar Filter: Mutation observer set up");
+        console.log("🔍 Filtro de Calendario: Mutation observer configurado");
     }
     
     getMessage(key) {
         const messages = {
-            calendar_filter_ui_title: 'Calendar Filter',
-            show_filters: 'Show Filters',
-            hide_filters: 'Hide Filters',
-            dubbed_filter: 'Dubbed Episodes',
-            dubbed_only: 'Only',
-            dubbed_show: 'Show',
-            dubbed_hide: 'Hide',
-            language_filter: 'Languages',
-            lang_english: 'English',
-            lang_spanish: 'Spanish',
-            lang_french: 'French',
-            lang_german: 'German',
-            lang_others: 'Others',
-            queue_filter: 'In Queue',
-            queue_only: 'Only',
-            queue_show: 'Show',
-            queue_hide: 'Hide',
-            premiere_filter: 'Premieres',
-            premiere_only: 'Only',
-            premiere_show: 'Show',
-            premiere_hide: 'Hide',
-            reset_filters: 'Reset Filters',
-            hidden: 'Hidden'
-        };
+            calendar_filter_ui_title: 'Filtro de calendario',
+            show_filters: 'Mostrar filtros',
+            hide_filters: 'Ocultar filtros',
+            dubbed_filter: 'Episodios doblados',
+            dubbed_only: 'Solo',
+            dubbed_show: 'Mostrar',
+            dubbed_hide: 'Ocultar',
+            language_filter: 'Idiomas',
+            lang_english: 'Inglés',
+            lang_spanish: 'Español',
+            lang_french: 'Francés',
+            lang_german: 'Alemán',
+            lang_others: 'Otros',
+            queue_filter: 'En la cola',
+            queue_only: 'Solo',
+            queue_show: 'Mostrar',
+            queue_hide: 'Ocultar',
+            premiere_filter: 'Estrenos',
+            premiere_only: 'Solo',
+            premiere_show: 'Mostrar',
+            premiere_hide: 'Ocultar',
+            reset_filters: 'Restablecer filtros',
+            hidden: 'Oculto'
+         };
         
         if (typeof chrome !== 'undefined' && chrome.i18n) {
             return chrome.i18n.getMessage(key) || messages[key] || key;
@@ -923,7 +923,7 @@ class CrunchyrollPowerUpCalendarFilter {
     }
 }
 
-// Initialize when DOM is ready
+// Inicializar cuando el DOM esté listo
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         new CrunchyrollPowerUpCalendarFilter();
@@ -932,14 +932,14 @@ if (document.readyState === 'loading') {
     new CrunchyrollPowerUpCalendarFilter();
 }
 
-// Also initialize on page navigation (for SPAs)
+// También inicializar cuando cambie la URL (para aplicaciones SPA)
 if (!window.crunchyrollPowerUpLastUrl) {
     window.crunchyrollPowerUpLastUrl = location.href;
     new MutationObserver(() => {
         const url = location.href;
         if (url !== window.crunchyrollPowerUpLastUrl) {
             window.crunchyrollPowerUpLastUrl = url;
-            console.log("🔍 Calendar Filter: URL changed, reinitializing");
+            console.log("🔍 Filtro de Calendario: URL cambiada, re-inicializando");
             setTimeout(() => {
                 new CrunchyrollPowerUpCalendarFilter();
             }, 2000);
@@ -947,4 +947,4 @@ if (!window.crunchyrollPowerUpLastUrl) {
     }).observe(document, { subtree: true, childList: true });
 }
 
-console.log("🔍 Crunchyroll Power Up Calendar Filter: Script initialized");
+console.log("🔍 Filtro de Calendario de Crunchyroll Power Up: Script inicializado");

@@ -1,6 +1,6 @@
-// Enhanced Mini Player (Picture-in-Picture) Module for Crunchyroll Power Up
-// Author: MiniMax Agent
-// Based on picture-in-picture-extension-for-crunchyroll with complete UI redesign
+// Módulo de Minireproductor Mejorado (Picture-in-Picture) para Crunchyroll Power Up
+// Autor: Ing. Adony R
+// Permite una ventana de minireproductor persistente
 
 // Debug configuration - set to false for production
 const DEBUG = false;
@@ -49,30 +49,30 @@ let lastUrl = window.location.href;
 // Enhanced video detection with multiple strategies and retry logic
 class VideoDetector {
     static async findVideo() {
-        debugLog("🔍 Enhanced Mini Player: Starting video search...");
+        debugLog("🔍 Minireproductor mejorado: Iniciando búsqueda de video...");
         
         // Strategy 1: Try main document selectors
         const video = this.searchInDocument(document);
         if (video) {
-            debugLog("✅ Enhanced Mini Player: Video found in main document");
+            debugLog("✅ Minireproductor mejorado: Video encontrado en el documento principal");
             return video;
         }
         
         // Strategy 2: Search in same-origin iframes
         const iframeVideo = this.searchInIframes();
         if (iframeVideo) {
-            debugLog("✅ Enhanced Mini Player: Video found in iframe");
+            debugLog("✅ Minireproductor mejorado: Video encontrado en iframe");
             return iframeVideo;
         }
         
         // Strategy 3: Search in shadow roots
         const shadowVideo = this.searchInShadowRoots(document.body);
         if (shadowVideo) {
-            debugLog("✅ Enhanced Mini Player: Video found in shadow DOM");
+            debugLog("✅ Minireproductor mejorado: Video encontrado en shadow DOM");
             return shadowVideo;
         }
         
-        debugLog("❌ Enhanced Mini Player: No video found in any context");
+    debugLog("❌ Minireproductor mejorado: No se encontró video en ningún contexto");
         return null;
     }
     
@@ -82,13 +82,13 @@ class VideoDetector {
                 const videos = doc.querySelectorAll(selector);
                 for (const video of videos) {
                     if (this.isValidVideo(video)) {
-                        debugLog(`📺 Enhanced Mini Player: Valid video found with selector: ${selector}`);
+                        debugLog(`📺 Minireproductor mejorado: Video válido encontrado con selector: ${selector}`);
                         return video;
                     }
                 }
             } catch (error) {
-                // Silently skip invalid selectors, only log in debug mode
-                debugLog(`⚠️ Enhanced Mini Player: Error with selector ${selector}:`, error);
+                // Omitir selectores inválidos silenciosamente; solo registrar en modo debug
+                debugLog(`⚠️ Minireproductor mejorado: Error con el selector ${selector}:`, error);
             }
         }
         return null;
@@ -107,8 +107,8 @@ class VideoDetector {
                     }
                 }
             } catch (error) {
-                // Silently skip cross-origin iframes
-                debugLog("🔍 Enhanced Mini Player: Skipping cross-origin iframe");
+                // Omitir iframes cross-origin silenciosamente
+                debugLog("🔍 Minireproductor mejorado: Omitiendo iframe de distinto origen");
             }
         }
         return null;
@@ -231,7 +231,7 @@ class ButtonManager {
             return miniPlayerButton;
         }
         
-        debugLog("🎯 Enhanced Mini Player: Creating floating button");
+    debugLog("🎯 Minireproductor mejorado: Creando botón flotante");
         
         const button = document.createElement('button');
         button.id = MINIPLAYER_CONFIG.buttonId;
@@ -305,13 +305,13 @@ class ButtonManager {
             button.style.transform = 'translateY(0) scale(1)';
         }, 100);
         
-        debugLog("✅ Enhanced Mini Player: Button created and positioned");
+    debugLog("✅ Minireproductor mejorado: Botón creado y posicionado");
         return button;
     }
     
     static remove() {
         if (miniPlayerButton) {
-            debugLog("🗑️ Enhanced Mini Player: Removing button");
+            debugLog("🗑️ Minireproductor mejorado: Eliminando botón");
             miniPlayerButton.style.opacity = '0';
             miniPlayerButton.style.transform = 'translateY(20px) scale(0.9)';
             
@@ -331,19 +331,19 @@ class ButtonManager {
     }
     
     static async handleClick() {
-        debugLog("👆 Enhanced Mini Player: Button clicked");
+    debugLog("👆 Minireproductor mejorado: Botón pulsado");
         
         // Find current video
         const video = await VideoDetector.findVideo();
         if (!video) {
-            debugLog("❌ Enhanced Mini Player: No video found on click");
+            debugLog("❌ Minireproductor mejorado: No se encontró un video al pulsar");
             ToastNotifier.show("No se encontró un video.");
             return;
         }
         
         // Check if video is ready and playing
         if (video.paused) {
-            debugLog("⏸️ Enhanced Mini Player: Video is paused");
+            debugLog("⏸️ Minireproductor mejorado: El video está en pausa");
             ToastNotifier.show("Reproduce el video primero.");
             return;
         }
@@ -351,7 +351,7 @@ class ButtonManager {
         try {
             // Check if PiP is already active
             if (document.pictureInPictureElement) {
-                debugLog("📤 Enhanced Mini Player: Exiting PiP");
+                debugLog("📤 Minireproductor mejorado: Saliendo de PiP");
                 await document.exitPictureInPicture();
                 this.updateText(MINIPLAYER_CONFIG.buttonText);
                 ToastNotifier.show("Picture-in-Picture desactivado");
@@ -362,14 +362,14 @@ class ButtonManager {
                     return;
                 }
                 
-                debugLog("📥 Enhanced Mini Player: Activating PiP");
+                debugLog("📥 Minireproductor mejorado: Activando PiP");
                 await video.requestPictureInPicture();
                 this.updateText("Salir PiP");
                 ToastNotifier.show("Picture-in-Picture activado");
             }
         } catch (error) {
-            // Keep error logging for genuine issues
-            console.error("Enhanced Mini Player: PiP operation failed:", error);
+            // Mantener el registro de errores para problemas reales
+            console.error("Minireproductor mejorado: Error en la operación PiP:", error);
             ToastNotifier.show("Error al activar Picture-in-Picture.");
         }
     }
@@ -388,12 +388,12 @@ class RetryManager {
     
     static async attemptVideoDetection() {
         currentRetryAttempt++;
-        debugLog(`🔄 Enhanced Mini Player: Video detection attempt ${currentRetryAttempt}/${MINIPLAYER_CONFIG.retryAttempts}`);
+    debugLog(`🔄 Minireproductor mejorado: Intento de detección de video ${currentRetryAttempt}/${MINIPLAYER_CONFIG.retryAttempts}`);
         
         const video = await VideoDetector.findVideo();
         
         if (video) {
-            debugLog("✅ Enhanced Mini Player: Video detected, showing button");
+            debugLog("✅ Minireproductor mejorado: Video detectado, mostrando botón");
             currentVideo = video;
             
             // Set up video event listeners
@@ -406,13 +406,13 @@ class RetryManager {
         
         if (currentRetryAttempt < MINIPLAYER_CONFIG.retryAttempts) {
             const delay = MINIPLAYER_CONFIG.retryDelay * Math.pow(MINIPLAYER_CONFIG.backoffMultiplier, currentRetryAttempt - 1);
-            debugLog(`⏳ Enhanced Mini Player: Retrying in ${delay}ms...`);
+            debugLog(`⏳ Minireproductor mejorado: Reintentando en ${delay}ms...`);
             
             retryTimeout = setTimeout(() => {
                 this.attemptVideoDetection();
             }, delay);
         } else {
-            debugLog("❌ Enhanced Mini Player: All retry attempts exhausted");
+            debugLog("❌ Minireproductor mejorado: Se agotaron los intentos de reintento");
             this.cleanup();
         }
         
@@ -422,12 +422,12 @@ class RetryManager {
     static setupVideoEventListeners(video) {
         // Listen for PiP events to update button text
         video.addEventListener('enterpictureinpicture', () => {
-            debugLog("📥 Enhanced Mini Player: Entered PiP mode");
+            debugLog("📥 Minireproductor mejorado: Entró en modo PiP");
             ButtonManager.updateText("Salir PiP");
         });
         
         video.addEventListener('leavepictureinpicture', () => {
-            debugLog("📤 Enhanced Mini Player: Left PiP mode");
+            debugLog("📤 Minireproductor mejorado: Salió del modo PiP");
             ButtonManager.updateText(MINIPLAYER_CONFIG.buttonText);
         });
     }
@@ -470,7 +470,7 @@ class NavigationManager {
             NavigationManager.handleNavigationChange();
         });
         
-        debugLog("🧭 Enhanced Mini Player: URL observer active");
+    debugLog("🧭 Minireproductor mejorado: Observador de URL activo");
     }
     
     static setupDomObserver() {
@@ -498,7 +498,7 @@ class NavigationManager {
             }
             
             if (shouldRecheck) {
-                debugLog("🔍 Enhanced Mini Player: DOM change detected, rechecking...");
+                debugLog("🔍 Minireproductor mejorado: Cambio en el DOM detectado, re-evaluando...");
                 setTimeout(() => {
                     NavigationManager.handlePageUpdate();
                 }, 500); // Small delay to allow DOM to stabilize
@@ -510,12 +510,12 @@ class NavigationManager {
             subtree: true
         });
         
-        debugLog("👁️ Enhanced Mini Player: DOM observer active");
+    debugLog("👁️ Minireproductor mejorado: Observador del DOM activo");
     }
     
     static handleNavigationChange() {
         if (PageDetector.hasUrlChanged()) {
-            debugLog("🧭 Enhanced Mini Player: URL change detected:", window.location.href);
+            debugLog("🧭 Minireproductor mejorado: Cambio de URL detectado:", window.location.href);
             setTimeout(() => {
                 this.handlePageUpdate();
             }, 1000); // Give page time to load
@@ -523,7 +523,7 @@ class NavigationManager {
     }
     
     static handleInitialPageLoad() {
-        debugLog("🏁 Enhanced Mini Player: Handling initial page load");
+    debugLog("🏁 Minireproductor mejorado: Procesando carga inicial de la página");
         setTimeout(() => {
             this.handlePageUpdate();
         }, 1500); // Wait for initial page content to load
@@ -531,7 +531,7 @@ class NavigationManager {
     
     static handlePageUpdate() {
         const isEpisodePage = PageDetector.isEpisodePage();
-        debugLog(`📄 Enhanced Mini Player: Page update - Episode page: ${isEpisodePage}`);
+    debugLog(`📄 Minireproductor mejorado: Actualización de página - Página de episodio: ${isEpisodePage}`);
         
         if (isEpisodePage) {
             // We're on an episode page, start video detection
@@ -543,7 +543,7 @@ class NavigationManager {
     }
     
     static cleanup() {
-        debugLog("🧹 Enhanced Mini Player: Cleaning up for non-episode page");
+    debugLog("🧹 Minireproductor mejorado: Limpiando para páginas que no son de episodio");
         ButtonManager.remove();
         RetryManager.cleanup();
         ToastNotifier.remove();
@@ -562,23 +562,23 @@ class NavigationManager {
         }
         
         this.cleanup();
-        debugLog("💀 Enhanced Mini Player: Module destroyed");
+    debugLog("💀 Minireproductor mejorado: Módulo destruido");
     }
 }
 
 // Main module interface
 const EnhancedMiniPlayer = {
     init() {
-        debugLog("🚀 Enhanced Mini Player: Initializing module");
+    debugLog("🚀 Minireproductor mejorado: Inicializando módulo");
         
         // Check if we're on a supported browser
         if (!document.pictureInPictureEnabled) {
-            debugLog("⚠️ Enhanced Mini Player: Picture-in-Picture not supported");
+            debugLog("⚠️ Minireproductor mejorado: Picture-in-Picture no soportado");
             return;
         }
         
         NavigationManager.init();
-        debugLog("✅ Enhanced Mini Player: Module initialized successfully");
+    debugLog("✅ Minireproductor mejorado: Módulo inicializado correctamente");
     },
     
     destroy() {
@@ -614,4 +614,4 @@ if (document.readyState === 'loading') {
 // Export for external access
 window.crunchyPowerUpEnhancedMiniPlayer = EnhancedMiniPlayer;
 
-debugLog("✅ Enhanced Mini Player: Module loaded successfully");
+debugLog("✅ Minireproductor mejorado: Módulo cargado correctamente");

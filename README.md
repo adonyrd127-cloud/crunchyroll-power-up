@@ -44,7 +44,6 @@ Compatible con:
 
 ## Idiomas
 
-- Inglés (English)
 - Español (Spanish)
 
 ## Estado

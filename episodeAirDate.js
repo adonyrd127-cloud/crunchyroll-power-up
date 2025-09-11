@@ -1,8 +1,7 @@
+// Funcionalidad de Fecha de Emisión del Episodio para Crunchyroll Power Up - Implementación por parseo del DOM
+console.log("Crunchyroll Power Up: Módulo Fecha de Emisión cargado (parseo DOM)");
 
-// Episode Air Date functionality for Crunchy+ Plus - DOM Parsing Implementation
-console.log("🟠 Crunchy+ Plus: EpisodeAirDate module loaded (DOM parsing version)");
-
-// Simple Renderer class to match reference implementation
+// Clase Renderer simple para coincidir con la implementación de referencia
 class Renderer {
   constructor(tagName) {
     this.element = document.createElement(tagName);
@@ -38,22 +37,18 @@ class EpisodeAirDate {
     this.actionButtons = null;
 
     this.actionButtons = document.querySelector('.erc-series-hero-actions');
-    if (!this.actionButtons) {
-      new MutationObserver((_, observer) => {
-        this.actionButtons = document.querySelector('.erc-series-hero-actions');
-        if (!this.actionButtons) return;
-        observer.disconnect();
-        this.createElement();
-      }).observe(document.getElementById('content'), {
-        childList: true,
-        subtree: true,
-      });
-    } else {
+    if (this.actionButtons) {
       this.createElement();
     }
   }
 
   createElement() {
+    // Comprobar si el elemento ya existe para evitar duplicados
+    if (document.querySelector('.next-air-date')) {
+      console.log("Crunchyroll Power Up: El elemento de próxima emisión ya existe, se omite la creación.");
+      return;
+    }
+
     this.getAirDate((date) => {
       if (!date) return;
 
@@ -72,19 +67,19 @@ class EpisodeAirDate {
         ]))
         .getElement();
 
-      // Append to the original action buttons container if available; otherwise fallback to body.
+      // Añadir al contenedor original de botones de acción si está disponible; si no, usar el body como fallback.
       const parent = this.actionButtons || document.querySelector('.erc-series-hero-actions') || document.body;
       parent.append(this.container);
     });
   }
 
   /**
-   * Parse Crunchyroll release date from DOM elements
-   * Looks for patterns like "Available Wed, Aug 13 · 08:05 AM PDT"
+   * Analiza la fecha de estreno en Crunchyroll a partir del DOM
+   * Busca patrones como "Available Wed, Aug 13 · 08:05 AM PDT"
    */
   parseCrunchyrollReleaseTime() {
     try {
-      // Look for release date elements with various selectors
+      // Buscar elementos de fecha de lanzamiento con varios selectores
       const selectors = [
         '.release-date',
         '[data-testid="release-date"]',
@@ -97,33 +92,33 @@ class EpisodeAirDate {
       let releaseElement = null;
       let releaseText = '';
 
-      // Try each selector
+      // Probar cada selector
       for (const selector of selectors) {
         releaseElement = document.querySelector(selector);
         if (releaseElement) {
           releaseText = releaseElement.textContent.trim();
-          console.log(`🟠 Crunchy+ Plus: Found release element with selector "${selector}":`, releaseText);
+      console.log(`Crunchyroll Power Up: Elemento de fecha encontrado con selector "${selector}":`, releaseText);
           break;
         }
       }
 
-      // If no specific release date element found, look in episode containers
+      // Si no se encuentra un elemento de fecha específico, buscar en contenedores de episodios
       if (!releaseText) {
         const episodeContainers = document.querySelectorAll('[class*="episode"], [class*="card"], [data-testid*="episode"]');
         
         for (const container of episodeContainers) {
           const text = container.textContent;
-          // Look for "Available" pattern in episode containers
+          // Buscar el patrón "Available" en los contenedores de episodios
           const availableMatch = text.match(/Available\s+[^·]+·[^·]+/i);
           if (availableMatch) {
             releaseText = availableMatch[0];
-            console.log("🟠 Crunchy+ Plus: Found release text in episode container:", releaseText);
+            console.log("Crunchyroll Power Up: Texto de fecha encontrado en contenedor de episodio:", releaseText);
             break;
           }
         }
       }
 
-      // If still no text found, look for any text containing "Available" pattern
+      // Si aún no se encuentra texto, buscar en cualquier elemento que contenga el patrón "Available"
       if (!releaseText) {
         const allElements = document.querySelectorAll('*');
         for (const element of allElements) {
@@ -132,7 +127,7 @@ class EpisodeAirDate {
             const availableMatch = text.match(/Available\s+[^·]+·[^·]+/i);
             if (availableMatch) {
               releaseText = availableMatch[0];
-              console.log("🟠 Crunchy+ Plus: Found release text in general search:", releaseText);
+              console.log("Crunchyroll Power Up: Texto de fecha encontrado en búsqueda general:", releaseText);
               break;
             }
           }
@@ -140,22 +135,22 @@ class EpisodeAirDate {
       }
 
       if (!releaseText) {
-        console.warn("🟠 Crunchy+ Plus: No release date text found in DOM");
+        console.log("Crunchyroll Power Up: No se encontró texto de fecha en el DOM (esperable si no hay próximo episodio o el DOM cambió)");
         return null;
       }
 
-      // Parse the release text
-      // Expected format: "Available Wed, Aug 13 · 08:05 AM PDT"
+      // Parsear el texto de lanzamiento
+      // Formato esperado: "Available Wed, Aug 13 · 08:05 AM PDT"
       const releaseMatch = releaseText.match(/Available\s+(\w+),\s+(\w+)\s+(\d+)\s+·\s+(\d{1,2}):(\d{2})\s+(AM|PM)\s+(\w+)/i);
       
       if (!releaseMatch) {
-        console.warn("🟠 Crunchy+ Plus: Could not parse release date format:", releaseText);
+  console.warn("Crunchyroll Power Up: No se pudo analizar el formato de la fecha de estreno:", releaseText);
         return null;
       }
 
       const [, dayName, monthName, day, hour, minute, ampm, timezone] = releaseMatch;
       
-      // Convert month name to number
+      // Convertir nombre del mes a número
       const monthMap = {
         'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
         'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
@@ -163,11 +158,11 @@ class EpisodeAirDate {
       
       const monthNum = monthMap[monthName];
       if (monthNum === undefined) {
-        console.warn("🟠 Crunchy+ Plus: Unknown month name:", monthName);
+        console.warn("Crunchyroll Power Up: Unknown month name:", monthName);
         return null;
       }
 
-      // Convert 12-hour to 24-hour format
+      // Convertir formato de 12 horas a 24 horas
       let hour24 = parseInt(hour);
       if (ampm.toUpperCase() === 'PM' && hour24 !== 12) {
         hour24 += 12;
@@ -175,16 +170,16 @@ class EpisodeAirDate {
         hour24 = 0;
       }
 
-      // Create date object (assuming current year for now)
+      // Crear objeto Date (asumiendo el año actual por ahora)
       const currentYear = new Date().getFullYear();
       const releaseDate = new Date(currentYear, monthNum, parseInt(day), hour24, parseInt(minute));
       
-      // If the date is in the past, assume it's next year
+      // Si la fecha está en el pasado, asumir que es el próximo año
       if (releaseDate < new Date()) {
         releaseDate.setFullYear(currentYear + 1);
       }
 
-      console.log("🟠 Crunchy+ Plus: Parsed release date:", {
+  console.log("Crunchyroll Power Up: Fecha de estreno analizada:", {
         originalText: releaseText,
         parsedDate: releaseDate,
         timezone: timezone
@@ -193,7 +188,7 @@ class EpisodeAirDate {
       return releaseDate;
 
     } catch (error) {
-      console.error("🟠 Crunchy+ Plus: Error parsing Crunchyroll release time:", error);
+      console.error("Crunchyroll Power Up: Error parsing Crunchyroll release time:", error);
       return null;
     }
   }
@@ -209,7 +204,7 @@ class EpisodeAirDate {
       return;
     }
 
-    // Get AniList data for the base date
+    // Obtener datos de AniList como fecha base
     chrome.runtime.sendMessage(chrome.runtime.id, {
       type: 'anilist',
       data: {
@@ -231,13 +226,13 @@ class EpisodeAirDate {
         
         if (airingAt) {
           const anilistDate = new Date(airingAt * 1000);
-          console.log("🟠 Crunchy+ Plus: AniList base date:", anilistDate);
+          console.log("Crunchyroll Power Up: AniList base date:", anilistDate);
 
-          // Try to get more accurate timing from DOM
+          // Intentar obtener una hora más precisa desde el DOM
           const crunchyrollTime = this.parseCrunchyrollReleaseTime();
           
           if (crunchyrollTime) {
-            // Use hybrid approach: AniList date + Crunchyroll time
+            // Usar enfoque híbrido: fecha de AniList + hora de Crunchyroll
             const hybridDate = new Date(
               anilistDate.getFullYear(),
               anilistDate.getMonth(),
@@ -247,7 +242,7 @@ class EpisodeAirDate {
               crunchyrollTime.getSeconds()
             );
             
-            console.log("🟠 Crunchy+ Plus: Hybrid timing calculated:", {
+            console.log("Crunchyroll Power Up: Hybrid timing calculated:", {
               anilistDate: anilistDate,
               crunchyrollTime: crunchyrollTime,
               finalDate: hybridDate
@@ -256,25 +251,25 @@ class EpisodeAirDate {
             window.anilistCache[this.seriesId].nextAiringDate = hybridDate;
             callback(hybridDate);
           } else {
-            // Fallback to AniList only
-            console.log("🟠 Crunchy+ Plus: Using AniList date only (no DOM timing found)");
+            // Fallback a AniList únicamente
+            console.log("Crunchyroll Power Up: Using AniList date only (no DOM timing found)");
             window.anilistCache[this.seriesId].nextAiringDate = anilistDate;
             callback(anilistDate);
           }
         } else {
-          // No AniList data, try DOM-only approach
+          // Sin datos AniList, intentar solo por DOM
           const crunchyrollTime = this.parseCrunchyrollReleaseTime();
           if (crunchyrollTime) {
-            console.log("🟠 Crunchy+ Plus: Using DOM-only timing:", crunchyrollTime);
+            console.log("Crunchyroll Power Up: Using DOM-only timing:", crunchyrollTime);
             window.anilistCache[this.seriesId].nextAiringDate = crunchyrollTime;
             callback(crunchyrollTime);
           } else {
-            console.log("🟠 Crunchy+ Plus: No timing data available");
+            console.log("Crunchyroll Power Up: No timing data available");
             window.anilistCache[this.seriesId].nextAiringDate = null;
           }
         }
       } catch (error) {
-        console.error("🟠 Crunchy+ Plus: Error in getAirDate:", error);
+        console.error("Crunchyroll Power Up: Error in getAirDate:", error);
         window.anilistCache[this.seriesId].nextAiringDate = null;
       }
     });
@@ -289,18 +284,15 @@ class EpisodeAirDate {
         const message = chrome.i18n.getMessage('nextEpisodeAirsAt', [dateText, timeText]);
         if (message) return message;
       } catch (error) {
-        console.warn("🟠 Crunchy+ Plus: Chrome i18n not available, using fallback");
+        console.warn("Crunchyroll Power Up: Chrome i18n not available, using fallback");
       }
     }
     
-    // Fallback to manual language detection
+    // Fallback a detección de idioma manual
     const lang = this.getCurrentLanguage();
     
-    if (lang === 'es') {
-      return `El próximo episodio se emite el ${dateText} a ${timeText}`;
-    } else {
-      return `Next episode airs on ${dateText} at ${timeText}`;
-    }
+  // Devolver siempre en español por defecto (manifest.default_locale = "es")
+  return `El próximo episodio se emite el ${dateText} a las ${timeText}`;
   }
 
   getCurrentLanguage() {
@@ -310,20 +302,35 @@ class EpisodeAirDate {
   }
 
   destroy() {
-    this.container?.remove();
+    if (this.container) {
+      this.container.remove();
+      this.container = null; // Clear reference
+    }
+    if (this.observer) {
+      this.observer.disconnect();
+      this.observer = null;
+    }
   }
 }
 
-// Initialize when DOM is ready
-function initializeEpisodeAirDate() {
-  // Check if we're on a series page
-  const pathMatch = location.pathname.match(/(?<=\/series\/)[^\/]*/);
-  if (!pathMatch) return;
-  
-  const seriesId = pathMatch[0];
-  if (!seriesId) return;
+// Global instance to manage lifecycle
+let currentEpisodeAirDateInstance = null;
 
-  console.log("🟠 Crunchy+ Plus: Initializing EpisodeAirDate for series:", seriesId);
+function initializeEpisodeAirDate(seriesId) {
+  // If an instance already exists, destroy it to prevent duplicates
+  if (currentEpisodeAirDateInstance) {
+    currentEpisodeAirDateInstance.destroy();
+    currentEpisodeAirDateInstance = null;
+  }
+
+  if (!seriesId) {
+    const pathMatch = location.pathname.match(/(?<=\/series\/)[^\/]*/);
+    if (!pathMatch) return;
+    seriesId = pathMatch[0];
+    if (!seriesId) return;
+  }
+
+  console.log("Crunchyroll Power Up: Initializing EpisodeAirDate for series:", seriesId);
   
   // Create mock seasons and episodes promises for compatibility
   const seasons = Promise.resolve([{
@@ -341,16 +348,16 @@ function initializeEpisodeAirDate() {
     }])
   };
 
-  new EpisodeAirDate(seriesId, seasons, episodes);
+  currentEpisodeAirDateInstance = new EpisodeAirDate(seriesId, seasons, episodes);
 }
 
-// Export for use in content script
+// Exportar para uso en el content script
 window.EpisodeAirDate = EpisodeAirDate;
 window.initializeEpisodeAirDate = initializeEpisodeAirDate;
 
-// Auto-initialize if on series page
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeEpisodeAirDate);
-} else {
-  initializeEpisodeAirDate();
-}
+// No hay auto-inicialización aquí; content.js lo gestionará
+// if (document.readyState === 'loading') {
+//   document.addEventListener('DOMContentLoaded', initializeEpisodeAirDate);
+// } else {
+//   initializeEpisodeAirDate();
+// }

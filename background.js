@@ -1,16 +1,16 @@
-// Crunchyroll Power Up Extension - Background Script
+// Extensión Crunchyroll Power Up - Script de Fondo
 // Author: Ing. Adony R.
 
-// Default settings compatible with the original repository format
+// Configuración predeterminada compatible con el formato del repositorio original
 const defaultSettings = {
-  // Skip settings (mapped to original format)
+  // Configuración de salto (mapeada al formato original)
   skip_event_intro: 1,        // 0=hidden, 1=visible, 2=auto-skip
   skip_event_ending: 1,       // 0=hidden, 1=visible, 2=auto-skip
   skip_event_recap: 1,        // 0=hidden, 1=visible, 2=auto-skip
   auto_skip: 0,               // General auto-skip setting
   hide_skip_button: 0,        // Hide skip buttons
   
-  // Our UI settings (maintain compatibility)
+  // Nuestra configuración de interfaz de usuario (mantener compatibilidad)
   autoSkipIntro: true,
   autoSkipRecap: true,
   autoSkipOutro: false,
@@ -37,62 +37,62 @@ const defaultSettings = {
   saturation: 100,
   nightMode: false,
   
-  // New features
+  // Nuevas características
   communityRatings: true,
   seasonProgress: true,
   nextEpisodeDate: true,
   miniPlayerEnabled: true,  // Mini Player enabled by default
   
-  // Player settings
+  // Configuración del reproductor
   player_auto_fullscreen: false,
   player_auto_theater: true,
   player_auto_next: true,
   player_speed_controls: true,
   player_quality_controls: true,
   
-  // UI settings
+  // Configuración de la interfaz de usuario
   ui_hide_comments: false,
   ui_hide_related: false,
   ui_compact_mode: false
 };
 
-// Initialize extension
+// Inicializar extensión
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log('🟠 Crunchyroll Power Up: Background script installed');
+  console.log('Crunchyroll Power Up: Script de fondo instalado');
   
   try {
-    // Get existing settings
+    // Obtener configuración existente
     const existingSettings = await chrome.storage.sync.get(null);
     
-    // Merge with defaults (don't overwrite existing settings)
+    // Fusionar con valores predeterminados (no sobrescribir la configuración existente)
     const mergedSettings = { ...defaultSettings, ...existingSettings };
     
-    // Map our UI settings to the original repository format
+    // Mapear nuestra configuración de interfaz de usuario al formato del repositorio original
     mergedSettings.skip_event_intro = mergedSettings.autoSkipIntro ? 2 : 1;
     mergedSettings.skip_event_recap = mergedSettings.autoSkipRecap ? 2 : 1;
     mergedSettings.skip_event_ending = mergedSettings.autoSkipEnding ? 2 : 1;
     mergedSettings.auto_skip = mergedSettings.autoSkipIntro || mergedSettings.autoSkipRecap || mergedSettings.autoSkipEnding ? 2 : 1;
-    mergedSettings.hide_skip_button = 0; // Always show buttons
+    mergedSettings.hide_skip_button = 0; // Siempre mostrar botones
     
-    // Save merged settings
+    // Guardar configuración fusionada
     await chrome.storage.sync.set(mergedSettings);
-    console.log('🟠 Crunchyroll Power Up: Settings initialized:', mergedSettings);
+  console.log('Crunchyroll Power Up: Configuración inicializada:', mergedSettings);
   } catch (error) {
-    console.error('🟠 Crunchyroll Power Up: Error initializing settings:', error);
+    console.error('Crunchyroll Power Up: Error al inicializar la configuración:', error);
   }
 });
 
-// Listen for settings changes and sync between formats
+// Escuchar cambios de configuración y sincronizar entre formatos
 chrome.storage.onChanged.addListener(async (changes, namespace) => {
   if (namespace === 'sync') {
-    console.log('🟠 Crunchyroll Power Up: Settings changed:', changes);
+  console.log('Crunchyroll Power Up: La configuración cambió:', changes);
     
     try {
       const currentSettings = await chrome.storage.sync.get(null);
       let needsUpdate = false;
       const updates = {};
       
-      // Sync our UI settings to original format
+      // Sincronizar nuestra configuración de interfaz de usuario al formato original
       if (changes.autoSkipIntro) {
         updates.skip_event_intro = changes.autoSkipIntro.newValue ? 2 : 1;
         needsUpdate = true;
@@ -113,7 +113,7 @@ chrome.storage.onChanged.addListener(async (changes, namespace) => {
         needsUpdate = true;
       }
       
-      // Update auto_skip based on any skip setting
+      // Actualizar auto_skip basado en cualquier configuración de salto
       if (changes.autoSkipIntro || changes.autoSkipEnding || changes.autoSkipOutro) {
         const hasAnyAutoSkip = currentSettings.autoSkipIntro || 
                               currentSettings.autoSkipEnding || 
@@ -124,40 +124,40 @@ chrome.storage.onChanged.addListener(async (changes, namespace) => {
       
       if (needsUpdate) {
         await chrome.storage.sync.set(updates);
-        console.log('🟠 Crunchyroll Power Up: Synced settings to original format:', updates);
+        console.log('Crunchyroll Power Up: Configuración sincronizada al formato original:', updates);
       }
     } catch (error) {
-      console.error('🟠 Crunchyroll Power Up: Error syncing settings:', error);
+      console.error('Crunchyroll Power Up: Error al sincronizar la configuración:', error);
     }
   }
 });
 
-// Handle messages from content scripts
+// Manejar mensajes de los scripts de contenido
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('🟠 Crunchyroll Power Up: Message received:', message);
+  console.log('Crunchyroll Power Up: Mensaje recibido:', message);
   
   switch (message.type) {
     case 'getSettings':
       chrome.storage.sync.get(null).then(settings => {
         sendResponse({ success: true, settings });
       }).catch(error => {
-        console.error('🟠 Crunchyroll Power Up: Error getting settings:', error);
+        console.error('Crunchyroll Power Up: Error al obtener la configuración:', error);
         sendResponse({ success: false, error: error.message });
       });
-      return true; // Keep message channel open for async response
+      return true; // Mantener el canal de mensajes abierto para respuesta asíncrona
       
     case 'updateSettings':
       chrome.storage.sync.set(message.settings).then(() => {
-        console.log('🟠 Crunchyroll Power Up: Settings updated successfully');
+        console.log('Crunchyroll Power Up: Configuración actualizada con éxito');
         sendResponse({ success: true });
       }).catch(error => {
-        console.error('🟠 Crunchyroll Power Up: Error updating settings:', error);
+        console.error('Crunchyroll Power Up: Error al actualizar la configuración:', error);
         sendResponse({ success: false, error: error.message });
       });
-      return true; // Keep message channel open for async response
+      return true; // Mantener el canal de mensajes abierto para respuesta asíncrona
       
     case 'skipActive':
-      // Forward skip command to content script
+      // Reenviar comando de salto al script de contenido
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, { type: 'skipActive' });
@@ -167,7 +167,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
       
     case 'MINI_PLAYER_TOGGLE':
-      // Handle Mini Player toggle
+      // Manejar el interruptor del Mini Reproductor
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, { 
@@ -180,9 +180,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
       
     case 'anilist':
-      // Handle AniList API requests
+      // Manejar solicitudes de la API de AniList
       const { query } = message.data;
-      console.log('🟠 Crunchyroll Power Up: AniList API request:', query);
+    console.log('Crunchyroll Power Up: Petición AniList API:', query);
       
       fetch('https://graphql.anilist.co', {
         method: 'POST',
@@ -193,38 +193,38 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       })
       .then((response) => response.json())
       .then((json) => {
-        console.log('🟠 Crunchyroll Power Up: AniList API response:', json);
+        console.log('Crunchyroll Power Up: Respuesta AniList API:', json);
         sendResponse(json);
       })
       .catch((error) => {
-        console.error('🟠 Crunchyroll Power Up: AniList API error:', error);
+        console.error('Crunchyroll Power Up: Error AniList API:', error);
         sendResponse({ error: error.message });
       });
-      return true; // Keep message channel open for async response
+      return true; // Mantener el canal de mensajes abierto para respuesta asíncrona
       
     default:
-      console.log('🟠 Crunchyroll Power Up: Unknown message type:', message.type);
+      console.log('Crunchyroll Power Up: Tipo de mensaje desconocido:', message.type);
       sendResponse({ success: false, error: 'Unknown message type' });
   }
 });
 
-// Handle extension icon click
+// Manejar clic en el icono de la extensión
 chrome.action.onClicked.addListener((tab) => {
-  console.log('🟠 Crunchyroll Power Up: Extension icon clicked');
-  // The popup will handle this automatically
+  console.log('Crunchyroll Power Up: Icono de la extensión clicado');
+  // El popup lo manejará automáticamente
 });
 
-// Handle tab updates (for SPA navigation detection)
+// Manejar actualizaciones de pestañas (para detección de navegación SPA)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url && 
       (tab.url.includes('crunchyroll.com') || tab.url.includes('beta.crunchyroll.com'))) {
-    console.log('🟠 Crunchyroll Power Up: Crunchyroll page loaded:', tab.url);
+    console.log('Crunchyroll Power Up: Página de Crunchyroll cargada:', tab.url);
     
-    // Send message to content script to reinitialize if needed
+    // Enviar mensaje al script de contenido para reinicializar si es necesario
     chrome.tabs.sendMessage(tabId, { type: 'pageLoaded', url: tab.url }).catch(() => {
       // Content script might not be ready yet, ignore error
     });
   }
 });
 
-console.log('🟠 Crunchyroll Power Up: Background script loaded successfully');
+console.log('Crunchyroll Power Up: Script de fondo cargado correctamente');

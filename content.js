@@ -1,6 +1,6 @@
-// Crunchyroll Power Up Extension - Content Script
-// Author: Ing. Adony R.
-console.log("🟠 Crunchyroll Power Up: Content script loaded");
+// Extensión Crunchyroll Power Up - Script de contenido
+// Autor: Ing. Adony R.
+console.log("Crunchyroll Power Up: Script de contenido cargado");
 
 // Global variables
 let chromeStorage = {};
@@ -10,20 +10,22 @@ let currentActiveButton = null;
 let controlsVisibilityObserver = null;
 let mouseInactivityTimeout = null;
 let lastControlsVisibility = true;
+let isNextEpisodeDateFeatureInitializing = false; // New flag to prevent multiple initializations
+let nextEpisodeDateFeatureObserver = null; // Observer for next episode date feature
 
 // Default settings
 const defaultSettings = {
     theaterMode: false,
     nextEpisodeDate: true,
-    skip_event_intro: 0,    // Manual mode by default
-    skip_event_recap: 0,    // Manual mode by default  
-    skip_event_ending: 0,   // Manual mode by default
+    skip_event_intro: 0,    // Modo manual por defecto
+    skip_event_recap: 0,    // Modo manual por defecto  
+    skip_event_ending: 0,   // Modo manual por defecto
     auto_skip: 0,
     hide_skip_button: 0,
-    miniPlayerEnabled: true // Mini Player enabled by default
+    miniPlayerEnabled: true // Minireproductor habilitado por defecto
 };
 
-// Internationalization messages
+// Mensajes de internacionalización
 const i18nMessages = {
     es: {
         skipRecap: ">> Saltar resumen",
@@ -31,6 +33,7 @@ const i18nMessages = {
         skipEnding: ">> Saltar final"
     },
     en: {
+        // Mantener compatibilidad con usuarios que prefieren la interfaz en inglés
         skipRecap: ">> Skip recap",
         skipIntro: ">> Skip intro",
         skipEnding: ">> Skip ending"
@@ -42,7 +45,7 @@ const i18nMessages = {
     }
 };
 
-// Get current language
+    // Obtener el idioma actual
 function getCurrentLanguage() {
     const lang = navigator.language.toLowerCase();
     if (lang.startsWith('es')) return 'es';
@@ -56,13 +59,13 @@ function getMessage(key) {
     return i18nMessages[lang]?.[key] || i18nMessages.en[key] || key;
 }
 
-// Initialize extension
+// Inicializar la extensión
 function init() {
-    console.log("🟠 Crunchyroll Power Up: Initializing extension");
-    console.log("🟠 Skippers handler:", skippersHandler ? "Active" : "Not active");
+    console.log("Crunchyroll Power Up: Inicializando extensión");
+    console.log("🟠 Manejador de skippers:", skippersHandler ? "Activo" : "No activo");
     
     loadConfig().then(() => {
-        console.log("🟠 Crunchyroll Power Up: Config loaded, starting initialization");
+        console.log("Crunchyroll Power Up: Configuración cargada, iniciando inicialización");
         
         // Apply theater mode if enabled
         if (chromeStorage.theaterMode) {
@@ -73,9 +76,7 @@ function init() {
         detectVideo();
         
         // Initialize next episode date feature
-        if (chromeStorage.nextEpisodeDate) {
-            addNextEpisodeDate();
-        }
+        handleNextEpisodeDateFeature();
         
         // Initialize Mini Player feature
         initializeMiniPlayer();
@@ -95,7 +96,7 @@ function init() {
 // Initialize Enhanced Mini Player
 function initializeMiniPlayer() {
     if (window.crunchyPowerUpEnhancedMiniPlayer) {
-        console.log("🟠 Crunchyroll Power Up: Initializing Enhanced Mini Player");
+        console.log("Crunchyroll Power Up: Inicializando Minireproductor mejorado");
         // Enhanced mini player initializes itself, but we can set enabled state
         if (chromeStorage.miniPlayerEnabled !== undefined) {
             window.crunchyPowerUpEnhancedMiniPlayer.setEnabled(chromeStorage.miniPlayerEnabled);
@@ -107,7 +108,7 @@ function initializeMiniPlayer() {
         const checkInterval = setInterval(() => {
             attempts++;
             if (window.crunchyPowerUpEnhancedMiniPlayer) {
-                console.log("🟠 Crunchyroll Power Up: Enhanced Mini Player module loaded, configuring");
+                console.log("Crunchyroll Power Up: Módulo Minireproductor cargado, configurando");
                 clearInterval(checkInterval);
                 
                 // Handle configuration
@@ -115,7 +116,7 @@ function initializeMiniPlayer() {
                     window.crunchyPowerUpEnhancedMiniPlayer.setEnabled(chromeStorage.miniPlayerEnabled);
                 }
             } else if (attempts >= maxAttempts) {
-                console.log("🟠 Crunchyroll Power Up: Enhanced Mini Player module not available after", maxAttempts, "attempts");
+                console.log("Crunchyroll Power Up: Módulo Minireproductor no disponible después de", maxAttempts, "intentos");
                 clearInterval(checkInterval);
             }
         }, 500);
@@ -125,7 +126,7 @@ function initializeMiniPlayer() {
 // Initialize Screen Size Buttons feature
 function initializeScreenSizeButtons() {
     if (window.crunchyPowerUpScreenSizeButtons) {
-        console.log("🟠 Crunchyroll Power Up: Initializing Screen Size Buttons");
+        console.log("Crunchyroll Power Up: Inicializando botones de tamaño de pantalla");
         // Set enabled state based on theater mode setting
         window.crunchyPowerUpScreenSizeButtons.setEnabled(chromeStorage.theaterMode);
     } else {
@@ -135,13 +136,13 @@ function initializeScreenSizeButtons() {
         const checkInterval = setInterval(() => {
             attempts++;
             if (window.crunchyPowerUpScreenSizeButtons) {
-                console.log("🟠 Crunchyroll Power Up: Screen Size Buttons module loaded, configuring");
+                console.log("Crunchyroll Power Up: Módulo Botones Tamaño Pantalla cargado, configurando");
                 clearInterval(checkInterval);
                 
                 // Set enabled state based on theater mode setting
                 window.crunchyPowerUpScreenSizeButtons.setEnabled(chromeStorage.theaterMode);
             } else if (attempts >= maxAttempts) {
-                console.log("🟠 Crunchyroll Power Up: Screen Size Buttons module not available after", maxAttempts, "attempts");
+                console.log("Crunchyroll Power Up: Módulo Botones Tamaño Pantalla no disponible después de", maxAttempts, "intentos");
                 clearInterval(checkInterval);
             }
         }, 500);
@@ -153,7 +154,7 @@ async function loadConfig() {
     return new Promise((resolve) => {
         chrome.storage.sync.get(defaultSettings, (result) => {
             chromeStorage = { ...defaultSettings, ...result };
-            console.log("🟠 Crunchyroll Power Up: Config loaded:", chromeStorage);
+            console.log("Crunchyroll Power Up: Configuración cargada:", chromeStorage);
             resolve();
         });
     });
@@ -163,13 +164,13 @@ async function loadConfig() {
 function saveConfig(key, value) {
     chrome.storage.sync.set({ [key]: value }, () => {
         chromeStorage[key] = value;
-        console.log(`🟠 Crunchyroll Power Up: Config saved: ${key} = ${value}`);
+        console.log(`Crunchyroll Power Up: Config guardada: ${key} = ${value}`);
     });
 }
 
 // Listen for messages from popup and background
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("🟠 Crunchyroll Power Up: Message received:", message);
+    console.log("Crunchyroll Power Up: Mensaje recibido:", message);
     
     switch (message.type) {
         case 'getStatus':
@@ -188,7 +189,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             
         case 'configChanged':
             chromeStorage = { ...chromeStorage, ...message.config };
-            console.log("🟠 Crunchyroll Power Up: Config updated:", chromeStorage);
+            console.log("Crunchyroll Power Up: Configuración actualizada:", chromeStorage);
             
             // Handle Enhanced Mini Player config change
             if ('miniPlayerEnabled' in message.config && window.crunchyPowerUpEnhancedMiniPlayer) {
@@ -206,7 +207,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             break;
             
         case 'MINI_PLAYER_TOGGLE':
-            console.log("🟠 Crunchyroll Power Up: Enhanced Mini Player toggle received:", message.enabled);
+            console.log("Crunchyroll Power Up: Toggle de Minireproductor recibido:", message.enabled);
             chromeStorage.miniPlayerEnabled = message.enabled;
             if (window.crunchyPowerUpEnhancedMiniPlayer) {
                 window.crunchyPowerUpEnhancedMiniPlayer.setEnabled(message.enabled);
@@ -227,21 +228,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (chromeStorage.nextEpisodeDate) {
                 // Delay slightly to allow mini player modifications to settle
                 setTimeout(() => {
-                    addNextEpisodeDate();
+                    handleNextEpisodeDateFeature();
                 }, 500);
             }
+            break;
+
+        case 'pageLoaded':
+            console.log("Crunchyroll Power Up: Page loaded message received.");
+            handleNextEpisodeDateFeature();
             break;
     }
 });
 
 // Theater mode functionality
 function enableTheaterMode() {
-    console.log("🟠 Crunchyroll Power Up: Enabling theater mode");
+    console.log("Crunchyroll Power Up: Activando modo teatro");
     setTimeout(() => {
         const theaterButton = document.querySelector('[data-testid="theater-mode-button"], .theater-mode-button, [aria-label*="theater"], [aria-label*="Theater"]');
-        if (theaterButton && !theaterButton.classList.contains('active')) {
+            if (theaterButton && !theaterButton.classList.contains('active')) {
             theaterButton.click();
-            console.log("🟠 Crunchyroll Power Up: Theater mode button clicked");
+            console.log("Crunchyroll Power Up: Botón modo teatro pulsado");
         }
     }, 2000);
 }
@@ -251,7 +257,7 @@ function detectVideo() {
     const video = document.querySelector('video');
     if (video && video !== videoElement) {
         videoElement = video;
-        console.log("🟠 Crunchyroll Power Up: Video detected, initializing features");
+        console.log("Crunchyroll Power Up: Video detected, initializing features");
         initializeVideoFeatures();
     }
     
@@ -266,15 +272,12 @@ function initializeVideoFeatures() {
     // Initialize skippers handler
     if (!skippersHandler) {
         skippersHandler = new SkippersHandler();
-        console.log("🟠 Crunchyroll Power Up: SkippersHandler created");
+        console.log("Crunchyroll Power Up: SkippersHandler created");
     }
     
     skippersHandler.init(videoElement);
     
-    // Add next episode date if enabled
-    if (chromeStorage.nextEpisodeDate) {
-        addNextEpisodeDate();
-    }
+    
     
     // Initialize global controls visibility sync
     initializeControlsSync();
@@ -282,7 +285,7 @@ function initializeVideoFeatures() {
 
 // Global controls synchronization system
 function initializeControlsSync() {
-    console.log("🟠 Crunchyroll Power Up: Initializing controls sync");
+    console.log("Crunchyroll Power Up: Initializing controls sync");
     
     // Clean up existing observers
     cleanupControlsSync();
@@ -361,7 +364,7 @@ function syncAllButtonsVisibility(forceVisible = null) {
     // Default to visible if not specified
     const shouldBeVisible = forceVisible !== null ? forceVisible : true;
     
-    console.log("🟠 Crunchyroll Power Up: Syncing all buttons visibility:", shouldBeVisible);
+    console.log("Crunchyroll Power Up: Syncing all buttons visibility:", shouldBeVisible);
     
     // Sync skip buttons (current active button)
     if (currentActiveButton) {
@@ -393,11 +396,11 @@ function syncButtonVisibility(button, shouldBeVisible) {
 
 // Go to specific time in video
 function goToTime(time, skipType = null) {
-    console.log("🟠 Crunchyroll Power Up: goToTime called with time:", time, "type:", skipType);
+    console.log("Crunchyroll Power Up: goToTime called with time:", time, "type:", skipType);
     
     if (videoElement) {
         videoElement.currentTime = time;
-        console.log("🟠 Crunchyroll Power Up: Video time set to:", time);
+        console.log("Crunchyroll Power Up: Video time set to:", time);
         
         // Show notification
         if (skipType) {
@@ -417,7 +420,7 @@ function goToTime(time, skipType = null) {
 
 // Show notification
 function showNotification(message, skipType = null, time = null) {
-    console.log("🟠 Crunchyroll Power Up: showNotification called:", { message, skipType, time });
+    console.log("Crunchyroll Power Up: showNotification called:", { message, skipType, time });
     
     // Use unified format if skipType and time provided
     let displayMessage = message;
@@ -487,11 +490,11 @@ class NativeSkipper {
         if (type) {
             this.key = `skip_event_${type}`;
         }
-        console.log("🟠 Crunchyroll Power Up: NativeSkipper created:", { start, end, type, key: this.key });
+        console.log("Crunchyroll Power Up: NativeSkipper created:", { start, end, type, key: this.key });
     }
     
     click() {
-        console.log("🟠 Crunchyroll Power Up: NativeSkipper click - skipping from", this.start, "to", this.end);
+        console.log("Crunchyroll Power Up: NativeSkipper click - skipping from", this.start, "to", this.end);
         this.skipped = true;
         
         // Get skip type for notification
@@ -504,7 +507,7 @@ class NativeSkipper {
         
         // Auto-skip logic
         if (isInPeriod && this.isAutoSkip()) {
-            console.log("🟠 Crunchyroll Power Up: Auto-skipping detected for", this.key);
+            console.log("Crunchyroll Power Up: Auto-skipping detected for", this.key);
             this.click();
             return true;
         }
@@ -534,7 +537,7 @@ class SkippersHandler {
     }
     
     init(video) {
-        console.log("🟠 Crunchyroll Power Up: SkippersHandler init");
+        console.log("Crunchyroll Power Up: SkippersHandler init");
         this.videoElement = video;
         this.loadSkippersData();
         this.startChecking();
@@ -549,7 +552,7 @@ class SkippersHandler {
             new NativeSkipper(0, 30, 'recap'),
             new NativeSkipper(1200, 1320, 'ending')
         ];
-        console.log("🟠 Crunchyroll Power Up: Skippers data loaded:", this.skippers.length, "skippers");
+        console.log("Crunchyroll Power Up: Skippers data loaded:", this.skippers.length, "skippers");
     }
     
     startChecking() {
@@ -560,7 +563,7 @@ class SkippersHandler {
             this.checkSkippers();
         }, 1000);
         
-        console.log("🟠 Crunchyroll Power Up: Started skippers checking");
+        console.log("Crunchyroll Power Up: Started skippers checking");
     }
     
     stopChecking() {
@@ -569,7 +572,7 @@ class SkippersHandler {
             this.checkInterval = null;
         }
         this.isChecking = false;
-        console.log("🟠 Crunchyroll Power Up: Stopped skippers checking");
+        console.log("Crunchyroll Power Up: Stopped skippers checking");
     }
     
     checkSkippers() {
@@ -666,8 +669,8 @@ class SkippersHandler {
         button.id = 'crunchyroll-powerup-miniplayer-btn';
         button.className = 'cp-btn miniplayer-btn';
         button.textContent = 'Minireproductor';
-        button.setAttribute('aria-label', 'Activar Picture-in-Picture');
-        button.setAttribute('title', 'Activar Picture-in-Picture');
+    button.setAttribute('aria-label', 'Activar Picture-in-Picture');
+    button.setAttribute('title', 'Activar Picture-in-Picture');
         
         button.addEventListener('click', () => this.activatePictureInPicture());
         
@@ -719,15 +722,15 @@ class SkippersHandler {
     
     activatePictureInPicture() {
         if (!this.videoElement) {
-            console.warn("🟠 Crunchyroll Power Up: No video element available for PiP");
+            console.warn("Crunchyroll Power Up: No hay elemento de vídeo disponible para PiP");
             return;
         }
         
-        console.log("🟠 Crunchyroll Power Up: Activating Picture-in-Picture");
+    console.log("Crunchyroll Power Up: Activando Picture-in-Picture");
         
         // Verificar si PiP está disponible
         if (!document.pictureInPictureEnabled) {
-            console.warn("🟠 Crunchyroll Power Up: Picture-in-Picture not supported");
+            console.warn("Crunchyroll Power Up: Picture-in-Picture no es compatible");
             showNotification("Picture-in-Picture no está disponible");
             return;
         }
@@ -736,21 +739,21 @@ class SkippersHandler {
         if (document.pictureInPictureElement) {
             document.exitPictureInPicture()
                 .then(() => {
-                    console.log("🟠 Crunchyroll Power Up: Exited Picture-in-Picture");
+                    console.log("Crunchyroll Power Up: Salió del Picture-in-Picture");
                     showNotification("Salió del minireproductor");
                 })
                 .catch((err) => {
-                    console.error("🟠 Crunchyroll Power Up: Error exiting PiP:", err);
+                    console.error("Crunchyroll Power Up: Error exiting PiP:", err);
                 });
         } else {
             // Activar PiP
             this.videoElement.requestPictureInPicture()
                 .then(() => {
-                    console.log("🟠 Crunchyroll Power Up: Entered Picture-in-Picture");
+                    console.log("Crunchyroll Power Up: Entró en Picture-in-Picture");
                     showNotification("Minireproductor activado");
                 })
                 .catch((err) => {
-                    console.error("🟠 Crunchyroll Power Up: Error entering PiP:", err);
+                    console.error("Crunchyroll Power Up: Error entering PiP:", err);
                     showNotification("Error al activar minireproductor");
                 });
         }
@@ -765,31 +768,104 @@ class SkippersHandler {
 }
 
 // Next episode date functionality
-function addNextEpisodeDate() {
-    // Check if feature is enabled
-    if (!chromeStorage.nextEpisodeDate) {
-        console.log("🟠 Crunchyroll Power Up: Next Episode Date feature is disabled");
+function handleNextEpisodeDateFeature() {
+    // Prevent multiple simultaneous initializations
+    if (isNextEpisodeDateFeatureInitializing) {
+        console.log("Crunchyroll Power Up: La función Fecha del próximo episodio ya se está inicializando, omitiendo.");
         return;
     }
+    isNextEpisodeDateFeatureInitializing = true;
+
+    // Disconnect any existing observer before starting a new one
+    if (nextEpisodeDateFeatureObserver) {
+        nextEpisodeDateFeatureObserver.disconnect();
+        nextEpisodeDateFeatureObserver = null;
+    }
+
     // Check if we're on a series page
-    if (!isSeriesPage()) {
-        console.log("🟠 Crunchyroll Power Up: Not on a series page, skipping Next Episode Date");
+    const seriesMatch = window.location.pathname.match(/(?<=\/series\/)[^\/]*/);
+    if (!seriesMatch) {
+        console.log("Crunchyroll Power Up: No estamos en una página de serie, omitiendo la función Fecha del próximo episodio.");
+        // Ensure any existing instance is destroyed if we navigate away from a series page
+        if (window.currentEpisodeAirDateInstance) {
+            window.currentEpisodeAirDateInstance.destroy();
+            window.currentEpisodeAirDateInstance = null;
+        }
+        isNextEpisodeDateFeatureInitializing = false;
         return;
     }
-    // Wait for the episodeAirDate.js module to be available
-    if (window.initializeEpisodeAirDate) {
-        console.log("🟠 Crunchyroll Power Up: Initializing EpisodeAirDate from module");
-        window.initializeEpisodeAirDate();
-    } else {
-        // Wait a bit for the module to load
-        setTimeout(() => {
-            if (window.initializeEpisodeAirDate) {
-                console.log("🟠 Crunchyroll Power Up: EpisodeAirDate module loaded, initializing");
-                window.initializeEpisodeAirDate();
-            } else {
-                console.log("🟠 Crunchyroll Power Up: EpisodeAirDate module not available");
+
+    const seriesId = seriesMatch[0];
+    if (!seriesId) {
+        console.log("Crunchyroll Power Up: No se pudo extraer el ID de la serie, omitiendo la función Fecha del próximo episodio.");
+        isNextEpisodeDateFeatureInitializing = false;
+        return;
+    }
+
+    // Check if feature is enabled
+    if (chromeStorage.nextEpisodeDate) {
+        console.log("Crunchyroll Power Up: La función Fecha del próximo episodio está habilitada.");
+
+        // Ensure any existing instance is destroyed before trying to create a new one
+        if (window.currentEpisodeAirDateInstance) {
+            window.currentEpisodeAirDateInstance.destroy();
+            window.currentEpisodeAirDateInstance = null;
+        }
+
+        // Use a MutationObserver to wait for the target element to appear
+        const targetElementSelector = '.erc-series-hero-actions';
+        nextEpisodeDateFeatureObserver = new MutationObserver((mutations, obs) => {
+            const actionButtons = document.querySelector(targetElementSelector);
+            if (actionButtons) {
+                obs.disconnect(); // Stop observing once found
+                nextEpisodeDateFeatureObserver = null;
+                console.log("Crunchyroll Power Up: Elemento objetivo encontrado, inicializando EpisodeAirDate.");
+                if (window.initializeEpisodeAirDate) {
+                    window.initializeEpisodeAirDate(seriesId);
+                } else {
+                    console.warn("Crunchyroll Power Up: window.initializeEpisodeAirDate is not available.");
+                }
+                isNextEpisodeDateFeatureInitializing = false;
             }
-        }, 1000);
+        });
+
+        // Start observing the body for changes
+        nextEpisodeDateFeatureObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Also check immediately in case the element is already there
+        const actionButtons = document.querySelector(targetElementSelector);
+        if (actionButtons) {
+            nextEpisodeDateFeatureObserver.disconnect(); // Desconectar si se encontró inmediatamente
+            nextEpisodeDateFeatureObserver = null;
+            console.log("Crunchyroll Power Up: Elemento objetivo encontrado inmediatamente, inicializando EpisodeAirDate.");
+            if (window.initializeEpisodeAirDate) {
+                window.initializeEpisodeAirDate(seriesId);
+            } else {
+                console.warn("Crunchyroll Power Up: window.initializeEpisodeAirDate is not available.");
+            }
+            isNextEpisodeDateFeatureInitializing = false;
+        }
+
+    } else {
+        console.log("Crunchyroll Power Up: La función Fecha del próximo episodio está deshabilitada, destruyendo cualquier instancia existente.");
+        if (window.currentEpisodeAirDateInstance) {
+            window.currentEpisodeAirDateInstance.destroy();
+            window.currentEpisodeAirDateInstance = null;
+        }
+        isNextEpisodeDateFeatureInitializing = false;
+    }
+}
+
+// Cleanup handler for the next episode date feature
+function destroyNextEpisodeDate() {
+    // The episodeAirDate module handles its own cleanup
+    console.log("Crunchyroll Power Up: Solicitud de limpieza de EpisodeAirDate");
+    if (window.currentEpisodeAirDateInstance) {
+        window.currentEpisodeAirDateInstance.destroy();
+        window.currentEpisodeAirDateInstance = null;
     }
 }
 
@@ -802,13 +878,13 @@ function isSeriesPage() {
 // Cleanup handler for the next episode date feature
 function destroyNextEpisodeDate() {
     // The episodeAirDate module handles its own cleanup
-    console.log("🟠 Crunchyroll Power Up: EpisodeAirDate cleanup requested");
+    console.log("Crunchyroll Power Up: EpisodeAirDate cleanup requested");
 }
 
 // Listen for storage changes to update features dynamically
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync') {
-        console.log("🟠 Crunchyroll Power Up: Storage changed:", changes);
+        console.log("Crunchyroll Power Up: El almacenamiento cambió:", changes);
         // Update local storage cache
         Object.keys(changes).forEach(key => {
             chromeStorage[key] = changes[key].newValue;
@@ -831,11 +907,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         }
         // Handle next episode date feature changes
         if (changes.nextEpisodeDate) {
-            if (changes.nextEpisodeDate.newValue) {
-                addNextEpisodeDate();
-            } else {
-                destroyNextEpisodeDate();
-            }
+            handleNextEpisodeDateFeature();
         }
     }
 });
@@ -847,7 +919,7 @@ if (document.readyState === 'loading') {
     init();
 }
 
-// Cleanup on page unload
+// Limpiar al descargar la página
 window.addEventListener('beforeunload', () => {
     if (skippersHandler) {
         skippersHandler.cleanup();
@@ -862,4 +934,4 @@ window.addEventListener('beforeunload', () => {
     cleanupControlsSync();
 });
 
-console.log("🟠 Crunchyroll Power Up: Content script ready");
+console.log("Crunchyroll Power Up: Script de contenido listo");
