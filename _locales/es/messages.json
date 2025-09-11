@@ -4,7 +4,7 @@
     "message": "Crunchyroll Power Up"
   },
   "ext_description": {
-    "message": "Experiencia mejorada de Crunchyroll con Mini Reproductor, botones de salto y funciones avanzadas. Autor: ING, Adony R."
+    "message": "Experiencia mejorada de Crunchyroll con Mini Reproductor, botones de salto y funciones avanzadas."
   },
   "popup_title": {
     "message": "Configuración de Crunchyroll Power Up"
@@ -153,6 +153,6 @@
     "message": "Activar Mini Reproductor"
   },
   "footer_text": {
-    "message": "Experiencia mejorada de Crunchyroll con características esenciales - ING, Adony R."
+    "message": "Experiencia mejorada de Crunchyroll con características esenciales"
   }
 }
