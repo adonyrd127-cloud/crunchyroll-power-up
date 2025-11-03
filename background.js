@@ -255,20 +255,20 @@ async function checkNewEpisodes() {
     const { lastNotifiedEpisode } = await chrome.storage.sync.get('lastNotifiedEpisode');
     let newLastNotifiedEpisode = lastNotifiedEpisode || {};
 
-    for (const seriesId of subscribedSeries) {
+    for (const series of subscribedSeries) {
         try {
-            const response = await fetch(`https://www.crunchyroll.com/content/v2/cms/series/${seriesId}/episodes`);
+            const response = await fetch(`https://www.crunchyroll.com/content/v2/cms/series/${series.id}/episodes`);
             const data = await response.json();
             const episodes = data.data;
             const lastEpisode = episodes[episodes.length - 1];
 
-            if (!newLastNotifiedEpisode[seriesId] || newLastNotifiedEpisode[seriesId] < lastEpisode.sequence_number) {
-                console.log(`New episode for ${seriesId}: ${lastEpisode.title}`);
+            if (!newLastNotifiedEpisode[series.id] || newLastNotifiedEpisode[series.id] < lastEpisode.sequence_number) {
+                console.log(`New episode for ${series.title}: ${lastEpisode.title}`);
 
-                chrome.notifications.create(`episode-${seriesId}-${lastEpisode.id}`, {
+                chrome.notifications.create(`episode-${series.id}-${lastEpisode.id}`, {
                     type: 'basic',
                     iconUrl: 'icons/icono chrome.png',
-                    title: `New Episode: ${episodes[0].series_title}`,
+                    title: `New Episode: ${series.title}`,
                     message: `Episode ${lastEpisode.sequence_number}: ${lastEpisode.title}`
                 });
 
@@ -277,10 +277,10 @@ async function checkNewEpisodes() {
                 await chrome.storage.sync.set({ newEpisodesCount: newCount });
                 chrome.action.setBadgeText({ text: newCount.toString() });
 
-                newLastNotifiedEpisode[seriesId] = lastEpisode.sequence_number;
+                newLastNotifiedEpisode[series.id] = lastEpisode.sequence_number;
             }
         } catch (error) {
-            console.error(`Error checking episodes for ${seriesId}:`, error);
+            console.error(`Error checking episodes for ${series.id}:`, error);
         }
     }
 

@@ -98,6 +98,25 @@ function init() {
 
         // Initialize Notifications feature
         handleNotificationsFeature();
+
+        // Initialize the unified observer for the series page
+        initializeSeriesPageObserver();
+    });
+}
+
+function initializeSeriesPageObserver() {
+    const targetElementSelector = '.erc-series-hero-actions';
+    const observer = new MutationObserver((mutations, obs) => {
+        const actionButtons = document.querySelector(targetElementSelector);
+        if (actionButtons) {
+            handleNextEpisodeDateFeature();
+            handleAnilistInfoFeature();
+            handleNotificationsFeature();
+        }
+    });
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
     });
 }
 
@@ -135,46 +154,45 @@ function initializeMiniPlayer() {
 function handleNotificationsFeature() {
     if (chromeStorage.notifications) {
         console.log("Crunchyroll Power Up: Notifications feature is enabled.");
-        const targetElementSelector = '.erc-series-hero-actions';
-        const observer = new MutationObserver((mutations, obs) => {
-            const actionButtons = document.querySelector(targetElementSelector);
-            if (actionButtons && !document.getElementById('notifications-button')) {
-                const button = document.createElement('button');
-                button.id = 'notifications-button';
-                button.innerHTML = '🔔';
-                button.className = 'cp-btn notifications-btn';
-                actionButtons.appendChild(button);
+        const actionButtons = document.querySelector('.erc-series-hero-actions');
+        if (actionButtons && !document.getElementById('notifications-button')) {
+            const button = document.createElement('button');
+            button.id = 'notifications-button';
+            button.innerHTML = '🔔';
+            button.className = 'cp-btn notifications-btn';
+            actionButtons.appendChild(button);
 
-                const seriesIdMatch = window.location.pathname.match(/(?<=\/series\/)[^\/]*/);
-                if (seriesIdMatch) {
-                    const seriesId = seriesIdMatch[0];
-                    chrome.storage.sync.get('subscribedSeries', (data) => {
-                        const subscribedSeries = data.subscribedSeries || [];
-                        if (subscribedSeries.includes(seriesId)) {
+            const seriesIdMatch = window.location.pathname.match(/(?<=\/series\/)[^\/]*/);
+            if (seriesIdMatch) {
+                const seriesId = seriesIdMatch[0];
+                    chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
+                        const subscribedSeries = data.subscribedSeries;
+                        if (subscribedSeries.some(series => series.id === seriesId)) {
+                        button.classList.add('active');
+                    }
+                });
+
+                button.addEventListener('click', () => {
+                    const titleElement = document.querySelector('h1.heading--nKNOf');
+                    if (!titleElement) return;
+                    const seriesTitle = titleElement.textContent;
+
+                    chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
+                        let subscribedSeries = data.subscribedSeries;
+                        const isSubscribed = subscribedSeries.some(series => series.id === seriesId);
+
+                        if (isSubscribed) {
+                            subscribedSeries = subscribedSeries.filter(series => series.id !== seriesId);
+                            button.classList.remove('active');
+                        } else {
+                            subscribedSeries.push({ id: seriesId, title: seriesTitle });
                             button.classList.add('active');
                         }
+                        chrome.storage.sync.set({ subscribedSeries });
                     });
-
-                    button.addEventListener('click', () => {
-                        chrome.storage.sync.get('subscribedSeries', (data) => {
-                            let subscribedSeries = data.subscribedSeries || [];
-                            if (subscribedSeries.includes(seriesId)) {
-                                subscribedSeries = subscribedSeries.filter(id => id !== seriesId);
-                                button.classList.remove('active');
-                            } else {
-                                subscribedSeries.push(seriesId);
-                                button.classList.add('active');
-                            }
-                            chrome.storage.sync.set({ subscribedSeries });
-                        });
-                    });
-                }
+                });
             }
-        });
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        }
     } else {
         destroyNotificationsFeature();
     }
@@ -949,22 +967,15 @@ function destroyNextEpisodeDate() {
 function handleAnilistInfoFeature() {
     if (chromeStorage.anilistInfo) {
         console.log("Crunchyroll Power Up: AniList Info feature is enabled.");
-        const targetElementSelector = '.erc-series-hero-actions';
-        const observer = new MutationObserver((mutations, obs) => {
-            const actionButtons = document.querySelector(targetElementSelector);
-            if (actionButtons && !document.getElementById('anilist-info-button')) {
-                const button = document.createElement('button');
-                button.id = 'anilist-info-button';
-                button.textContent = 'AniList Info';
-                button.className = 'cp-btn anilist-btn';
-                button.addEventListener('click', fetchAnilistData);
-                actionButtons.appendChild(button);
-            }
-        });
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        const actionButtons = document.querySelector('.erc-series-hero-actions');
+        if (actionButtons && !document.getElementById('anilist-info-button')) {
+            const button = document.createElement('button');
+            button.id = 'anilist-info-button';
+            button.textContent = 'AniList Info';
+            button.className = 'cp-btn anilist-btn';
+            button.addEventListener('click', fetchAnilistData);
+            actionButtons.appendChild(button);
+        }
     } else {
         destroyAnilistInfo();
     }

@@ -280,3 +280,27 @@ video {
 .pip-control:hover {
     background-color: #00000099;
 }
+
+.erc-series-hero-actions {
+    position: relative;
+}
+
+.notifications-btn {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    font-size: 24px !important;
+    padding: 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: transparent !important;
+    border: none !important;
+    color: white !important;
+}
+
+.notifications-btn.active {
+    color: #f47521 !important;
+}

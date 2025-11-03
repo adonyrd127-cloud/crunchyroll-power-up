@@ -75,5 +75,9 @@
   "enable_notifications": {
     "message": "Enable Notifications",
     "description": "Label for the notifications toggle switch."
+  },
+  "subscriptions_title": {
+    "message": "My Subscriptions",
+    "description": "Title for the subscriptions list section."
   }
 }

@@ -178,5 +178,9 @@
   "enable_notifications": {
     "message": "Activar Notificaciones",
     "description": "Etiqueta para el interruptor de la función de notificaciones."
+  },
+  "subscriptions_title": {
+    "message": "Mis Suscripciones",
+    "description": "Título para la sección de la lista de suscripciones."
   }
 }

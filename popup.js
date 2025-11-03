@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Cargar configuración guardada
     loadConfiguration();
+    loadSubscriptions();
     
     // Agregar event listeners
     setupEventListeners();
@@ -336,6 +337,42 @@ function initializeUIState() {
         if (anilistInfoSwitch && anilistInfoCheckbox) updateSwitch(anilistInfoSwitch, anilistInfoCheckbox);
         if (notificationsSwitch && notificationsCheckbox) updateSwitch(notificationsSwitch, notificationsCheckbox);
     }, 100);
+}
+
+function loadSubscriptions() {
+    const subscriptionsList = document.getElementById('subscriptions-list');
+    chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
+        const subscribedSeries = data.subscribedSeries;
+        subscriptionsList.innerHTML = ''; // Clear existing list
+
+        if (subscribedSeries.length === 0) {
+            subscriptionsList.innerHTML = '<p style="font-size: 12px; color: #8b9dc3;">No subscriptions yet.</p>';
+            return;
+        }
+
+        subscribedSeries.forEach(series => {
+            const seriesDiv = document.createElement('div');
+            seriesDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 4px 0;';
+
+            const seriesTitle = document.createElement('span');
+            seriesTitle.textContent = series.title;
+            seriesTitle.style.cssText = 'font-size: 14px;';
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = '❌';
+            removeButton.style.cssText = 'border: none; background: transparent; cursor: pointer;';
+            removeButton.addEventListener('click', () => {
+                const newSubscribedSeries = subscribedSeries.filter(s => s.id !== series.id);
+                chrome.storage.sync.set({ subscribedSeries: newSubscribedSeries }, () => {
+                    loadSubscriptions(); // Refresh the list
+                });
+            });
+
+            seriesDiv.appendChild(seriesTitle);
+            seriesDiv.appendChild(removeButton);
+            subscriptionsList.appendChild(seriesDiv);
+        });
+    });
 }
 
 console.log("Crunchyroll Power Up Popup: Script cargado con LÓGICA CORREGIDA + Calendar Filter");
