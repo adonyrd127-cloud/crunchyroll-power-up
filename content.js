@@ -22,7 +22,8 @@ const defaultSettings = {
     skip_event_ending: 0,   // Modo manual por defecto
     auto_skip: 0,
     hide_skip_button: 0,
-    miniPlayerEnabled: true // Minireproductor habilitado por defecto
+    miniPlayerEnabled: true, // Minireproductor habilitado por defecto
+    anilistInfo: false // Deshabilitado por defecto
 };
 
 // Mensajes de internacionalización
@@ -90,6 +91,9 @@ function init() {
             skippersActive: !!skippersHandler,
             currentUrl: window.location.href
         });
+
+        // Initialize AniList Info feature
+        handleAnilistInfoFeature();
     });
 }
 
@@ -881,6 +885,167 @@ function destroyNextEpisodeDate() {
     console.log("Crunchyroll Power Up: EpisodeAirDate cleanup requested");
 }
 
+// AniList Info functionality
+function handleAnilistInfoFeature() {
+    if (chromeStorage.anilistInfo) {
+        console.log("Crunchyroll Power Up: AniList Info feature is enabled.");
+        const targetElementSelector = '.erc-series-hero-actions';
+        const observer = new MutationObserver((mutations, obs) => {
+            const actionButtons = document.querySelector(targetElementSelector);
+            if (actionButtons && !document.getElementById('anilist-info-button')) {
+                const button = document.createElement('button');
+                button.id = 'anilist-info-button';
+                button.textContent = 'AniList Info';
+                button.className = 'cp-btn anilist-btn';
+                button.addEventListener('click', fetchAnilistData);
+                actionButtons.appendChild(button);
+            }
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    } else {
+        destroyAnilistInfo();
+    }
+}
+
+function destroyAnilistInfo() {
+    const button = document.getElementById('anilist-info-button');
+    if (button) {
+        button.remove();
+    }
+}
+
+// Fetch AniList Data
+function fetchAnilistData() {
+    const titleElement = document.querySelector('h1.heading--nKNOf');
+    if (!titleElement) {
+        console.error("Crunchyroll Power Up: Could not find anime title.");
+        return;
+    }
+    const title = titleElement.textContent;
+
+    const query = `
+    query ($search: String) {
+      Media (search: $search, type: ANIME) {
+        id
+        title {
+          romaji
+          english
+          native
+        }
+        coverImage {
+          large
+        }
+        averageScore
+        description(asHtml: false)
+        genres
+        siteUrl
+      }
+    }
+    `;
+
+    const variables = {
+        search: title
+    };
+
+    const url = 'https://graphql.anilist.co',
+        options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        };
+
+    fetch(url, options).then(handleResponse)
+                       .then(handleData)
+                       .catch(handleError);
+
+    function handleResponse(response) {
+        return response.json().then(function (json) {
+            return response.ok ? json : Promise.reject(json);
+        });
+    }
+
+    function handleData(data) {
+        console.log("Crunchyroll Power Up: AniList data received:", data);
+        displayAnilistModal(data.data.Media);
+    }
+
+    function handleError(error) {
+        console.error("Crunchyroll Power Up: Error fetching from AniList:", error);
+    }
+}
+
+// Display AniList Data in a Modal
+function displayAnilistModal(media) {
+    const modalContainer = document.createElement('div');
+    modalContainer.id = 'anilist-modal-container';
+    modalContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background-color: #1a2332;
+        padding: 20px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        color: white;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+
+    const score = media.averageScore ? `${media.averageScore} / 100` : 'N/A';
+    const description = media.description ? media.description.replace(/<br><br>/g, '<br>') : 'No description available.';
+
+    modalContent.innerHTML = `
+        <div style="display: flex; gap: 20px;">
+            <img src="${media.coverImage.large}" alt="${media.title.romaji}" style="width: 150px; border-radius: 8px;">
+            <div>
+                <h2>${media.title.romaji} (${media.title.native})</h2>
+                <p><strong>Score:</strong> ${score}</p>
+                <p><strong>Genres:</strong> ${media.genres.join(', ')}</p>
+                <a href="${media.siteUrl}" target="_blank" style="color: #ff6b35;">View on AniList</a>
+            </div>
+        </div>
+        <div style="margin-top: 20px;">
+            <h3>Description</h3>
+            <p style="height: 150px; overflow-y: auto;">${description}</p>
+        </div>
+        <button id="anilist-modal-close" style="margin-top: 20px; padding: 10px 20px; border-radius: 8px; background-color: #ff6b35; color: white; border: none; cursor: pointer;">Close</button>
+    `;
+
+    modalContainer.appendChild(modalContent);
+    document.body.appendChild(modalContainer);
+
+    document.getElementById('anilist-modal-close').addEventListener('click', () => {
+        document.body.removeChild(modalContainer);
+    });
+
+    modalContainer.addEventListener('click', (e) => {
+        if (e.target === modalContainer) {
+            document.body.removeChild(modalContainer);
+        }
+    });
+}
+
+
 // Listen for storage changes to update features dynamically
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync') {
@@ -908,6 +1073,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         // Handle next episode date feature changes
         if (changes.nextEpisodeDate) {
             handleNextEpisodeDateFeature();
+        }
+        // Handle AniList Info feature changes
+        if (changes.anilistInfo) {
+            handleAnilistInfoFeature();
         }
     }
 });

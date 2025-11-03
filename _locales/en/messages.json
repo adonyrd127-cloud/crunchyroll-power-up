@@ -51,5 +51,17 @@
   "mini_player_title": { "message": "Mini Player" },
   "mini_player_description": { "message": "Enable Picture-in-Picture to watch videos in a floating window." },
   "enable_mini_player": { "message": "Enable Mini Player" },
-  "footer_text": { "message": "Enhanced Crunchyroll experience with essential features" }
+  "footer_text": { "message": "Enhanced Crunchyroll experience with essential features" },
+  "anilist_info_title": {
+    "message": "AniList Info",
+    "description": "Title for the AniList info feature."
+  },
+  "anilist_info_description": {
+    "message": "Displays a button on series pages to quickly view AniList ratings and information.",
+    "description": "Description for the AniList info feature."
+  },
+  "enable_anilist_info": {
+    "message": "Show AniList Info",
+    "description": "Label for the AniList info toggle switch."
+  }
 }

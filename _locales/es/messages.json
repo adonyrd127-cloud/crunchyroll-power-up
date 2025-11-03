@@ -154,5 +154,17 @@
   },
   "footer_text": {
     "message": "Experiencia mejorada de Crunchyroll con características esenciales"
+  },
+  "anilist_info_title": {
+    "message": "Información de AniList",
+    "description": "Título para la función de información de AniList."
+  },
+  "anilist_info_description": {
+    "message": "Muestra un botón en las páginas de series para ver rápidamente la calificación e información de AniList.",
+    "description": "Descripción para la función de información de AniList."
+  },
+  "enable_anilist_info": {
+    "message": "Mostrar Información de AniList",
+    "description": "Etiqueta para el interruptor de la función de información de AniList."
   }
 }
