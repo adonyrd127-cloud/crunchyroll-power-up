@@ -166,5 +166,17 @@
   "enable_anilist_info": {
     "message": "Mostrar Información de AniList",
     "description": "Etiqueta para el interruptor de la función de información de AniList."
+  },
+  "notifications_title": {
+    "message": "Notificaciones de Episodios",
+    "description": "Título para la función de notificaciones de episodios."
+  },
+  "notifications_description": {
+    "message": "Recibe notificaciones cuando se publique un nuevo episodio de una serie a la que te hayas suscrito.",
+    "description": "Descripción para la función de notificaciones de episodios."
+  },
+  "enable_notifications": {
+    "message": "Activar Notificaciones",
+    "description": "Etiqueta para el interruptor de la función de notificaciones."
   }
 }

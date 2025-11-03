@@ -209,9 +209,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Manejar clic en el icono de la extensión
-chrome.action.onClicked.addListener((tab) => {
-  console.log('Crunchyroll Power Up: Icono de la extensión clicado');
-  // El popup lo manejará automáticamente
+chrome.action.onClicked.addListener(async (tab) => {
+    console.log('Crunchyroll Power Up: Icono de la extensión clicado');
+    await chrome.storage.sync.set({ newEpisodesCount: 0 });
+    chrome.action.setBadgeText({ text: '' });
+});
+
+chrome.notifications.onClicked.addListener((notificationId) => {
+    if (notificationId.startsWith('episode-')) {
+        const url = `https://www.crunchyroll.com/${notificationId.split('-')[2]}`;
+        chrome.tabs.create({ url });
+    }
 });
 
 // Manejar actualizaciones de pestañas (para detección de navegación SPA)
@@ -226,5 +234,57 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     });
   }
 });
+
+chrome.alarms.create('episode-checker', {
+    periodInMinutes: 30
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'episode-checker') {
+        console.log("Crunchyroll Power Up: Checking for new episodes...");
+        checkNewEpisodes();
+    }
+});
+
+async function checkNewEpisodes() {
+    const { subscribedSeries } = await chrome.storage.sync.get('subscribedSeries');
+    if (!subscribedSeries || subscribedSeries.length === 0) {
+        return;
+    }
+
+    const { lastNotifiedEpisode } = await chrome.storage.sync.get('lastNotifiedEpisode');
+    let newLastNotifiedEpisode = lastNotifiedEpisode || {};
+
+    for (const seriesId of subscribedSeries) {
+        try {
+            const response = await fetch(`https://www.crunchyroll.com/content/v2/cms/series/${seriesId}/episodes`);
+            const data = await response.json();
+            const episodes = data.data;
+            const lastEpisode = episodes[episodes.length - 1];
+
+            if (!newLastNotifiedEpisode[seriesId] || newLastNotifiedEpisode[seriesId] < lastEpisode.sequence_number) {
+                console.log(`New episode for ${seriesId}: ${lastEpisode.title}`);
+
+                chrome.notifications.create(`episode-${seriesId}-${lastEpisode.id}`, {
+                    type: 'basic',
+                    iconUrl: 'icons/icono chrome.png',
+                    title: `New Episode: ${episodes[0].series_title}`,
+                    message: `Episode ${lastEpisode.sequence_number}: ${lastEpisode.title}`
+                });
+
+                const { newEpisodesCount } = await chrome.storage.sync.get({ newEpisodesCount: 0 });
+                const newCount = newEpisodesCount + 1;
+                await chrome.storage.sync.set({ newEpisodesCount: newCount });
+                chrome.action.setBadgeText({ text: newCount.toString() });
+
+                newLastNotifiedEpisode[seriesId] = lastEpisode.sequence_number;
+            }
+        } catch (error) {
+            console.error(`Error checking episodes for ${seriesId}:`, error);
+        }
+    }
+
+    await chrome.storage.sync.set({ lastNotifiedEpisode: newLastNotifiedEpisode });
+}
 
 console.log('Crunchyroll Power Up: Script de fondo cargado correctamente');

@@ -63,5 +63,17 @@
   "enable_anilist_info": {
     "message": "Show AniList Info",
     "description": "Label for the AniList info toggle switch."
+  },
+  "notifications_title": {
+    "message": "Episode Notifications",
+    "description": "Title for the episode notifications feature."
+  },
+  "notifications_description": {
+    "message": "Get notified when a new episode of a subscribed series is released.",
+    "description": "Description for the episode notifications feature."
+  },
+  "enable_notifications": {
+    "message": "Enable Notifications",
+    "description": "Label for the notifications toggle switch."
   }
 }

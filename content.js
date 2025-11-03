@@ -23,7 +23,8 @@ const defaultSettings = {
     auto_skip: 0,
     hide_skip_button: 0,
     miniPlayerEnabled: true, // Minireproductor habilitado por defecto
-    anilistInfo: false // Deshabilitado por defecto
+    anilistInfo: false, // Deshabilitado por defecto
+    notifications: false // Deshabilitado por defecto
 };
 
 // Mensajes de internacionalización
@@ -94,6 +95,9 @@ function init() {
 
         // Initialize AniList Info feature
         handleAnilistInfoFeature();
+
+        // Initialize Notifications feature
+        handleNotificationsFeature();
     });
 }
 
@@ -124,6 +128,62 @@ function initializeMiniPlayer() {
                 clearInterval(checkInterval);
             }
         }, 500);
+    }
+}
+
+// Notifications functionality
+function handleNotificationsFeature() {
+    if (chromeStorage.notifications) {
+        console.log("Crunchyroll Power Up: Notifications feature is enabled.");
+        const targetElementSelector = '.erc-series-hero-actions';
+        const observer = new MutationObserver((mutations, obs) => {
+            const actionButtons = document.querySelector(targetElementSelector);
+            if (actionButtons && !document.getElementById('notifications-button')) {
+                const button = document.createElement('button');
+                button.id = 'notifications-button';
+                button.innerHTML = '🔔';
+                button.className = 'cp-btn notifications-btn';
+                actionButtons.appendChild(button);
+
+                const seriesIdMatch = window.location.pathname.match(/(?<=\/series\/)[^\/]*/);
+                if (seriesIdMatch) {
+                    const seriesId = seriesIdMatch[0];
+                    chrome.storage.sync.get('subscribedSeries', (data) => {
+                        const subscribedSeries = data.subscribedSeries || [];
+                        if (subscribedSeries.includes(seriesId)) {
+                            button.classList.add('active');
+                        }
+                    });
+
+                    button.addEventListener('click', () => {
+                        chrome.storage.sync.get('subscribedSeries', (data) => {
+                            let subscribedSeries = data.subscribedSeries || [];
+                            if (subscribedSeries.includes(seriesId)) {
+                                subscribedSeries = subscribedSeries.filter(id => id !== seriesId);
+                                button.classList.remove('active');
+                            } else {
+                                subscribedSeries.push(seriesId);
+                                button.classList.add('active');
+                            }
+                            chrome.storage.sync.set({ subscribedSeries });
+                        });
+                    });
+                }
+            }
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    } else {
+        destroyNotificationsFeature();
+    }
+}
+
+function destroyNotificationsFeature() {
+    const button = document.getElementById('notifications-button');
+    if (button) {
+        button.remove();
     }
 }
 
@@ -1077,6 +1137,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         // Handle AniList Info feature changes
         if (changes.anilistInfo) {
             handleAnilistInfoFeature();
+        }
+        // Handle Notifications feature changes
+        if (changes.notifications) {
+            handleNotificationsFeature();
         }
     }
 });
