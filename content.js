@@ -168,6 +168,7 @@ function createFeatureButton(id, className, content, onClick) {
 
 // Notifications functionality
 function handleNotificationsFeature() {
+    if (document.getElementById('notifications-button')) return;
     if (chromeStorage.notifications) {
         console.log("Crunchyroll Power Up: Notifications feature is enabled.");
 
@@ -861,6 +862,7 @@ class SkippersHandler {
 
 // Next episode date functionality
 function handleNextEpisodeDateFeature() {
+    if (document.querySelector('.next-air-date')) return;
     // Prevent multiple simultaneous initializations
     if (isNextEpisodeDateFeatureInitializing) {
         console.log("Crunchyroll Power Up: La función Fecha del próximo episodio ya se está inicializando, omitiendo.");
@@ -975,6 +977,7 @@ function destroyNextEpisodeDate() {
 
 // AniList Info functionality
 function handleAnilistInfoFeature() {
+    if (document.getElementById('anilist-info-button')) return;
     if (chromeStorage.anilistInfo) {
         console.log("Crunchyroll Power Up: AniList Info feature is enabled.");
         createFeatureButton('anilist-info-button', 'anilist-btn', 'AniList Info', fetchAnilistData);
