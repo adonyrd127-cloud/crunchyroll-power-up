@@ -150,48 +150,58 @@ function initializeMiniPlayer() {
     }
 }
 
+function createFeatureButton(id, className, content, onClick) {
+    const actionButtons = document.querySelector('.erc-series-hero-actions');
+    if (!actionButtons || document.getElementById(id)) {
+        return null;
+    }
+
+    const button = document.createElement('button');
+    button.id = id;
+    button.className = `cp-btn ${className}`;
+    button.innerHTML = content;
+    button.addEventListener('click', onClick);
+
+    actionButtons.appendChild(button);
+    return button;
+}
+
 // Notifications functionality
 function handleNotificationsFeature() {
     if (chromeStorage.notifications) {
         console.log("Crunchyroll Power Up: Notifications feature is enabled.");
-        const actionButtons = document.querySelector('.erc-series-hero-actions');
-        if (actionButtons && !document.getElementById('notifications-button')) {
-            const button = document.createElement('button');
-            button.id = 'notifications-button';
-            button.innerHTML = '🔔';
-            button.className = 'cp-btn notifications-btn';
-            actionButtons.appendChild(button);
 
-            const seriesIdMatch = window.location.pathname.match(/(?<=\/series\/)[^\/]*/);
-            if (seriesIdMatch) {
-                const seriesId = seriesIdMatch[0];
-                    chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
-                        const subscribedSeries = data.subscribedSeries;
-                        if (subscribedSeries.some(series => series.id === seriesId)) {
-                        button.classList.add('active');
-                    }
-                });
+        const seriesIdMatch = window.location.pathname.match(/(?<=\/series\/)[^\/]*/);
+        if (!seriesIdMatch) return;
+        const seriesId = seriesIdMatch[0];
 
-                button.addEventListener('click', () => {
-                    const titleElement = document.querySelector('h1.heading--nKNOf');
-                    if (!titleElement) return;
-                    const seriesTitle = titleElement.textContent;
+        const button = createFeatureButton('notifications-button', 'notifications-btn', '🔔', () => {
+            const titleElement = document.querySelector('h1.heading--nKNOf');
+            if (!titleElement) return;
+            const seriesTitle = titleElement.textContent;
 
-                    chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
-                        let subscribedSeries = data.subscribedSeries;
-                        const isSubscribed = subscribedSeries.some(series => series.id === seriesId);
+            chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
+                let subscribedSeries = data.subscribedSeries;
+                const isSubscribed = subscribedSeries.some(series => series.id === seriesId);
 
-                        if (isSubscribed) {
-                            subscribedSeries = subscribedSeries.filter(series => series.id !== seriesId);
-                            button.classList.remove('active');
-                        } else {
-                            subscribedSeries.push({ id: seriesId, title: seriesTitle });
-                            button.classList.add('active');
-                        }
-                        chrome.storage.sync.set({ subscribedSeries });
-                    });
-                });
-            }
+                if (isSubscribed) {
+                    subscribedSeries = subscribedSeries.filter(series => series.id !== seriesId);
+                    button.classList.remove('active');
+                } else {
+                    subscribedSeries.push({ id: seriesId, title: seriesTitle });
+                    button.classList.add('active');
+                }
+                chrome.storage.sync.set({ subscribedSeries });
+            });
+        });
+
+        if (button) {
+            chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
+                const subscribedSeries = data.subscribedSeries;
+                if (subscribedSeries.some(series => series.id === seriesId)) {
+                    button.classList.add('active');
+                }
+            });
         }
     } else {
         destroyNotificationsFeature();
@@ -967,15 +977,7 @@ function destroyNextEpisodeDate() {
 function handleAnilistInfoFeature() {
     if (chromeStorage.anilistInfo) {
         console.log("Crunchyroll Power Up: AniList Info feature is enabled.");
-        const actionButtons = document.querySelector('.erc-series-hero-actions');
-        if (actionButtons && !document.getElementById('anilist-info-button')) {
-            const button = document.createElement('button');
-            button.id = 'anilist-info-button';
-            button.textContent = 'AniList Info';
-            button.className = 'cp-btn anilist-btn';
-            button.addEventListener('click', fetchAnilistData);
-            actionButtons.appendChild(button);
-        }
+        createFeatureButton('anilist-info-button', 'anilist-btn', 'AniList Info', fetchAnilistData);
     } else {
         destroyAnilistInfo();
     }
