@@ -87,14 +87,12 @@ const DEFAULT_CONFIG = {
     theaterMode: false,     // Deshabilitado por defecto
     nextEpisodeDate: true,  // Habilitado por defecto
     calendarFilter: false,  // Deshabilitado por defecto
-    miniPlayerEnabled: false, // Deshabilitado por defecto
-    anilistInfo: false, // Deshabilitado por defecto
-    notifications: false // Deshabilitado por defecto
+    miniPlayerEnabled: false // Deshabilitado por defecto
 };
 
 // Elementos del DOM
 let skipIntroCheckbox, skipRecapCheckbox, skipEndingCheckbox;
-let theaterModeCheckbox, nextEpisodeDateCheckbox, calendarFilterCheckbox, miniPlayerCheckbox, anilistInfoCheckbox, notificationsCheckbox;
+let theaterModeCheckbox, nextEpisodeDateCheckbox, calendarFilterCheckbox, miniPlayerCheckbox;
 
 // Inicializar popup
 document.addEventListener('DOMContentLoaded', function() {
@@ -111,12 +109,9 @@ document.addEventListener('DOMContentLoaded', function() {
     nextEpisodeDateCheckbox = document.getElementById('nextEpisodeDate');
     calendarFilterCheckbox = document.getElementById('calendarFilter');
     miniPlayerCheckbox = document.getElementById('miniPlayer');
-    anilistInfoCheckbox = document.getElementById('anilistInfo');
-    notificationsCheckbox = document.getElementById('notifications');
     
     // Cargar configuración guardada
     loadConfiguration();
-    loadSubscriptions();
     
     // Agregar event listeners
     setupEventListeners();
@@ -141,8 +136,6 @@ function loadConfiguration() {
         nextEpisodeDateCheckbox.checked = result.nextEpisodeDate;
         calendarFilterCheckbox.checked = result.calendarFilter;
         miniPlayerCheckbox.checked = result.miniPlayerEnabled;
-        anilistInfoCheckbox.checked = result.anilistInfo;
-        notificationsCheckbox.checked = result.notifications;
         
     console.log("🟠 Popup: Checkboxes configurados");
     console.log("🟠 ✅ LÓGICA CORREGIDA:");
@@ -203,16 +196,6 @@ function setupEventListeners() {
             type: 'MINI_PLAYER_TOGGLE',
             enabled: this.checked
         });
-    });
-
-    anilistInfoCheckbox.addEventListener('change', function() {
-        saveConfig('anilistInfo', this.checked);
-        console.log("🟠 Popup: Anilist Info cambiado a:", this.checked);
-    });
-
-    notificationsCheckbox.addEventListener('change', function() {
-        saveConfig('notifications', this.checked);
-        console.log("🟠 Popup: Notifications cambiado a:", this.checked);
     });
     
     console.log("🟠 Popup: Event listeners configurados");
@@ -293,8 +276,6 @@ function initializeUIState() {
     const episodeSwitch = document.getElementById('episode-switch');
     const calendarFilterSwitch = document.getElementById('calendar-filter-switch');
     const miniPlayerSwitch = document.getElementById('mini-player-switch');
-    const anilistInfoSwitch = document.getElementById('anilist-info-switch');
-    const notificationsSwitch = document.getElementById('notifications-switch');
     
     // Añadir listeners para actualizar la UI
     if (skipIntroCheckbox) {
@@ -318,12 +299,6 @@ function initializeUIState() {
     if (miniPlayerCheckbox) {
         miniPlayerCheckbox.addEventListener('change', () => updateSwitch(miniPlayerSwitch, miniPlayerCheckbox));
     }
-    if (anilistInfoCheckbox) {
-        anilistInfoCheckbox.addEventListener('change', () => updateSwitch(anilistInfoSwitch, anilistInfoCheckbox));
-    }
-    if (notificationsCheckbox) {
-        notificationsCheckbox.addEventListener('change', () => updateSwitch(notificationsSwitch, notificationsCheckbox));
-    }
     
     // Inicializar el estado visual una vez cargada la configuración
     setTimeout(() => {
@@ -334,45 +309,7 @@ function initializeUIState() {
         if (episodeSwitch && nextEpisodeDateCheckbox) updateSwitch(episodeSwitch, nextEpisodeDateCheckbox);
         if (calendarFilterSwitch && calendarFilterCheckbox) updateSwitch(calendarFilterSwitch, calendarFilterCheckbox);
         if (miniPlayerSwitch && miniPlayerCheckbox) updateSwitch(miniPlayerSwitch, miniPlayerCheckbox);
-        if (anilistInfoSwitch && anilistInfoCheckbox) updateSwitch(anilistInfoSwitch, anilistInfoCheckbox);
-        if (notificationsSwitch && notificationsCheckbox) updateSwitch(notificationsSwitch, notificationsCheckbox);
     }, 100);
-}
-
-function loadSubscriptions() {
-    const subscriptionsList = document.getElementById('subscriptions-list');
-    chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
-        const subscribedSeries = data.subscribedSeries;
-        subscriptionsList.innerHTML = ''; // Clear existing list
-
-        if (subscribedSeries.length === 0) {
-            subscriptionsList.innerHTML = '<p style="font-size: 12px; color: #8b9dc3;">No subscriptions yet.</p>';
-            return;
-        }
-
-        subscribedSeries.forEach(series => {
-            const seriesDiv = document.createElement('div');
-            seriesDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 4px 0;';
-
-            const seriesTitle = document.createElement('span');
-            seriesTitle.textContent = series.title;
-            seriesTitle.style.cssText = 'font-size: 14px;';
-
-            const removeButton = document.createElement('button');
-            removeButton.textContent = '❌';
-            removeButton.style.cssText = 'border: none; background: transparent; cursor: pointer;';
-            removeButton.addEventListener('click', () => {
-                const newSubscribedSeries = subscribedSeries.filter(s => s.id !== series.id);
-                chrome.storage.sync.set({ subscribedSeries: newSubscribedSeries }, () => {
-                    loadSubscriptions(); // Refresh the list
-                });
-            });
-
-            seriesDiv.appendChild(seriesTitle);
-            seriesDiv.appendChild(removeButton);
-            subscriptionsList.appendChild(seriesDiv);
-        });
-    });
 }
 
 console.log("Crunchyroll Power Up Popup: Script cargado con LÓGICA CORREGIDA + Calendar Filter");

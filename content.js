@@ -22,9 +22,7 @@ const defaultSettings = {
     skip_event_ending: 0,   // Modo manual por defecto
     auto_skip: 0,
     hide_skip_button: 0,
-    miniPlayerEnabled: true, // Minireproductor habilitado por defecto
-    anilistInfo: false, // Deshabilitado por defecto
-    notifications: false // Deshabilitado por defecto
+    miniPlayerEnabled: true // Minireproductor habilitado por defecto
 };
 
 // Mensajes de internacionalización
@@ -92,31 +90,6 @@ function init() {
             skippersActive: !!skippersHandler,
             currentUrl: window.location.href
         });
-
-        // Initialize AniList Info feature
-        handleAnilistInfoFeature();
-
-        // Initialize Notifications feature
-        handleNotificationsFeature();
-
-        // Initialize the unified observer for the series page
-        initializeSeriesPageObserver();
-    });
-}
-
-function initializeSeriesPageObserver() {
-    const targetElementSelector = '.erc-series-hero-actions';
-    const observer = new MutationObserver((mutations, obs) => {
-        const actionButtons = document.querySelector(targetElementSelector);
-        if (actionButtons) {
-            handleNextEpisodeDateFeature();
-            handleAnilistInfoFeature();
-            handleNotificationsFeature();
-        }
-    });
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
     });
 }
 
@@ -147,72 +120,6 @@ function initializeMiniPlayer() {
                 clearInterval(checkInterval);
             }
         }, 500);
-    }
-}
-
-function createFeatureButton(id, className, content, onClick) {
-    const actionButtons = document.querySelector('.erc-series-hero-actions');
-    if (!actionButtons || document.getElementById(id)) {
-        return null;
-    }
-
-    const button = document.createElement('button');
-    button.id = id;
-    button.className = `cp-btn ${className}`;
-    button.innerHTML = content;
-    button.addEventListener('click', onClick);
-
-    actionButtons.appendChild(button);
-    return button;
-}
-
-// Notifications functionality
-function handleNotificationsFeature() {
-    if (document.getElementById('notifications-button')) return;
-    if (chromeStorage.notifications) {
-        console.log("Crunchyroll Power Up: Notifications feature is enabled.");
-
-        const seriesIdMatch = window.location.pathname.match(/(?<=\/series\/)[^\/]*/);
-        if (!seriesIdMatch) return;
-        const seriesId = seriesIdMatch[0];
-
-        const button = createFeatureButton('notifications-button', 'notifications-btn', '🔔', () => {
-            const titleElement = document.querySelector('h1.heading--nKNOf');
-            if (!titleElement) return;
-            const seriesTitle = titleElement.textContent;
-
-            chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
-                let subscribedSeries = data.subscribedSeries;
-                const isSubscribed = subscribedSeries.some(series => series.id === seriesId);
-
-                if (isSubscribed) {
-                    subscribedSeries = subscribedSeries.filter(series => series.id !== seriesId);
-                    button.classList.remove('active');
-                } else {
-                    subscribedSeries.push({ id: seriesId, title: seriesTitle });
-                    button.classList.add('active');
-                }
-                chrome.storage.sync.set({ subscribedSeries });
-            });
-        });
-
-        if (button) {
-            chrome.storage.sync.get({ subscribedSeries: [] }, (data) => {
-                const subscribedSeries = data.subscribedSeries;
-                if (subscribedSeries.some(series => series.id === seriesId)) {
-                    button.classList.add('active');
-                }
-            });
-        }
-    } else {
-        destroyNotificationsFeature();
-    }
-}
-
-function destroyNotificationsFeature() {
-    const button = document.getElementById('notifications-button');
-    if (button) {
-        button.remove();
     }
 }
 
@@ -862,7 +769,6 @@ class SkippersHandler {
 
 // Next episode date functionality
 function handleNextEpisodeDateFeature() {
-    if (document.querySelector('.next-air-date')) return;
     // Prevent multiple simultaneous initializations
     if (isNextEpisodeDateFeatureInitializing) {
         console.log("Crunchyroll Power Up: La función Fecha del próximo episodio ya se está inicializando, omitiendo.");
@@ -906,14 +812,13 @@ function handleNextEpisodeDateFeature() {
             window.currentEpisodeAirDateInstance = null;
         }
 
-        // Use a MutationObserver to wait for the target element to appear
+        // Use a MutationObserver to wait for the target element and its content to appear
         const targetElementSelector = '.erc-series-hero-actions';
-        nextEpisodeDateFeatureObserver = new MutationObserver((mutations, obs) => {
+        const observer = new MutationObserver((mutations, obs) => {
             const actionButtons = document.querySelector(targetElementSelector);
-            if (actionButtons) {
-                obs.disconnect(); // Stop observing once found
-                nextEpisodeDateFeatureObserver = null;
-                console.log("Crunchyroll Power Up: Elemento objetivo encontrado, inicializando EpisodeAirDate.");
+            if (actionButtons && actionButtons.children.length > 0) {
+                obs.disconnect();
+                console.log("Crunchyroll Power Up: Elemento objetivo y su contenido encontrados, inicializando EpisodeAirDate.");
                 if (window.initializeEpisodeAirDate) {
                     window.initializeEpisodeAirDate(seriesId);
                 } else {
@@ -923,8 +828,7 @@ function handleNextEpisodeDateFeature() {
             }
         });
 
-        // Start observing the body for changes
-        nextEpisodeDateFeatureObserver.observe(document.body, {
+        observer.observe(document.body, {
             childList: true,
             subtree: true
         });
@@ -975,153 +879,6 @@ function destroyNextEpisodeDate() {
     console.log("Crunchyroll Power Up: EpisodeAirDate cleanup requested");
 }
 
-// AniList Info functionality
-function handleAnilistInfoFeature() {
-    if (document.getElementById('anilist-info-button')) return;
-    if (chromeStorage.anilistInfo) {
-        console.log("Crunchyroll Power Up: AniList Info feature is enabled.");
-        createFeatureButton('anilist-info-button', 'anilist-btn', 'AniList Info', fetchAnilistData);
-    } else {
-        destroyAnilistInfo();
-    }
-}
-
-function destroyAnilistInfo() {
-    const button = document.getElementById('anilist-info-button');
-    if (button) {
-        button.remove();
-    }
-}
-
-// Fetch AniList Data
-function fetchAnilistData() {
-    const titleElement = document.querySelector('h1.heading--nKNOf');
-    if (!titleElement) {
-        console.error("Crunchyroll Power Up: Could not find anime title.");
-        return;
-    }
-    const title = titleElement.textContent;
-
-    const query = `
-    query ($search: String) {
-      Media (search: $search, type: ANIME) {
-        id
-        title {
-          romaji
-          english
-          native
-        }
-        coverImage {
-          large
-        }
-        averageScore
-        description(asHtml: false)
-        genres
-        siteUrl
-      }
-    }
-    `;
-
-    const variables = {
-        search: title
-    };
-
-    const url = 'https://graphql.anilist.co',
-        options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-                query: query,
-                variables: variables
-            })
-        };
-
-    fetch(url, options).then(handleResponse)
-                       .then(handleData)
-                       .catch(handleError);
-
-    function handleResponse(response) {
-        return response.json().then(function (json) {
-            return response.ok ? json : Promise.reject(json);
-        });
-    }
-
-    function handleData(data) {
-        console.log("Crunchyroll Power Up: AniList data received:", data);
-        displayAnilistModal(data.data.Media);
-    }
-
-    function handleError(error) {
-        console.error("Crunchyroll Power Up: Error fetching from AniList:", error);
-    }
-}
-
-// Display AniList Data in a Modal
-function displayAnilistModal(media) {
-    const modalContainer = document.createElement('div');
-    modalContainer.id = 'anilist-modal-container';
-    modalContainer.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-    `;
-
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-        background-color: #1a2332;
-        padding: 20px;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 600px;
-        color: white;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    `;
-
-    const score = media.averageScore ? `${media.averageScore} / 100` : 'N/A';
-    const description = media.description ? media.description.replace(/<br><br>/g, '<br>') : 'No description available.';
-
-    modalContent.innerHTML = `
-        <div style="display: flex; gap: 20px;">
-            <img src="${media.coverImage.large}" alt="${media.title.romaji}" style="width: 150px; border-radius: 8px;">
-            <div>
-                <h2>${media.title.romaji} (${media.title.native})</h2>
-                <p><strong>Score:</strong> ${score}</p>
-                <p><strong>Genres:</strong> ${media.genres.join(', ')}</p>
-                <a href="${media.siteUrl}" target="_blank" style="color: #ff6b35;">View on AniList</a>
-            </div>
-        </div>
-        <div style="margin-top: 20px;">
-            <h3>Description</h3>
-            <p style="height: 150px; overflow-y: auto;">${description}</p>
-        </div>
-        <button id="anilist-modal-close" style="margin-top: 20px; padding: 10px 20px; border-radius: 8px; background-color: #ff6b35; color: white; border: none; cursor: pointer;">Close</button>
-    `;
-
-    modalContainer.appendChild(modalContent);
-    document.body.appendChild(modalContainer);
-
-    document.getElementById('anilist-modal-close').addEventListener('click', () => {
-        document.body.removeChild(modalContainer);
-    });
-
-    modalContainer.addEventListener('click', (e) => {
-        if (e.target === modalContainer) {
-            document.body.removeChild(modalContainer);
-        }
-    });
-}
-
-
 // Listen for storage changes to update features dynamically
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync') {
@@ -1149,14 +906,6 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         // Handle next episode date feature changes
         if (changes.nextEpisodeDate) {
             handleNextEpisodeDateFeature();
-        }
-        // Handle AniList Info feature changes
-        if (changes.anilistInfo) {
-            handleAnilistInfoFeature();
-        }
-        // Handle Notifications feature changes
-        if (changes.notifications) {
-            handleNotificationsFeature();
         }
     }
 });
