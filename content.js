@@ -812,13 +812,14 @@ function handleNextEpisodeDateFeature() {
             window.currentEpisodeAirDateInstance = null;
         }
 
-        // Use a MutationObserver to wait for the target element and its content to appear
+        // Use a MutationObserver to wait for the target element to appear
         const targetElementSelector = '.erc-series-hero-actions';
-        const observer = new MutationObserver((mutations, obs) => {
+        nextEpisodeDateFeatureObserver = new MutationObserver((mutations, obs) => {
             const actionButtons = document.querySelector(targetElementSelector);
-            if (actionButtons && actionButtons.children.length > 0) {
-                obs.disconnect();
-                console.log("Crunchyroll Power Up: Elemento objetivo y su contenido encontrados, inicializando EpisodeAirDate.");
+            if (actionButtons) {
+                obs.disconnect(); // Stop observing once found
+                nextEpisodeDateFeatureObserver = null;
+                console.log("Crunchyroll Power Up: Elemento objetivo encontrado, inicializando EpisodeAirDate.");
                 if (window.initializeEpisodeAirDate) {
                     window.initializeEpisodeAirDate(seriesId);
                 } else {
@@ -828,7 +829,8 @@ function handleNextEpisodeDateFeature() {
             }
         });
 
-        observer.observe(document.body, {
+        // Start observing the body for changes
+        nextEpisodeDateFeatureObserver.observe(document.body, {
             childList: true,
             subtree: true
         });
