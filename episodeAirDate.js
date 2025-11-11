@@ -56,7 +56,7 @@ class EpisodeAirDate {
             const year = date.getFullYear();
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
-            text = `${day}/${month}/${year} a las ${hours}:${minutes}`;
+            text = `EL PRÓXIMO EPISODIO SE PUBLICA EL ${day}/${month}/${year} a las ${hours}:${minutes}`;
         } else {
             text = "No hay próximos episodios programados";
         }
