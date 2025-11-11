@@ -45,31 +45,31 @@ class EpisodeAirDate {
   createElement() {
     // Comprobar si el elemento ya existe para evitar duplicados
     if (document.querySelector('.next-air-date')) {
-      console.log("Crunchyroll Power Up: El elemento de próxima emisión ya existe, se omite la creación.");
-      return;
+        return;
     }
 
     this.getAirDate((date) => {
-      if (!date) return;
+        let text;
+        if (date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            text = `${day}/${month}/${year} a las ${hours}:${minutes}`;
+        } else {
+            text = "No hay próximos episodios programados";
+        }
 
-      this.container = new Renderer('p')
-        .addClass('next-air-date')
-        .setText(this.getLocalizedMessage([
-          Intl.DateTimeFormat(undefined, {
-            day: '2-digit',
-            weekday: 'long',
-            month: '2-digit',
-          }).format(date), 
-          Intl.DateTimeFormat(undefined, {
-            minute: '2-digit',
-            hour: '2-digit',
-          }).format(date)
-        ]))
-        .getElement();
+        this.container = new Renderer('p')
+            .addClass('next-air-date')
+            .setText(text)
+            .getElement();
 
-      // Añadir al contenedor original de botones de acción si está disponible; si no, usar el body como fallback.
-      const parent = this.actionButtons || document.querySelector('.erc-series-hero-actions') || document.body;
-      parent.append(this.container);
+        const parent = this.actionButtons || document.querySelector('.erc-series-hero-actions');
+        if (parent) {
+            parent.append(this.container);
+        }
     });
   }
 
@@ -194,17 +194,6 @@ class EpisodeAirDate {
   }
 
   getAirDate(callback) {
-    if (!window.anilistCache) {
-      window.anilistCache = {};
-    }
-    
-    // Check cache first
-    if (window.anilistCache[this.seriesId] && window.anilistCache[this.seriesId].nextAiringDate > new Date()) {
-      callback(window.anilistCache[this.seriesId].nextAiringDate);
-      return;
-    }
-
-    // Obtener datos de AniList como fecha base
     chrome.runtime.sendMessage(chrome.runtime.id, {
       type: 'anilist',
       data: {
@@ -216,62 +205,20 @@ class EpisodeAirDate {
           }
         }`,
       },
-    }, async (response) => {
-      try {
+    }, (response) => {
         const airingAt = response?.data?.Media?.nextAiringEpisode?.airingAt;
-
-        if (!window.anilistCache[this.seriesId]) {
-          window.anilistCache[this.seriesId] = {};
-        }
-        
         if (airingAt) {
-          const anilistDate = new Date(airingAt * 1000);
-          console.log("Crunchyroll Power Up: AniList base date:", anilistDate);
-
-          // Intentar obtener una hora más precisa desde el DOM
-          const crunchyrollTime = this.parseCrunchyrollReleaseTime();
-          
-          if (crunchyrollTime) {
-            // Usar enfoque híbrido: fecha de AniList + hora de Crunchyroll
-            const hybridDate = new Date(
-              anilistDate.getFullYear(),
-              anilistDate.getMonth(),
-              anilistDate.getDate(),
-              crunchyrollTime.getHours(),
-              crunchyrollTime.getMinutes(),
-              crunchyrollTime.getSeconds()
-            );
+            let nextAirDate = new Date(airingAt * 1000);
+            const now = new Date();
             
-            console.log("Crunchyroll Power Up: Hybrid timing calculated:", {
-              anilistDate: anilistDate,
-              crunchyrollTime: crunchyrollTime,
-              finalDate: hybridDate
-            });
-            
-            window.anilistCache[this.seriesId].nextAiringDate = hybridDate;
-            callback(hybridDate);
-          } else {
-            // Fallback a AniList únicamente
-            console.log("Crunchyroll Power Up: Using AniList date only (no DOM timing found)");
-            window.anilistCache[this.seriesId].nextAiringDate = anilistDate;
-            callback(anilistDate);
-          }
+            // Si la fecha de AniList ya pasó, calcular la próxima ocurrencia semanal
+            while (nextAirDate < now) {
+                nextAirDate.setDate(nextAirDate.getDate() + 7);
+            }
+            callback(nextAirDate);
         } else {
-          // Sin datos AniList, intentar solo por DOM
-          const crunchyrollTime = this.parseCrunchyrollReleaseTime();
-          if (crunchyrollTime) {
-            console.log("Crunchyroll Power Up: Using DOM-only timing:", crunchyrollTime);
-            window.anilistCache[this.seriesId].nextAiringDate = crunchyrollTime;
-            callback(crunchyrollTime);
-          } else {
-            console.log("Crunchyroll Power Up: No timing data available");
-            window.anilistCache[this.seriesId].nextAiringDate = null;
-          }
+            callback(null); // No hay próximo episodio programado
         }
-      } catch (error) {
-        console.error("Crunchyroll Power Up: Error in getAirDate:", error);
-        window.anilistCache[this.seriesId].nextAiringDate = null;
-      }
     });
   }
 
