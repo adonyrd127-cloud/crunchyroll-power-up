@@ -42,18 +42,34 @@ class AnilistButtonHandler {
     }
 
     waitForShareButton() {
-        const targetNode = document.body;
-        const config = { childList: true, subtree: true };
+        const targetSelector = '.erc-series-hero-actions';
 
-        this.observer = new MutationObserver((mutationsList, observer) => {
-            const shareButton = document.querySelector('button[aria-label="Compartir"]');
+        const initObserver = () => {
+            const targetNode = document.querySelector(targetSelector);
+            if (!targetNode) {
+                // Si el nodo objetivo no existe, esperar un poco y reintentar.
+                setTimeout(initObserver, 500);
+                return;
+            }
+
+            this.observer = new MutationObserver(() => {
+                // Buscar el botón de compartir por cualquiera de sus posibles etiquetas.
+                const shareButton = targetNode.querySelector('button[aria-label="Compartir"], button[aria-label="Share"]');
+                if (shareButton && !this.button) {
+                    this.injectButton(shareButton);
+                }
+            });
+
+            this.observer.observe(targetNode, { childList: true, subtree: true });
+
+            // Comprobación inicial en caso de que el botón ya esté presente.
+            const shareButton = targetNode.querySelector('button[aria-label="Compartir"], button[aria-label="Share"]');
             if (shareButton) {
                 this.injectButton(shareButton);
-                observer.disconnect();
             }
-        });
+        };
 
-        this.observer.observe(targetNode, config);
+        initObserver();
     }
 
     injectButton(shareButton) {
@@ -67,8 +83,12 @@ class AnilistButtonHandler {
         this.button.setAttribute('aria-label', 'Ver detalles en AniList');
         this.button.setAttribute('title', 'Ver detalles en AniList');
         this.button.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                <path d="M12.96,2.69a1.2,1.2,0,0,0-1.92,0L2.7,16.51,2.22,15a1.2,1.2,0,0,0-2.16,1.2l1.2,4.8a1.2,1.2,0,0,0,1.2,1.2H10.8a1.2,1.2,0,1,0,0-2.4H5.85l7.99-12.01a1.2,1.2,0,0,0,0-1.2ZM21.78,8,14.22,20.06a1.2,1.2,0,1,1-1.92-1.44L20.25,5.21l.48,1.93a1.2,1.2,0,0,0,2.16-1.2Z"></path>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="20" role="img" aria-label="AL logo">
+              <rect width="100%" height="100%" fill="#19212d" />
+              <rect x="300" y="90" width="120" height="270" rx="22" ry="22" fill="#00aaff"/>
+              <rect x="350" y="350" width="162" height="60" rx="22" ry="22" fill="#00aaff"/>
+              <path fill="#fefefe" fill-rule="evenodd" d=" M 80 400 L 145 155 L 245 155 L 310 400 L 240 400 L 220 330 L 140 330 L 120 400 Z M 195 210 L 170 280 L 220 280 Z "/>
+              <rect x="0" y="0" width="512" height="512" fill-opacity="0" />
             </svg>
         `;
 
@@ -78,9 +98,11 @@ class AnilistButtonHandler {
     }
 
     async handleButtonClick() {
-        const titleElement = document.querySelector('h1.title');
+        // Selector mejorado y más específico para el título.
+        const titleElement = document.querySelector('[data-testid="series-title"] h1') || document.querySelector('h1.title');
         if (!titleElement) {
             console.error('🔵 AniList: No se pudo encontrar el título del anime.');
+            this.showModal(null, "No se pudo encontrar el título del anime en la página.");
             return;
         }
         const animeTitle = titleElement.textContent.trim();
@@ -95,8 +117,8 @@ class AnilistButtonHandler {
         if (data) {
             this.cache[animeTitle] = data;
             this.saveCache();
-            this.showModal(data);
         }
+        this.showModal(data, `No se encontraron resultados para "${animeTitle}" en AniList.`);
     }
 
     async fetchAniListData(search) {
@@ -149,7 +171,7 @@ class AnilistButtonHandler {
         }
     }
 
-    showModal(data) {
+    showModal(data, errorMessage = "Ocurrió un error inesperado.") {
         if (this.modal) {
             this.modal.remove();
         }
@@ -157,32 +179,47 @@ class AnilistButtonHandler {
         this.modal = document.createElement('div');
         this.modal.className = 'anilist-modal';
 
-        const description = data.description.length > 400
-            ? data.description.substring(0, 400) + '...'
-            : data.description;
+        let modalContentHTML = '';
 
-        this.modal.innerHTML = `
-            <div class="anilist-modal-content">
-                <button class="anilist-modal-close">&times;</button>
+        if (data) {
+            const description = data.description?.length > 400
+                ? data.description.substring(0, 400) + '...'
+                : data.description || 'No hay descripción disponible.';
+
+            modalContentHTML = `
                 <div class="anilist-modal-header">
-                    <img src="${data.coverImage.large}" alt="Cover Image" class="anilist-modal-cover">
+                    <img src="${data.coverImage?.large}" alt="Cover Image" class="anilist-modal-cover">
                     <div class="anilist-modal-title">
-                        <h2>${data.title.romaji || data.title.english}</h2>
-                        <p>${data.title.native}</p>
+                        <h2>${data.title?.romaji || data.title?.english || 'Título no disponible'}</h2>
+                        <p>${data.title?.native || ''}</p>
                     </div>
                 </div>
                 <div class="anilist-modal-body">
                     <p class="anilist-modal-description">${description}</p>
                     <div class="anilist-modal-details">
-                        <p><strong>Puntuación:</strong> ${data.averageScore} / 100</p>
-                        <p><strong>Géneros:</strong> ${data.genres.join(', ')}</p>
-                        <p><strong>Episodios:</strong> ${data.episodes}</p>
-                        <p><strong>Temporada:</strong> ${data.season} ${data.seasonYear}</p>
+                        <p><strong>Puntuación:</strong> ${data.averageScore ? `${data.averageScore} / 100` : 'N/A'}</p>
+                        <p><strong>Géneros:</strong> ${data.genres?.join(', ') || 'N/A'}</p>
+                        <p><strong>Episodios:</strong> ${data.episodes || 'N/A'}</p>
+                        <p><strong>Temporada:</strong> ${data.season ? `${data.season} ${data.seasonYear}` : 'N/A'}</p>
                     </div>
                 </div>
                 <div class="anilist-modal-footer">
                     <a href="${data.siteUrl}" target="_blank" class="anilist-modal-button">Ver en AniList</a>
                 </div>
+            `;
+        } else {
+            modalContentHTML = `
+                <div class="anilist-modal-body" style="text-align: center; padding: 40px;">
+                    <h2>Error</h2>
+                    <p>${errorMessage}</p>
+                </div>
+            `;
+        }
+
+        this.modal.innerHTML = `
+            <div class="anilist-modal-content">
+                <button class="anilist-modal-close">&times;</button>
+                ${modalContentHTML}
             </div>
         `;
 
