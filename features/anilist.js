@@ -98,10 +98,24 @@ class AnilistButtonHandler {
     }
 
     async handleButtonClick() {
-        // Selector mejorado y más específico para el título.
-        const titleElement = document.querySelector('[data-testid="series-title"] h1') || document.querySelector('h1.title');
+        // Secuencia de selectores para encontrar el título de la forma más robusta posible.
+        const selectors = [
+            '[data-testid="series-title"] h1',
+            'h1[itemprop="name"]',
+            'h1.title'
+        ];
+
+        let titleElement = null;
+        for (const selector of selectors) {
+            titleElement = document.querySelector(selector);
+            if (titleElement) {
+                console.log(`🔵 AniList: Título encontrado con el selector: "${selector}"`);
+                break;
+            }
+        }
+
         if (!titleElement) {
-            console.error('🔵 AniList: No se pudo encontrar el título del anime.');
+            console.error('🔵 AniList: No se pudo encontrar el título del anime con ninguno de los selectores.');
             this.showModal(null, "No se pudo encontrar el título del anime en la página.");
             return;
         }

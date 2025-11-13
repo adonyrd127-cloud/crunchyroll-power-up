@@ -96,6 +96,9 @@ function init() {
             currentUrl: window.location.href
         });
     });
+
+    // Observador de navegación para SPA
+    observeNavigation();
 }
 
 // Initialize Enhanced Mini Player
@@ -935,6 +938,24 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         }
     }
 });
+
+// SPA Navigation Observer
+function observeNavigation() {
+    const titleElement = document.querySelector('head > title');
+    if (!titleElement) return;
+
+    const navigationObserver = new MutationObserver(() => {
+        console.log("🔵 Crunchyroll Power Up: Navegación detectada (cambio de título). Reinicializando funciones.");
+
+        // Da un pequeño margen para que el DOM se actualice tras la navegación
+        setTimeout(() => {
+            handleNextEpisodeDateFeature();
+            initializeAnilistButton();
+        }, 500);
+    });
+
+    navigationObserver.observe(titleElement, { childList: true });
+}
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
