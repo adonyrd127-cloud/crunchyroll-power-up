@@ -51,5 +51,8 @@
   "mini_player_title": { "message": "Mini Player" },
   "mini_player_description": { "message": "Enable Picture-in-Picture to watch videos in a floating window." },
   "enable_mini_player": { "message": "Enable Mini Player" },
+  "anilist_button_title": { "message": "AniList Integration" },
+  "anilist_button_description": { "message": "Display a button on the series page to view details on AniList." },
+  "enable_anilist_button": { "message": "Enable AniList Button" },
   "footer_text": { "message": "Enhanced Crunchyroll experience with essential features" }
 }

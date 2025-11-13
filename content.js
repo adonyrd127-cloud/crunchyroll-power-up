@@ -12,9 +12,11 @@ let mouseInactivityTimeout = null;
 let lastControlsVisibility = true;
 let isNextEpisodeDateFeatureInitializing = false; // New flag to prevent multiple initializations
 let nextEpisodeDateFeatureObserver = null; // Observer for next episode date feature
+let anilistButtonHandler = null; // Handler for the anilist button
 
 // Default settings
 const defaultSettings = {
+    anilistButton: false,
     theaterMode: false,
     nextEpisodeDate: true,
     skip_event_intro: 0,    // Modo manual por defecto
@@ -83,6 +85,9 @@ function init() {
         
         // Initialize Screen Size Buttons feature
         initializeScreenSizeButtons();
+
+        // Initialize AniList Button feature
+        initializeAnilistButton();
         
         // Send status to popup
         chrome.runtime.sendMessage({
@@ -881,6 +886,21 @@ function destroyNextEpisodeDate() {
     console.log("Crunchyroll Power Up: EpisodeAirDate cleanup requested");
 }
 
+// Initialize AniList Button
+function initializeAnilistButton() {
+    if (chromeStorage.anilistButton) {
+        if (!anilistButtonHandler) {
+            anilistButtonHandler = new AnilistButtonHandler();
+        }
+        anilistButtonHandler.init();
+    } else {
+        if (anilistButtonHandler) {
+            anilistButtonHandler.destroy();
+            anilistButtonHandler = null;
+        }
+    }
+}
+
 // Listen for storage changes to update features dynamically
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync') {
@@ -908,6 +928,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         // Handle next episode date feature changes
         if (changes.nextEpisodeDate) {
             handleNextEpisodeDateFeature();
+        }
+        // Handle anilist button feature changes
+        if (changes.anilistButton) {
+            initializeAnilistButton();
         }
     }
 });

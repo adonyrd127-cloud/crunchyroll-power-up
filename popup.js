@@ -87,12 +87,13 @@ const DEFAULT_CONFIG = {
     theaterMode: false,     // Deshabilitado por defecto
     nextEpisodeDate: true,  // Habilitado por defecto
     calendarFilter: false,  // Deshabilitado por defecto
-    miniPlayerEnabled: false // Deshabilitado por defecto
+    miniPlayerEnabled: false, // Deshabilitado por defecto
+    anilistButton: false    // Deshabilitado por defecto
 };
 
 // Elementos del DOM
 let skipIntroCheckbox, skipRecapCheckbox, skipEndingCheckbox;
-let theaterModeCheckbox, nextEpisodeDateCheckbox, calendarFilterCheckbox, miniPlayerCheckbox;
+let theaterModeCheckbox, nextEpisodeDateCheckbox, calendarFilterCheckbox, miniPlayerCheckbox, anilistButtonCheckbox;
 
 // Inicializar popup
 document.addEventListener('DOMContentLoaded', function() {
@@ -109,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     nextEpisodeDateCheckbox = document.getElementById('nextEpisodeDate');
     calendarFilterCheckbox = document.getElementById('calendarFilter');
     miniPlayerCheckbox = document.getElementById('miniPlayer');
+    anilistButtonCheckbox = document.getElementById('anilistButton');
     
     // Cargar configuración guardada
     loadConfiguration();
@@ -136,6 +138,7 @@ function loadConfiguration() {
         nextEpisodeDateCheckbox.checked = result.nextEpisodeDate;
         calendarFilterCheckbox.checked = result.calendarFilter;
         miniPlayerCheckbox.checked = result.miniPlayerEnabled;
+        anilistButtonCheckbox.checked = result.anilistButton;
         
     console.log("🟠 Popup: Checkboxes configurados");
     console.log("🟠 ✅ LÓGICA CORREGIDA:");
@@ -196,6 +199,12 @@ function setupEventListeners() {
             type: 'MINI_PLAYER_TOGGLE',
             enabled: this.checked
         });
+    });
+
+    // NEW: AniList Button checkbox
+    anilistButtonCheckbox.addEventListener('change', function() {
+        saveConfig('anilistButton', this.checked);
+        console.log("🔵 Popup: Botón de AniList cambiado a:", this.checked);
     });
     
     console.log("🟠 Popup: Event listeners configurados");
@@ -276,6 +285,7 @@ function initializeUIState() {
     const episodeSwitch = document.getElementById('episode-switch');
     const calendarFilterSwitch = document.getElementById('calendar-filter-switch');
     const miniPlayerSwitch = document.getElementById('mini-player-switch');
+    const anilistSwitch = document.getElementById('anilist-switch');
     
     // Añadir listeners para actualizar la UI
     if (skipIntroCheckbox) {
@@ -299,6 +309,9 @@ function initializeUIState() {
     if (miniPlayerCheckbox) {
         miniPlayerCheckbox.addEventListener('change', () => updateSwitch(miniPlayerSwitch, miniPlayerCheckbox));
     }
+    if (anilistButtonCheckbox) {
+        anilistButtonCheckbox.addEventListener('change', () => updateSwitch(anilistSwitch, anilistButtonCheckbox));
+    }
     
     // Inicializar el estado visual una vez cargada la configuración
     setTimeout(() => {
@@ -309,6 +322,7 @@ function initializeUIState() {
         if (episodeSwitch && nextEpisodeDateCheckbox) updateSwitch(episodeSwitch, nextEpisodeDateCheckbox);
         if (calendarFilterSwitch && calendarFilterCheckbox) updateSwitch(calendarFilterSwitch, calendarFilterCheckbox);
         if (miniPlayerSwitch && miniPlayerCheckbox) updateSwitch(miniPlayerSwitch, miniPlayerCheckbox);
+        if (anilistSwitch && anilistButtonCheckbox) updateSwitch(anilistSwitch, anilistButtonCheckbox);
     }, 100);
 }
 

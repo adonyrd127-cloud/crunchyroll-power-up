@@ -152,6 +152,15 @@
   "enable_mini_player": {
     "message": "Activar Mini Reproductor"
   },
+  "anilist_button_title": {
+    "message": "Integración con AniList"
+  },
+  "anilist_button_description": {
+    "message": "Muestra un botón en la página de la serie para ver detalles en AniList."
+  },
+  "enable_anilist_button": {
+    "message": "Activar botón de AniList"
+  },
   "footer_text": {
     "message": "Experiencia mejorada de Crunchyroll con características esenciales"
   }

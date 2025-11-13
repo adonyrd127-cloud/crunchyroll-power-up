@@ -41,9 +41,16 @@
                 "features/miniplayer.js",
                 "features/pipControl.js",
                 "features/screenSizeButtons.js",
-                "content_scripts/calendarFilter.js"
+                "content_scripts/calendarFilter.js",
+                "features/anilist.js"
             ],
-      "css": ["content.css", "nextEpisode.css", "css/calendarFilter.css", "css/screenSizeButtons.css"],
+      "css": [
+          "content.css",
+          "nextEpisode.css",
+          "css/calendarFilter.css",
+          "css/screenSizeButtons.css",
+          "css/anilist.css"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }
@@ -62,11 +69,13 @@
         "nextEpisode.css",
         "css/calendarFilter.css",
         "css/screenSizeButtons.css",
+        "css/anilist.css",
         "episodeAirDate.js",
         "content_scripts/calendarFilter.js",
         "features/miniplayer.js",
         "features/pipControl.js",
         "features/screenSizeButtons.js",
+        "features/anilist.js",
         "icons/icono chrome.png"
       ],
       "matches": [ "*://*.crunchyroll.com/*", "*://crunchyroll.com/*", "*://beta.crunchyroll.com/*" ]
