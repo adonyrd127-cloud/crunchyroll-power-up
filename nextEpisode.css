@@ -1,0 +1,61 @@
+
+/* Estilos para la Fecha del Próximo Episodio - Fondo mejorado */
+
+html[ic_page='series'] .next-air-date {
+  margin-top: .5rem;
+  text-decoration: underline #f47521;
+  background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3) !important;
+  border: 2px solid rgba(255,255,255,0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Fallback for pages without ic_page attribute */
+.next-air-date {
+  margin-top: .5rem;
+  text-decoration: underline #f47521;
+  background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3) !important;
+  border: 2px solid rgba(255,255,255,0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Hover effect for better interactivity */
+.next-air-date:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4) !important;
+  background: linear-gradient(135deg, #ff7a47, #fa9d30) !important;
+}
+
+/* Additional styling for better integration */
+.erc-series-hero-actions .next-air-date {
+  display: block;
+  font-size: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  text-decoration: none !important;
+  border-radius: 8px !important;
+  margin: 8px 0 !important;
+}
+
+.erc-series-hero-actions .next-air-date:hover {
+  text-decoration: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .next-air-date {
+    font-size: 14px !important;
+    padding: 6px 12px !important;
+    margin-top: 0.25rem !important;
+  }
+}

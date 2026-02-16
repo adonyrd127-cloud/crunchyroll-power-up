@@ -1,0 +1,309 @@
+/* Crunchyroll Power Up Extension  */
+
+/* NOTE: Native skip button hiding is handled by JavaScript in content.js
+   using safe text-content matching. CSS selectors were removed because
+   div[class*="skipEvent"] etc. matched VIDEO PLAYER CONTAINERS and caused
+   the video to go black when seeking back to the intro section. */
+
+/* Clase unificada para todos los botones (Recap, Intro, Ending, Minireproductor y notificaciones) */
+.cp-btn {
+  position: fixed !important;
+  right: 20px !important;
+  background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+  color: white !important;
+  padding: 12px 20px !important;
+  border-radius: 8px !important;
+  font-weight: bold !important;
+  z-index: 999999 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  font-size: 14px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  pointer-events: auto !important;
+  transition: all 0.3s ease !important;
+  opacity: 1 !important;
+  transform: translateX(0) scale(1) !important;
+}
+
+.cp-btn:hover {
+  transform: scale(1.05) translateX(0) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Estilo específico para el botón de minireproductor (posicionado a la izquierda) */
+.cp-btn.miniplayer-btn {
+  left: 20px !important;
+  right: auto !important;
+  transform: scale(1) !important;
+}
+
+.cp-btn.miniplayer-btn:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Estados de visibilidad para sincronización opcional */
+.cp-btn.sync-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(100%) scale(0.9) !important;
+}
+
+.cp-btn.miniplayer-btn.sync-hidden {
+  transform: scale(0.9) !important;
+}
+
+
+/* Notification styles - hereda de cp-btn */
+.crunchy-plus-notification {
+  top: 20px !important;
+}
+
+/* Modern YouTube-style Skip Buttons */
+/* Modern Skip Buttons - Coral Theme */
+.crunchyroll-power-up-skipper {
+  position: fixed !important;
+  bottom: 80px !important;
+  /* Position similar to original */
+  right: 20px !important;
+  height: 38px !important;
+  /* Slightly larger for better clickability */
+  padding: 0 20px !important;
+  background-color: #FF6B6B !important;
+  /* Coral Mamey Color */
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+  /* Rounded corners */
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  z-index: 999999 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(4px) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  /* Initially hidden, managed by JS */
+  transform: translateY(10px) !important;
+  pointer-events: none !important;
+  /* No clicks when hidden */
+}
+
+.crunchyroll-power-up-skipper:hover {
+  transform: translateY(0) scale(1.05) !important;
+  background-color: #ff8585 !important;
+  /* Lighter coral on hover */
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4) !important;
+}
+
+.crunchyroll-power-up-skipper.active {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+
+/* Temp Auto Skip Feedback Mode */
+.crunchyroll-power-up-skipper.temp-auto-show {
+  pointer-events: none !important;
+  /* Just visual */
+  opacity: 0.9 !important;
+}
+
+/* Skip button icons */
+.crunchyroll-power-up-skipper .skip-icon {
+  width: 16px !important;
+  height: 16px !important;
+  fill: currentColor !important;
+  flex-shrink: 0 !important;
+}
+
+/* Skip button text */
+.crunchyroll-power-up-skipper .skip-text {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1 !important;
+}
+
+/* Different positions for multiple buttons (if needed) */
+.crunchyroll-power-up-skipper.position-1 {
+  bottom: 80px !important;
+}
+
+.crunchyroll-power-up-skipper.position-2 {
+  bottom: 120px !important;
+}
+
+.crunchyroll-power-up-skipper.position-3 {
+  bottom: 160px !important;
+}
+
+/* Download button styles */
+.crunchyroll-power-up-download-btn {
+  background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+  color: white !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 6px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  margin: 10px 0 !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.crunchyroll-power-up-download-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4) !important;
+}
+
+/* Hide Crunchyroll ads */
+[class*="ad-banner"],
+[class*="advertisement"],
+[id*="ad-"],
+[class*="ads-"],
+.ad-container,
+.advertisement,
+.ads-wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Theater mode enhancements */
+.theater-mode {
+  background: #000 !important;
+}
+
+/* Video player enhancements */
+video {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Animation keyframes */
+@keyframes crunchyrollPowerUpSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes crunchyrollPowerUpSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes crunchyrollPowerUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes crunchyrollPowerUpFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Ensure our elements are always on top */
+.crunchy-plus-notification,
+.crunchyroll-power-up-skipper,
+.crunchyroll-power-up-download-btn {
+  z-index: 999999 !important;
+}
+
+/* Fix for potential conflicts with Crunchyroll styles */
+.crunchy-plus-notification *,
+.crunchyroll-power-up-skipper *,
+.crunchyroll-power-up-download-btn * {
+  box-sizing: border-box !important;
+}
+
+.crunchy-plus-notification svg,
+.crunchyroll-power-up-skipper svg {
+  width: 16px !important;
+  height: 16px !important;
+  fill: currentColor !important;
+  flex-shrink: 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .crunchyroll-power-up-skipper {
+    right: 10px !important;
+    bottom: 60px !important;
+    font-size: 12px !important;
+    height: 28px !important;
+    padding: 6px 12px !important;
+  }
+
+  .crunchyroll-power-up-skipper .skip-icon {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .crunchyroll-power-up-skipper .skip-text {
+    font-size: 12px !important;
+  }
+}
+
+/* Picture-in-Picture control styles imported from the upstream PiP extension
+   (Teoenge/picture-in-picture-extension-for-crunchyroll).  These rules define
+   the size and hover behaviour for the PiP button injected into the
+   Crunchyroll video player's control bar when the Mini Player option is
+   enabled. */
+.pip-control {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+}
+
+.pip-control:active {
+  opacity: 0.2;
+}
+
+.pip-control:hover {
+  background-color: #00000099;
+}

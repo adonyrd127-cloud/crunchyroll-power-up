@@ -1,0 +1,50 @@
+/* Screen Size Buttons - Native Control Bar Integration */
+/* Uses the same .pip-control class as the PiP button for consistency */
+
+/* Active mode indicator — coral highlight */
+.cpu-screen-mode-control.cpu-screen-mode-active {
+    position: relative;
+}
+
+.cpu-screen-mode-control.cpu-screen-mode-active svg {
+    fill: #FF6B6B !important;
+}
+
+.cpu-screen-mode-control.cpu-screen-mode-active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #FF6B6B;
+}
+
+/* Hover effect */
+.cpu-screen-mode-control:hover svg {
+    fill: #ffffff !important;
+    transition: fill 0.15s ease;
+}
+
+/* Size-specific styles for video containers */
+.screen-size-small {
+    width: 640px !important;
+    height: 360px !important;
+    max-width: 640px !important;
+    max-height: 360px !important;
+    margin: 0 auto !important;
+}
+
+.screen-size-normal {
+    width: auto !important;
+    height: auto !important;
+}
+
+.screen-size-theater {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 70vh !important;
+    max-height: 70vh !important;
+}
