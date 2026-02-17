@@ -116,6 +116,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Agregar event listeners
     setupEventListeners();
 
+    // === ANIME TRACKING: Initialize section ===
+    initFollowedAnimesSection();
+
     console.log("🟠 Popup: Inicialización completa");
 });
 
@@ -306,4 +309,191 @@ function initializeUIState() {
     }, 100);
 }
 
-console.log("Crunchyroll Power Up Popup: Script cargado con LÓGICA CORREGIDA + Calendar Filter");
+// ============================================
+// ANIME TRACKING: POPUP SECTION
+// ============================================
+
+async function initFollowedAnimesSection() {
+    console.log('📺 Popup: Inicializando sección de animes seguidos...');
+    await loadFollowedAnimes();
+    await loadNotificationSettings();
+    setupFollowedAnimesListeners();
+}
+
+async function loadFollowedAnimes() {
+    try {
+        const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
+
+        const animeList = document.getElementById('animeList');
+        const emptyState = document.getElementById('emptyState');
+        const totalFollowed = document.getElementById('totalFollowed');
+
+        if (!animeList || !emptyState || !totalFollowed) return;
+
+        totalFollowed.textContent = followedAnimes.length;
+
+        if (followedAnimes.length === 0) {
+            animeList.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        animeList.style.display = 'flex';
+        emptyState.style.display = 'none';
+        animeList.innerHTML = '';
+
+        // Sort: most recently added first
+        followedAnimes.sort((a, b) => (b.addedDate || 0) - (a.addedDate || 0));
+
+        for (const anime of followedAnimes) {
+            animeList.appendChild(createAnimeItem(anime));
+        }
+
+    } catch (error) {
+        console.error('Error cargando animes seguidos:', error);
+    }
+}
+
+function createAnimeItem(anime) {
+    const item = document.createElement('div');
+    item.className = 'anime-item';
+    item.dataset.animeId = anime.id;
+
+    item.innerHTML = `
+        <img
+            src="${anime.thumbnail || 'icons/icono chrome.png'}"
+            alt="${anime.title || 'Anime'}"
+            class="anime-thumb"
+            onerror="this.src='icons/icono chrome.png'"
+        >
+        <div class="anime-info">
+            <h3 class="anime-title" title="${anime.title || ''}">${anime.title || 'Sin título'}</h3>
+            <p class="ep-status">Episodio ${anime.lastEpisode || '?'}</p>
+        </div>
+        <div class="anime-actions">
+            <button class="btn-watch" data-url="${anime.url}" title="Ver anime">▶️</button>
+            <button class="btn-unfollow" data-id="${anime.id}" title="Dejar de seguir">🔕</button>
+        </div>
+    `;
+
+    return item;
+}
+
+async function loadNotificationSettings() {
+    try {
+        const { notificationSettings = {} } = await chrome.storage.sync.get('notificationSettings');
+
+        const els = {
+            notifyEnabled: document.getElementById('notifyEnabled'),
+            quietHoursEnabled: document.getElementById('quietHoursEnabled'),
+            notifyNewEpisode: document.getElementById('notifyNewEpisode'),
+            soundEnabled: document.getElementById('soundEnabled'),
+        };
+
+        if (els.notifyEnabled) els.notifyEnabled.checked = notificationSettings.enabled !== false;
+        if (els.quietHoursEnabled) els.quietHoursEnabled.checked = notificationSettings.quietHoursEnabled !== false;
+        if (els.notifyNewEpisode) els.notifyNewEpisode.checked = notificationSettings.notifyNewEpisode !== false;
+        if (els.soundEnabled) els.soundEnabled.checked = notificationSettings.soundEnabled !== false;
+
+    } catch (error) {
+        console.error('Error cargando configuración de notificaciones:', error);
+    }
+}
+
+function setupFollowedAnimesListeners() {
+    // Manual check button
+    const manualCheckBtn = document.getElementById('manualCheckBtn');
+    if (manualCheckBtn) {
+        manualCheckBtn.addEventListener('click', () => {
+            manualCheckBtn.style.pointerEvents = 'none';
+            manualCheckBtn.textContent = '⏳';
+
+            chrome.runtime.sendMessage({ type: 'manualCheck' }, (response) => {
+                manualCheckBtn.textContent = '🔄';
+                manualCheckBtn.style.pointerEvents = 'auto';
+
+                if (response?.success) {
+                    showPopupToast('✅ Verificación completada');
+                    setTimeout(() => loadFollowedAnimes(), 800);
+                } else {
+                    showPopupToast('⚠️ Error en la verificación');
+                }
+            });
+        });
+    }
+
+    // Delegated click handlers for anime items
+    const animeList = document.getElementById('animeList');
+    if (animeList) {
+        animeList.addEventListener('click', async (e) => {
+            const watchBtn = e.target.closest('.btn-watch');
+            if (watchBtn) {
+                const url = watchBtn.dataset.url;
+                if (url) chrome.tabs.create({ url });
+                return;
+            }
+
+            const unfollowBtn = e.target.closest('.btn-unfollow');
+            if (unfollowBtn) {
+                const animeId = unfollowBtn.dataset.id;
+                if (animeId) await unfollowAnime(animeId);
+            }
+        });
+    }
+
+    // Notification settings checkboxes
+    ['notifyEnabled', 'quietHoursEnabled', 'notifyNewEpisode', 'soundEnabled'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => saveNotificationSettings());
+    });
+}
+
+async function unfollowAnime(animeId) {
+    try {
+        const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
+        const anime = followedAnimes.find(a => a.id === animeId);
+        const title = anime?.title || 'el anime';
+
+        const updated = followedAnimes.filter(a => a.id !== animeId);
+        await chrome.storage.sync.set({ followedAnimes: updated });
+        showPopupToast(`❌ Dejaste de seguir "${title}"`);
+        await loadFollowedAnimes();
+
+    } catch (error) {
+        console.error('Error al dejar de seguir:', error);
+        showPopupToast('❌ Error al actualizar');
+    }
+}
+
+async function saveNotificationSettings() {
+    try {
+        const settings = {
+            enabled: document.getElementById('notifyEnabled')?.checked ?? true,
+            quietHoursEnabled: document.getElementById('quietHoursEnabled')?.checked ?? true,
+            quietHoursStart: '22:00',
+            quietHoursEnd: '08:00',
+            notifyNewEpisode: document.getElementById('notifyNewEpisode')?.checked ?? true,
+            soundEnabled: document.getElementById('soundEnabled')?.checked ?? true,
+        };
+        await chrome.storage.sync.set({ notificationSettings: settings });
+        showPopupToast('✅ Configuración guardada');
+    } catch (error) {
+        console.error('Error guardando configuración:', error);
+        showPopupToast('❌ Error al guardar');
+    }
+}
+
+function showPopupToast(message) {
+    let toast = document.querySelector('.popup-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'popup-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.display = 'block';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 2500);
+}
+
+console.log("Crunchyroll Power Up Popup: Script cargado con LÓGICA CORREGIDA + Calendar Filter + Anime Tracking");
