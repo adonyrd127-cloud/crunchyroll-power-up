@@ -662,6 +662,26 @@ class CrunchyrollPowerUpCalendarFilter {
             /\(German\)/i
         ];
 
+        // Enhanced Other languages dub detection patterns
+        const otherPatterns = [
+            /\(Thai\)/i,
+            /\(Hindi\)/i,
+            /\(Tamil\)/i,
+            /\(Telugu\)/i,
+            /\(Malay\)/i,
+            /\(Indonesian\)/i,
+            /\(Bahasa Indonesia\)/i,
+            /\(Chinese\)/i,
+            /\(Mandarin\)/i,
+            /\(Arabic\)/i,
+            /\(Russian\)/i,
+            /\(Portuguese\)/i,
+            /\(Italian\)/i,
+            /\(Other\)/i
+        ];
+
+
+
         // Check for Spanish dubs
         for (const pattern of spanishPatterns) {
             if (pattern.test(title)) {
@@ -703,6 +723,18 @@ class CrunchyrollPowerUpCalendarFilter {
                     isDub = true;
                     languages.push('german');
                     console.log("✅ Doblaje en alemán detectado con patrón:", pattern);
+                    break;
+                }
+            }
+        }
+
+        // Check for Other languages dubs (only if no other language found)
+        if (languages.length === 0) {
+            for (const pattern of otherPatterns) {
+                if (pattern.test(title)) {
+                    isDub = true;
+                    languages.push('others');
+                    console.log("✅ Doblaje en otro idioma detectado con patrón:", pattern);
                     break;
                 }
             }
