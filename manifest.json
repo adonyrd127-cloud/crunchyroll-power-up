@@ -84,7 +84,10 @@
         "features/miniplayer.js",
         "features/pipControl.js",
         "features/screenSizeButtons.js",
-        "icons/icono chrome.png"
+        "icons/icono chrome.png",
+        "manage_animes.html",
+        "manage_animes.css",
+        "manage_animes.js"
       ],
       "matches": [
         "*://*.crunchyroll.com/*",

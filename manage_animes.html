@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Animes - Crunchyroll Power Up</title>
+    <link rel="stylesheet" href="manage_animes.css">
+</head>
+
+<body>
+    <div class="manage-modal">
+        <!-- Header -->
+        <header class="modal-header">
+            <div class="header-left">
+                <div class="logo">
+                    <img src="icons/icono chrome.png" alt="Logo">
+                    <h1>Mis Animes Seguidos</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="closeModalBtn" class="close-btn" title="Cerrar">✕</button>
+            </div>
+        </header>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <!-- Búsqueda -->
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Buscar anime..." autocomplete="off">
+                    <button id="clearSearchBtn" class="clear-search" style="display: none;">✕</button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters">
+                    <button id="filterBtn" class="filter-toggle">
+                        <span>🎯 Filtros</span>
+                        <span class="filter-badge" id="filterBadge" style="display: none;">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="toolbar-right">
+                <!-- Sorting -->
+                <select id="sortSelect" class="sort-select">
+                    <option value="recent">Más recientes</option>
+                    <option value="alphabetical">A-Z</option>
+                    <option value="episodes">Por episodios</option>
+                    <option value="new">Con nuevos episodios</option>
+                </select>
+
+                <!-- View toggle -->
+                <div class="view-toggle">
+                    <button id="gridViewBtn" class="view-btn active" title="Vista de cuadrícula">
+                        <span>▦</span>
+                    </button>
+                    <button id="listViewBtn" class="view-btn" title="Vista de lista">
+                        <span>☰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de filtros (colapsable) -->
+        <div id="filterPanel" class="filter-panel" style="display: none;">
+            <div class="filter-group">
+                <label>Estado:</label>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" name="filter-status" value="watching" checked>
+                        <span>Viendo</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="filter-status" value="completed">
+                        <span>Completado</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="filter-status" value="onhold">
+                        <span>En pausa</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Episodios:</label>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" name="filter-episodes" value="new">
+                        <span>Con nuevos episodios</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="filter-episodes" value="uptodate">
+                        <span>Al día</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button id="applyFiltersBtn" class="btn-primary">Aplicar Filtros</button>
+                <button id="clearFiltersBtn" class="btn-secondary">Limpiar</button>
+            </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-label">Total:</span>
+                <span class="stat-value" id="totalAnimesCount">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Mostrando:</span>
+                <span class="stat-value" id="displayedAnimesCount">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Nuevos episodios:</span>
+                <span class="stat-value new" id="newEpisodesCount">0</span>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <main class="modal-content">
+            <div id="animesGrid" class="animes-grid">
+                <!-- Se llenará dinámicamente con JavaScript -->
+            </div>
+
+            <!-- Empty state -->
+            <div id="emptyResults" class="empty-results" style="display: none;">
+                <div class="empty-icon">🔍</div>
+                <h2>No se encontraron resultados</h2>
+                <p>Intenta con otros términos de búsqueda o filtros</p>
+            </div>
+
+            <!-- Loading state -->
+            <div id="loadingState" class="loading-state">
+                <div class="spinner"></div>
+                <p>Cargando animes...</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="manage_animes.js"></script>
+</body>
+
+</html>

@@ -330,6 +330,8 @@ async function loadFollowedAnimes() {
         const animeList = document.getElementById('animeList');
         const emptyState = document.getElementById('emptyState');
         const totalFollowed = document.getElementById('totalFollowed');
+        const manageBtn = document.getElementById('openManageAnimesBtn');
+        const countBadge = document.getElementById('animeCountBadge');
 
         if (!animeList || !emptyState || !totalFollowed) return;
 
@@ -338,6 +340,7 @@ async function loadFollowedAnimes() {
         if (followedAnimes.length === 0) {
             animeList.style.display = 'none';
             emptyState.style.display = 'block';
+            if (manageBtn) manageBtn.style.display = 'none';
             return;
         }
 
@@ -348,8 +351,19 @@ async function loadFollowedAnimes() {
         // Sort: most recently added first
         followedAnimes.sort((a, b) => (b.addedDate || 0) - (a.addedDate || 0));
 
-        for (const anime of followedAnimes) {
+        // Show only first 3 as preview
+        const previewAnimes = followedAnimes.slice(0, 3);
+
+        for (const anime of previewAnimes) {
             animeList.appendChild(createAnimeItem(anime));
+        }
+
+        // Show manage button with count
+        if (manageBtn) {
+            manageBtn.style.display = 'flex';
+        }
+        if (countBadge) {
+            countBadge.textContent = followedAnimes.length;
         }
 
     } catch (error) {
@@ -528,5 +542,24 @@ function initSkipButtonsSetting() {
         showPopupToast(enabled ? '✅ Botones de salto activados' : '🔕 Botones de salto desactivados');
     });
 }
+
+// ============================================
+// OPEN MANAGE ANIMES MODAL (Full Screen)
+// ============================================
+
+function openManageAnimesModal() {
+    chrome.windows.create({
+        url: chrome.runtime.getURL('manage_animes.html'),
+        type: 'popup',
+        width: 1200,
+        height: 800,
+        left: 100,
+        top: 50
+    });
+}
+
+document.getElementById('openManageAnimesBtn')?.addEventListener('click', () => {
+    openManageAnimesModal();
+});
 
 console.log("Crunchyroll Power Up Popup: Script cargado + AniSkip Hybrid System");

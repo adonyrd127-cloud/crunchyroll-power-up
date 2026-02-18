@@ -466,9 +466,56 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 360px;
+            max-height: 260px;
             overflow-y: auto;
             padding-right: 4px;
+        }
+
+        /* Manage All Button */
+        .manage-all-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
+            margin-top: 12px;
+        }
+
+        .manage-all-btn:hover {
+            background: linear-gradient(135deg, #42A5F5 0%, #64B5F6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+        }
+
+        .manage-all-btn:active {
+            transform: translateY(0);
+        }
+
+        .manage-all-btn .btn-arrow {
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        .manage-all-btn:hover .btn-arrow {
+            transform: translateX(4px);
+        }
+
+        .anime-count-badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
         }
 
         .anime-list::-webkit-scrollbar {
@@ -712,6 +759,14 @@
             <p class="empty-hint">Visita la página de un anime y haz click en "Seguir Anime" para recibir notificaciones
                 de nuevos episodios.</p>
         </div>
+
+        <!-- Botón Administrar Todos -->
+        <button id="openManageAnimesBtn" class="manage-all-btn" style="display: none;">
+            <span>📋</span>
+            <span>Administrar Todos los Animes</span>
+            <span class="anime-count-badge" id="animeCountBadge">0</span>
+            <span class="btn-arrow">→</span>
+        </button>
 
         <div class="notif-settings">
             <h3>⚙️ Configuración de Notificaciones</h3>
