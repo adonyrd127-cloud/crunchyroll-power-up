@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -233,6 +234,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <div class="logo-container">
@@ -246,7 +248,7 @@
 
     <div class="content">
         <div class="section-header">__MSG_core_features__</div>
-        
+
         <div class="feature-card">
             <div class="feature-header">
                 <div class="feature-icon icon-play">▶</div>
@@ -255,6 +257,23 @@
             <div class="feature-description">
                 __MSG_auto_skip_description__
             </div>
+
+            <!-- AniSkip Badge -->
+            <div style="
+                background: rgba(76, 175, 80, 0.1);
+                padding: 10px 12px;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                border-left: 3px solid #4CAF50;
+            ">
+                <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.9);">
+                    ✨ <strong>Powered by AniSkip</strong> — Timestamps precisos de la comunidad
+                </p>
+                <p style="margin: 4px 0 0 0; font-size: 11px; color: rgba(255,255,255,0.5);">
+                    Fallback: Detección heurística → Configuración manual
+                </p>
+            </div>
+
             <div class="feature-controls">
                 <div class="pill-buttons">
                     <label class="pill-button" id="intro-pill">
@@ -273,6 +292,32 @@
                         <span>__MSG_ending_label__</span>
                     </label>
                 </div>
+            </div>
+
+            <!-- Show manual buttons toggle -->
+            <div class="feature-controls" style="margin-top: 8px;">
+                <div class="switch-container">
+                    <span class="switch-label" style="font-size: 12px;">Mostrar botones de salto manuales</span>
+                    <label class="switch" id="skip-buttons-switch">
+                        <input type="checkbox" id="showSkipButtons" checked />
+                        <div class="switch-thumb"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Info box -->
+            <div style="
+                background: rgba(33, 150, 243, 0.08);
+                padding: 10px;
+                border-radius: 6px;
+                margin-top: 10px;
+            ">
+                <p style="font-size: 11px; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.5;">
+                    💡 <strong style="color: rgba(255,255,255,0.8);">3 Niveles:</strong>
+                    1. AniSkip (precisos) →
+                    2. Detección automática →
+                    3. Manual
+                </p>
             </div>
         </div>
 
@@ -358,98 +403,284 @@
     <!-- ============================================ -->
     <style>
         /* Anime Tracking Section */
-        .followed-section { margin-top: 8px; }
-        .followed-section .section-header {
-            display: flex; align-items: center; gap: 8px;
+        .followed-section {
+            margin-top: 8px;
         }
-        .followed-section .section-icon { font-size: 18px; }
+
+        .followed-section .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .followed-section .section-icon {
+            font-size: 18px;
+        }
 
         .stats-summary {
-            display: flex; justify-content: space-around; align-items: center;
-            background: rgba(255,255,255,0.05); border-radius: 12px;
-            padding: 14px; margin-bottom: 14px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
         }
-        .stat-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .stat-number { font-size: 24px; font-weight: 700; color: #FF6B35; }
-        .stat-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FF6B35;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .icon-button {
-            background: rgba(255,107,53,0.2); border: none; border-radius: 8px;
-            padding: 8px 12px; font-size: 20px; cursor: pointer; transition: all 0.25s;
+            background: rgba(255, 107, 53, 0.2);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.25s;
         }
-        .icon-button:hover { background: rgba(255,107,53,0.4); transform: rotate(180deg); }
+
+        .icon-button:hover {
+            background: rgba(255, 107, 53, 0.4);
+            transform: rotate(180deg);
+        }
 
         .anime-list {
-            display: flex; flex-direction: column; gap: 10px;
-            max-height: 360px; overflow-y: auto; padding-right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
-        .anime-list::-webkit-scrollbar { width: 5px; }
-        .anime-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
-        .anime-list::-webkit-scrollbar-thumb { background: rgba(255,107,53,0.5); border-radius: 3px; }
+
+        .anime-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .anime-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .anime-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 107, 53, 0.5);
+            border-radius: 3px;
+        }
 
         .anime-item {
-            display: flex; align-items: center; gap: 12px;
-            background: #1a2332; border-radius: 10px; padding: 10px 12px;
-            border: 1px solid #2a3441; transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1a2332;
+            border-radius: 10px;
+            padding: 10px 12px;
+            border: 1px solid #2a3441;
+            transition: all 0.25s;
             border-left: 3px solid transparent;
         }
-        .anime-item:hover { background: rgba(255,107,53,0.08); transform: translateX(3px); }
-        .anime-item.has-new { border-left-color: #FF6B35; background: rgba(255,107,53,0.12); }
+
+        .anime-item:hover {
+            background: rgba(255, 107, 53, 0.08);
+            transform: translateX(3px);
+        }
+
+        .anime-item.has-new {
+            border-left-color: #FF6B35;
+            background: rgba(255, 107, 53, 0.12);
+        }
 
         .anime-thumb {
-            width: 46px; height: 64px; object-fit: cover; border-radius: 6px; flex-shrink: 0;
+            width: 46px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
             background: #2a3441;
         }
-        .anime-info { flex: 1; min-width: 0; }
+
+        .anime-info {
+            flex: 1;
+            min-width: 0;
+        }
+
         .anime-title {
-            font-size: 13px; font-weight: 600; color: white; margin: 0 0 3px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            margin: 0 0 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .ep-status { font-size: 12px; color: rgba(255,255,255,0.6); margin: 0; }
-        .ep-status.new-ep { color: #FF6B35; font-weight: 600; }
+
+        .ep-status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0;
+        }
+
+        .ep-status.new-ep {
+            color: #FF6B35;
+            font-weight: 600;
+        }
+
         .new-badge {
-            background: #FF6B35; color: white; padding: 1px 5px; border-radius: 4px;
-            font-size: 10px; margin-left: 4px; font-weight: 700;
+            background: #FF6B35;
+            color: white;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 4px;
+            font-weight: 700;
         }
 
-        .anime-actions { display: flex; gap: 5px; flex-shrink: 0; }
+        .anime-actions {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
         .btn-watch {
-            background: linear-gradient(135deg, #FF6B35, #FF8C5A); color: white;
-            border: none; border-radius: 6px; padding: 5px 10px; font-size: 13px;
-            font-weight: 600; cursor: pointer; transition: all 0.2s;
+            background: linear-gradient(135deg, #FF6B35, #FF8C5A);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .btn-watch:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,107,53,0.4); }
+
+        .btn-watch:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        }
+
         .btn-unfollow {
-            background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
-            padding: 5px 8px; font-size: 14px; cursor: pointer; transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .btn-unfollow:hover { background: rgba(255,59,48,0.2); border-color: rgba(255,59,48,0.5); color: #ff453a; }
 
-        .empty-state { text-align: center; padding: 30px 16px; }
-        .empty-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
-        .empty-state p { color: rgba(255,255,255,0.5); margin: 6px 0; font-size: 13px; }
-        .empty-hint { font-size: 11px; color: rgba(255,255,255,0.35); max-width: 260px; margin: 8px auto 0; }
+        .btn-unfollow:hover {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: rgba(255, 59, 48, 0.5);
+            color: #ff453a;
+        }
 
-        .notif-settings { margin-top: 18px; padding-top: 16px; border-top: 1px solid #2a3441; }
-        .notif-settings h3 { font-size: 13px; color: white; margin: 0 0 12px; font-weight: 600; }
-        .setting-row { margin-bottom: 10px; }
+        .empty-state {
+            text-align: center;
+            padding: 30px 16px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            color: rgba(255, 255, 255, 0.5);
+            margin: 6px 0;
+            font-size: 13px;
+        }
+
+        .empty-hint {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            max-width: 260px;
+            margin: 8px auto 0;
+        }
+
+        .notif-settings {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid #2a3441;
+        }
+
+        .notif-settings h3 {
+            font-size: 13px;
+            color: white;
+            margin: 0 0 12px;
+            font-weight: 600;
+        }
+
+        .setting-row {
+            margin-bottom: 10px;
+        }
+
         .setting-label {
-            display: flex; align-items: center; gap: 10px; cursor: pointer;
-            color: rgba(255,255,255,0.8); font-size: 13px; transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            transition: color 0.2s;
         }
-        .setting-label:hover { color: white; }
-        .setting-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #FF6B35; }
+
+        .setting-label:hover {
+            color: white;
+        }
+
+        .setting-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #FF6B35;
+        }
 
         .popup-toast {
-            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, #FF6B35, #FF8C5A); color: white;
-            padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 600;
-            box-shadow: 0 4px 16px rgba(255,107,53,0.4); z-index: 10000;
-            display: none; animation: popupSlideUp 0.3s ease;
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FF6B35, #FF8C5A);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
+            z-index: 10000;
+            display: none;
+            animation: popupSlideUp 0.3s ease;
         }
+
         @keyframes popupSlideUp {
-            from { transform: translateX(-50%) translateY(60px); opacity: 0; }
-            to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+            from {
+                transform: translateX(-50%) translateY(60px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
         }
     </style>
 
@@ -478,15 +709,20 @@
         <div class="empty-state" id="emptyState" style="display:none;">
             <div class="empty-icon">📺</div>
             <p>No estás siguiendo ningún anime</p>
-            <p class="empty-hint">Visita la página de un anime y haz click en "Seguir Anime" para recibir notificaciones de nuevos episodios.</p>
+            <p class="empty-hint">Visita la página de un anime y haz click en "Seguir Anime" para recibir notificaciones
+                de nuevos episodios.</p>
         </div>
 
         <div class="notif-settings">
             <h3>⚙️ Configuración de Notificaciones</h3>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="notifyEnabled" checked><span>Activar notificaciones</span></label></div>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="quietHoursEnabled" checked><span>Modo "No molestar" (22:00 - 08:00)</span></label></div>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="notifyNewEpisode" checked><span>Notificar nuevos episodios</span></label></div>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="soundEnabled" checked><span>Sonido en notificaciones</span></label></div>
+            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="notifyEnabled"
+                        checked><span>Activar notificaciones</span></label></div>
+            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="quietHoursEnabled"
+                        checked><span>Modo "No molestar" (22:00 - 08:00)</span></label></div>
+            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="notifyNewEpisode"
+                        checked><span>Notificar nuevos episodios</span></label></div>
+            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="soundEnabled"
+                        checked><span>Sonido en notificaciones</span></label></div>
         </div>
     </div>
 
@@ -496,4 +732,5 @@
 
     <script src="popup.js"></script>
 </body>
+
 </html>

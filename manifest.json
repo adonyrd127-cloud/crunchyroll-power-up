@@ -17,6 +17,8 @@
     "*://crunchyroll.com/*",
     "*://beta.crunchyroll.com/*",
     "*://graphql.anilist.co/*",
+    "*://api.aniskip.com/*",
+    "*://api.jikan.moe/*",
     "https://static.crunchyroll.com/*"
   ],
   "icons": {
@@ -45,7 +47,7 @@
       ],
       "js": [
         "episodeAirDate.js",
-        "utils/aniskip.js",
+        "content_scripts/aniskip_service.js",
         "content_scripts/SkipperHandler.js",
         "content.js",
         "features/miniplayer.js",

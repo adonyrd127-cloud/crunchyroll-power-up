@@ -110,6 +110,31 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 });
 
+// ============================================
+// BROWSER STARTUP: Check immediately + ensure alarm exists
+// ============================================
+chrome.runtime.onStartup.addListener(async () => {
+  console.log('🚀 Navegador iniciado — verificando episodios inmediatamente...');
+
+  // Ensure the periodic alarm exists (it may have been lost on restart)
+  const existingAlarm = await chrome.alarms.get('checkNewEpisodes');
+  if (!existingAlarm) {
+    chrome.alarms.create('checkNewEpisodes', {
+      periodInMinutes: 30,
+      delayInMinutes: 1
+    });
+    console.log('🔔 Alarma recreada al iniciar navegador');
+  }
+
+  // Run an immediate check (don't wait 30 minutes)
+  try {
+    await checkForNewEpisodes();
+    console.log('✅ Verificación al inicio completada');
+  } catch (error) {
+    console.error('❌ Error en verificación al inicio:', error);
+  }
+});
+
 // Escuchar cambios de configuración
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'sync') {

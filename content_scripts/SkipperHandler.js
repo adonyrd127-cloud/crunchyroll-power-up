@@ -146,6 +146,7 @@ class SkippersHandler {
         this.isChecking = false;
         this.miniPlayerButton = null;
         this.currentActiveButton = null;
+        this.dataSource = null; // 'native', 'aniskip', 'heuristic', 'manual', null
     }
 
     init(video) {
@@ -156,64 +157,118 @@ class SkippersHandler {
         this.showMiniPlayerButton(); // Agregar el botón de minireproductor
     }
 
+    // ============================================
+    // 3-LEVEL FALLBACK: loadSkippersData
+    // Level 1: Native Crunchyroll + AniSkip API
+    // Level 2: Heuristic detection
+    // Level 3: Manual timestamps
+    // ============================================
+
     async loadSkippersData() {
-        console.log("Crunchyroll Power Up: Cargando datos de skip...");
+        console.log('⏭️ Cargando datos de skip (sistema híbrido 3 niveles)...');
 
-        // Extraer mediaId directamente de la URL
-        // Formato: /es/watch/GE00366770JAJP/episode-slug
-        // O: /watch/GE00366770JAJP/episode-slug
+        // ── NIVEL 1: Native Crunchyroll skip events ──
         const mediaId = await this.getMediaIdFromUrl();
+        if (mediaId) {
+            try {
+                const response = await new Promise((resolve) => {
+                    chrome.runtime.sendMessage({ type: 'skipEvents', mediaId }, resolve);
+                });
 
-        if (!mediaId) {
-            console.warn("Crunchyroll Power Up: No se pudo extraer mediaId de la URL:", window.location.pathname);
+                if (response && response.success && response.skipTimes && response.skipTimes.length > 0) {
+                    this.skippers = response.skipTimes.map(s => new NativeSkipper(s.start, s.end, s.type));
+                    this.dataSource = 'native';
+                    console.log(`✅ Nivel 1a: ${this.skippers.length} skip events nativos cargados`);
+                    this.showDataSourceBadge('Crunchyroll Nativo', '#4CAF50');
+                    return;
+                }
+            } catch (error) {
+                console.warn('⚠️ Error cargando skip events nativos:', error);
+            }
+        }
+
+        // ── NIVEL 1b: AniSkip API (community timestamps) ──
+        console.log('🔍 Nivel 1b: Intentando AniSkip API...');
+        const aniSkipLoaded = await this.loadAniSkipData();
+        if (aniSkipLoaded) return;
+
+        // ── NIVEL 2: Detección heurística ──
+        console.log('🔍 Nivel 2: Usando detección heurística...');
+        const heuristicData = this.detectSkipRanges();
+        if (heuristicData) {
+            this.skippers = [];
+            if (heuristicData.intro) {
+                this.skippers.push(new NativeSkipper(heuristicData.intro.start, heuristicData.intro.end, 'intro'));
+            }
+            if (heuristicData.recap) {
+                this.skippers.push(new NativeSkipper(heuristicData.recap.start, heuristicData.recap.end, 'recap'));
+            }
+            if (heuristicData.outro) {
+                this.skippers.push(new NativeSkipper(heuristicData.outro.start, heuristicData.outro.end, 'ending'));
+            }
+            this.dataSource = 'heuristic';
+            console.log(`⚠️ Nivel 2: ${this.skippers.length} skip points heurísticos (menos preciso)`);
+            this.showDataSourceBadge('Detección Auto', '#FF9800');
             return;
         }
 
-        console.log("Crunchyroll Power Up: mediaId extraído:", mediaId);
-
-        try {
-            // Pedir skip events nativos de Crunchyroll al background script
-            const response = await new Promise((resolve) => {
-                chrome.runtime.sendMessage({ type: 'skipEvents', mediaId }, resolve);
-            });
-
-            if (response && response.success && response.skipTimes && response.skipTimes.length > 0) {
-                this.skippers = response.skipTimes.map(s => new NativeSkipper(s.start, s.end, s.type));
-                console.log(`Crunchyroll Power Up: ${this.skippers.length} skip events nativos cargados:`, response.skipTimes);
-            } else {
-                console.log("Crunchyroll Power Up: No se encontraron skip events nativos. Intentando AniSkip...");
-                await this.loadAniSkipData();
+        // ── NIVEL 3: Timestamps manuales ──
+        console.log('🔍 Nivel 3: Buscando timestamps manuales...');
+        const manualData = this.loadManualTimestamps();
+        if (manualData) {
+            this.skippers = [];
+            if (manualData.intro) {
+                this.skippers.push(new NativeSkipper(manualData.intro.start, manualData.intro.end, 'intro'));
             }
-        } catch (error) {
-            console.error("Crunchyroll Power Up: Error al cargar skip events:", error);
-            // Fallback en caso de error también
-            await this.loadAniSkipData();
+            if (manualData.outro) {
+                this.skippers.push(new NativeSkipper(manualData.outro.start, manualData.outro.end, 'ending'));
+            }
+            this.dataSource = 'manual';
+            console.log(`✅ Nivel 3: ${this.skippers.length} timestamps manuales cargados`);
+            this.showDataSourceBadge('Manual', '#2196F3');
+            return;
         }
+
+        // ── Sin datos disponibles ──
+        console.warn('⚠️ No hay timestamps disponibles en ningún nivel');
+        this.dataSource = null;
+        this.offerManualConfiguration();
     }
 
+    /**
+     * Level 1b: Load skip times from AniSkip Hybrid Service.
+     * @returns {boolean} true if data was loaded
+     */
     async loadAniSkipData() {
-        if (!window.AniSkip) {
-            console.warn("Crunchyroll Power Up: AniSkip no está disponible");
-            return;
+        if (!window.aniSkipService) {
+            console.warn('⏭️ AniSkipHybridService no disponible');
+            return false;
         }
 
-        const seriesSlug = this.getSeriesSlug();
-        const episodeNumber = this.getEpisodeNumber();
+        try {
+            const skipTimes = await window.aniSkipService.getSkipTimesForCurrentEpisode();
 
-        if (!seriesSlug || !episodeNumber) {
-            console.warn("Crunchyroll Power Up: No se pudo obtener info de la serie/episodio para AniSkip", { seriesSlug, episodeNumber });
-            return;
+            if (skipTimes && (skipTimes.intro || skipTimes.recap || skipTimes.outro)) {
+                this.skippers = [];
+                if (skipTimes.intro) {
+                    this.skippers.push(new NativeSkipper(skipTimes.intro.start, skipTimes.intro.end, 'intro'));
+                }
+                if (skipTimes.recap) {
+                    this.skippers.push(new NativeSkipper(skipTimes.recap.start, skipTimes.recap.end, 'recap'));
+                }
+                if (skipTimes.outro) {
+                    this.skippers.push(new NativeSkipper(skipTimes.outro.start, skipTimes.outro.end, 'ending'));
+                }
+                this.dataSource = 'aniskip';
+                console.log(`✅ Nivel 1b: ${this.skippers.length} timestamps de AniSkip cargados`);
+                this.showDataSourceBadge('AniSkip', '#4CAF50');
+                return true;
+            }
+        } catch (error) {
+            console.error('⏭️ Error cargando AniSkip:', error);
         }
 
-        console.log(`Crunchyroll Power Up: Buscando en AniSkip para ${seriesSlug} Ep. ${episodeNumber}`);
-        const skipTimes = await window.AniSkip.getSkipTimes(seriesSlug, episodeNumber);
-
-        if (skipTimes && skipTimes.length > 0) {
-            this.skippers = skipTimes.map(s => new NativeSkipper(s.start, s.end, s.type));
-            console.log(`Crunchyroll Power Up: ${this.skippers.length} skip events de AniSkip cargados:`, this.skippers);
-        } else {
-            console.log("Crunchyroll Power Up: No se encontraron skip events en AniSkip");
-        }
+        return false;
     }
 
     getSeriesSlug() {
@@ -604,6 +659,403 @@ class SkippersHandler {
         this.stopChecking();
         this.removeSkipButton();
         this.removeMiniPlayerButton();
+    }
+
+    // ============================================
+    // LEVEL 2: HEURISTIC DETECTION
+    // ============================================
+
+    /**
+     * Detect skip ranges based on common anime patterns.
+     * Only works for videos > 10 minutes.
+     */
+    detectSkipRanges() {
+        if (!this.videoElement ||
+            !this.videoElement.duration ||
+            this.videoElement.duration === Infinity ||
+            this.videoElement.duration < 600) {
+            console.warn('⚠️ Duración del video no disponible o muy corta para heurística');
+            return null;
+        }
+
+        const duration = this.videoElement.duration;
+
+        return {
+            intro: {
+                start: 60,
+                end: 180,
+                confidence: 0.6
+            },
+            recap: {
+                start: 30,
+                end: 90,
+                confidence: 0.5
+            },
+            outro: {
+                start: duration - 90,
+                end: duration,
+                confidence: 0.7
+            }
+        };
+    }
+
+    // ============================================
+    // LEVEL 3: MANUAL TIMESTAMPS
+    // ============================================
+
+    /**
+     * Load manually configured timestamps from localStorage.
+     */
+    loadManualTimestamps() {
+        const animeId = this.getAnimeId();
+        const episode = this.getEpisodeNumber();
+
+        if (!animeId || !episode) return null;
+
+        const key = `manual_timestamps_${animeId}_${episode}`;
+        const stored = localStorage.getItem(key);
+
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                if (data && (data.intro || data.outro)) {
+                    return data;
+                }
+            } catch (e) {
+                console.error('Error parsing manual timestamps:', e);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract anime ID from URL.
+     */
+    getAnimeId() {
+        const match = window.location.href.match(/\/watch\/([A-Z0-9]+)/i);
+        return match ? match[1] : null;
+    }
+
+    // ============================================
+    // UI: DATA SOURCE BADGE
+    // ============================================
+
+    showDataSourceBadge(label, color) {
+        // Remove existing badge
+        const existing = document.querySelector('.crpu-data-source-badge');
+        if (existing) existing.remove();
+
+        const badge = document.createElement('div');
+        badge.className = 'crpu-data-source-badge';
+        badge.textContent = `⏭️ ${label}`;
+        badge.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: ${color};
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 99999;
+            opacity: 0.85;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        `;
+
+        document.body.appendChild(badge);
+
+        setTimeout(() => {
+            badge.style.opacity = '0';
+            setTimeout(() => badge.remove(), 300);
+        }, 4000);
+    }
+
+    // ============================================
+    // UI: MANUAL CONFIGURATION OFFER
+    // ============================================
+
+    offerManualConfiguration() {
+        const notification = document.createElement('div');
+        notification.className = 'crpu-manual-config-offer';
+        notification.innerHTML = `
+            <div style="margin-bottom: 8px;">
+                <strong>⚠️ Timestamps no disponibles</strong>
+            </div>
+            <div style="font-size: 12px; margin-bottom: 12px; color: rgba(255,255,255,0.8);">
+                Este anime no tiene timestamps en AniSkip.
+                ¿Quieres configurarlos manualmente?
+            </div>
+            <button id="crpu-configure-timestamps" style="
+                background: #2196F3;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 12px;
+            ">
+                Configurar Timestamps
+            </button>
+            <button id="crpu-dismiss-offer" style="
+                background: transparent;
+                color: rgba(255,255,255,0.7);
+                border: 1px solid rgba(255,255,255,0.3);
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                margin-left: 8px;
+                font-size: 12px;
+            ">
+                No, gracias
+            </button>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.92);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            z-index: 999999;
+            max-width: 300px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            animation: crpuSlideIn 0.3s ease;
+        `;
+
+        // Add animation keyframes
+        if (!document.getElementById('crpu-skip-animations')) {
+            const style = document.createElement('style');
+            style.id = 'crpu-skip-animations';
+            style.textContent = `
+                @keyframes crpuSlideIn {
+                    from { transform: translateX(100px); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        document.body.appendChild(notification);
+
+        document.getElementById('crpu-configure-timestamps')?.addEventListener('click', () => {
+            notification.remove();
+            this.showTimestampEditor();
+        });
+
+        document.getElementById('crpu-dismiss-offer')?.addEventListener('click', () => {
+            notification.remove();
+        });
+
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 15000);
+    }
+
+    // ============================================
+    // UI: TIMESTAMP EDITOR MODAL
+    // ============================================
+
+    showTimestampEditor() {
+        const modal = document.createElement('div');
+        modal.className = 'crpu-timestamp-editor';
+        modal.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+                border-radius: 20px;
+                padding: 32px;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            ">
+                <h2 style="color: white; margin: 0 0 24px 0; font-size: 20px;">⚙️ Configurar Timestamps</h2>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="color: rgba(255,255,255,0.9); display: block; margin-bottom: 8px; font-size: 14px;">
+                        🎵 Intro - Inicio (segundos):
+                    </label>
+                    <input type="number" id="crpu-intro-start" placeholder="Ej: 60" style="
+                        width: 100%; box-sizing: border-box;
+                        background: rgba(255,255,255,0.1);
+                        border: 2px solid rgba(255,255,255,0.2);
+                        color: white; padding: 10px;
+                        border-radius: 8px; font-size: 14px;
+                    ">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="color: rgba(255,255,255,0.9); display: block; margin-bottom: 8px; font-size: 14px;">
+                        🎵 Intro - Fin (segundos):
+                    </label>
+                    <input type="number" id="crpu-intro-end" placeholder="Ej: 150" style="
+                        width: 100%; box-sizing: border-box;
+                        background: rgba(255,255,255,0.1);
+                        border: 2px solid rgba(255,255,255,0.2);
+                        color: white; padding: 10px;
+                        border-radius: 8px; font-size: 14px;
+                    ">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="color: rgba(255,255,255,0.9); display: block; margin-bottom: 8px; font-size: 14px;">
+                        🎬 Outro - Inicio (segundos):
+                    </label>
+                    <input type="number" id="crpu-outro-start" placeholder="Ej: 1320" style="
+                        width: 100%; box-sizing: border-box;
+                        background: rgba(255,255,255,0.1);
+                        border: 2px solid rgba(255,255,255,0.2);
+                        color: white; padding: 10px;
+                        border-radius: 8px; font-size: 14px;
+                    ">
+                </div>
+
+                <div style="background: rgba(33, 150, 243, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0;">
+                        💡 Tip: Usa los controles del video para encontrar los tiempos exactos.
+                        El tiempo actual es: <strong id="crpu-current-time">0:00</strong>
+                    </p>
+                </div>
+
+                <button id="crpu-save-timestamps" style="
+                    width: 100%;
+                    background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
+                    color: white; border: none;
+                    padding: 14px; border-radius: 10px;
+                    font-size: 16px; font-weight: 600;
+                    cursor: pointer; margin-bottom: 8px;
+                ">
+                    Guardar Timestamps
+                </button>
+
+                <button id="crpu-cancel-timestamps" style="
+                    width: 100%;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    padding: 12px; border-radius: 10px;
+                    font-size: 14px; cursor: pointer;
+                ">
+                    Cancelar
+                </button>
+            </div>
+        `;
+
+        modal.style.cssText = `
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            backdrop-filter: blur(10px);
+        `;
+
+        document.body.appendChild(modal);
+
+        // Live time update
+        const updateTimer = setInterval(() => {
+            const el = document.getElementById('crpu-current-time');
+            if (el && this.videoElement) {
+                const min = Math.floor(this.videoElement.currentTime / 60);
+                const sec = Math.floor(this.videoElement.currentTime % 60);
+                el.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+
+        // Save
+        document.getElementById('crpu-save-timestamps')?.addEventListener('click', () => {
+            const introStart = parseFloat(document.getElementById('crpu-intro-start').value) || null;
+            const introEnd = parseFloat(document.getElementById('crpu-intro-end').value) || null;
+            const outroStart = parseFloat(document.getElementById('crpu-outro-start').value) || null;
+
+            const timestamps = {
+                intro: (introStart !== null && introEnd !== null) ? { start: introStart, end: introEnd } : null,
+                recap: null,
+                outro: outroStart !== null ? { start: outroStart, end: this.videoElement.duration } : null
+            };
+
+            const animeId = this.getAnimeId();
+            const episode = this.getEpisodeNumber();
+            const key = `manual_timestamps_${animeId}_${episode}`;
+            localStorage.setItem(key, JSON.stringify(timestamps));
+
+            // Apply immediately
+            this.skippers = [];
+            if (timestamps.intro) {
+                this.skippers.push(new NativeSkipper(timestamps.intro.start, timestamps.intro.end, 'intro'));
+            }
+            if (timestamps.outro) {
+                this.skippers.push(new NativeSkipper(timestamps.outro.start, timestamps.outro.end, 'ending'));
+            }
+            this.dataSource = 'manual';
+
+            clearInterval(updateTimer);
+            modal.remove();
+            this.showToast('✅ Timestamps guardados correctamente');
+            this.showDataSourceBadge('Manual', '#2196F3');
+        });
+
+        // Cancel
+        document.getElementById('crpu-cancel-timestamps')?.addEventListener('click', () => {
+            clearInterval(updateTimer);
+            modal.remove();
+        });
+
+        // Click outside to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                clearInterval(updateTimer);
+                modal.remove();
+            }
+        });
+    }
+
+    // ============================================
+    // UI: TOAST NOTIFICATION
+    // ============================================
+
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 999999;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            animation: crpuSlideIn 0.3s ease;
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 }
 

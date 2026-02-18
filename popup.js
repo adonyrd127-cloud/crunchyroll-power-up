@@ -119,6 +119,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // === ANIME TRACKING: Initialize section ===
     initFollowedAnimesSection();
 
+    // === SKIP BUTTONS SETTING ===
+    initSkipButtonsSetting();
+
     console.log("🟠 Popup: Inicialización completa");
 });
 
@@ -496,4 +499,34 @@ function showPopupToast(message) {
     toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 2500);
 }
 
-console.log("Crunchyroll Power Up Popup: Script cargado con LÓGICA CORREGIDA + Calendar Filter + Anime Tracking");
+// ============================================
+// SKIP BUTTONS SETTING (showSkipButtons toggle)
+// ============================================
+
+function initSkipButtonsSetting() {
+    const showSkipButtonsCheckbox = document.getElementById('showSkipButtons');
+    const skipButtonsSwitch = document.getElementById('skip-buttons-switch');
+
+    if (!showSkipButtonsCheckbox) return;
+
+    // Load saved setting
+    chrome.storage.sync.get('showSkipButtons', (data) => {
+        const enabled = data.showSkipButtons !== undefined ? data.showSkipButtons : true;
+        showSkipButtonsCheckbox.checked = enabled;
+        if (skipButtonsSwitch) {
+            skipButtonsSwitch.classList.toggle('active', enabled);
+        }
+    });
+
+    // Save on change
+    showSkipButtonsCheckbox.addEventListener('change', () => {
+        const enabled = showSkipButtonsCheckbox.checked;
+        chrome.storage.sync.set({ showSkipButtons: enabled });
+        if (skipButtonsSwitch) {
+            skipButtonsSwitch.classList.toggle('active', enabled);
+        }
+        showPopupToast(enabled ? '✅ Botones de salto activados' : '🔕 Botones de salto desactivados');
+    });
+}
+
+console.log("Crunchyroll Power Up Popup: Script cargado + AniSkip Hybrid System");
