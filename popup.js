@@ -148,6 +148,12 @@ function loadConfiguration() {
         console.log("🟠 Marcado = Salto automático (true)");
         console.log("🟠 Desmarcado = Modo manual (false)");
         console.log("🔍 Filtro de Calendario:", result.calendarFilter ? "HABILITADO" : "DESHABILITADO");
+
+        // Calendar dark mode
+        const calendarDarkModeCheckbox = document.getElementById('calendarDarkMode');
+        if (calendarDarkModeCheckbox) {
+            calendarDarkModeCheckbox.checked = result.calendarDarkMode || false;
+        }
     });
 }
 
@@ -199,6 +205,15 @@ function setupEventListeners() {
             enabled: this.checked
         });
     });
+
+    // NEW: Calendar Dark Mode checkbox
+    const calendarDarkModeCheckbox = document.getElementById('calendarDarkMode');
+    if (calendarDarkModeCheckbox) {
+        calendarDarkModeCheckbox.addEventListener('change', function () {
+            chrome.storage.sync.set({ calendarDarkMode: this.checked });
+            console.log("🌙 Popup: Modo Oscuro del Calendario cambiado a:", this.checked);
+        });
+    }
 
     console.log("🟠 Popup: Event listeners configurados");
 

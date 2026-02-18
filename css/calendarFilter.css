@@ -135,11 +135,25 @@
 }
 
 /* Language specific styling */
-.crunchyroll-power-up-filter-option[data-lang="english"] .emoji::before { content: "🇺🇸"; }
-.crunchyroll-power-up-filter-option[data-lang="spanish"] .emoji::before { content: "🇪🇸"; }
-.crunchyroll-power-up-filter-option[data-lang="french"] .emoji::before { content: "🇫🇷"; }
-.crunchyroll-power-up-filter-option[data-lang="german"] .emoji::before { content: "🇩🇪"; }
-.crunchyroll-power-up-filter-option[data-lang="others"] .emoji::before { content: "🌍"; }
+.crunchyroll-power-up-filter-option[data-lang="english"] .emoji::before {
+    content: "🇺🇸";
+}
+
+.crunchyroll-power-up-filter-option[data-lang="spanish"] .emoji::before {
+    content: "🇪🇸";
+}
+
+.crunchyroll-power-up-filter-option[data-lang="french"] .emoji::before {
+    content: "🇫🇷";
+}
+
+.crunchyroll-power-up-filter-option[data-lang="german"] .emoji::before {
+    content: "🇩🇪";
+}
+
+.crunchyroll-power-up-filter-option[data-lang="others"] .emoji::before {
+    content: "🌍";
+}
 
 /* Status counters */
 .crunchyroll-power-up-hidden-counter {
@@ -215,23 +229,23 @@
         padding: 16px;
         border-radius: 0 0 12px 12px;
     }
-    
+
     .crunchyroll-power-up-filter-controls {
         grid-template-columns: 1fr;
         gap: 16px;
     }
-    
+
     .crunchyroll-power-up-filter-header {
         flex-direction: column;
         gap: 12px;
         align-items: stretch;
     }
-    
+
     .crunchyroll-power-up-filter-title {
         font-size: 20px;
         justify-content: center;
     }
-    
+
     .crunchyroll-power-up-filter-options {
         justify-content: center;
     }
@@ -242,11 +256,11 @@
         padding: 6px 12px;
         font-size: 13px;
     }
-    
+
     .crunchyroll-power-up-filter-group {
         padding: 12px;
     }
-    
+
     .crunchyroll-power-up-filter-group-title {
         font-size: 14px;
     }
@@ -258,6 +272,7 @@
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -268,6 +283,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -281,19 +297,234 @@
     animation: fadeIn 0.3s ease-out;
 }
 
-/* Dark mode compatibility */
-@media (prefers-color-scheme: dark) {
-    .crunchyroll-power-up-calendar-filter {
-        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
-    }
-    
-    .crunchyroll-power-up-filter-group {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.15);
-    }
-    
-    .crunchyroll-power-up-filter-option {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.25);
-    }
+/* ============================================
+   DARK MODE TOGGLE BUTTON
+   ============================================ */
+
+.crunchyroll-power-up-darkmode-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 8px 16px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.crunchyroll-power-up-darkmode-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.crunchyroll-power-up-darkmode-toggle.active {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(100, 181, 246, 0.5);
+    box-shadow: 0 0 12px rgba(100, 181, 246, 0.3);
+}
+
+.crunchyroll-power-up-darkmode-icon {
+    font-size: 18px;
+    transition: transform 0.4s ease;
+}
+
+.crunchyroll-power-up-darkmode-toggle:hover .crunchyroll-power-up-darkmode-icon {
+    transform: rotate(30deg);
+}
+
+/* ============================================
+   DARK MODE - FULL PAGE OVERRIDE
+   Applied via .crpu-dark-mode class on <html>
+   ============================================ */
+
+.crpu-dark-mode body,
+.crpu-dark-mode {
+    background-color: #0F172A !important;
+    color: #e2e8f0 !important;
+}
+
+/* Main page wrapper and content areas */
+.crpu-dark-mode .app-body-wrapper,
+.crpu-dark-mode .content-wrapper,
+.crpu-dark-mode .erc-simulcast-calendar,
+.crpu-dark-mode [class*="simulcast"],
+.crpu-dark-mode [class*="calendar-page"],
+.crpu-dark-mode main {
+    background-color: #0F172A !important;
+    color: #e2e8f0 !important;
+}
+
+/* Calendar header */
+.crpu-dark-mode header.simulcast-calendar-header {
+    background-color: #1E293B !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Tab buttons (Calendario de Estrenos, Programa de Invierno) */
+.crpu-dark-mode [class*="tab"],
+.crpu-dark-mode [class*="simulcast-header"] {
+    background-color: #1E293B !important;
+    color: #e2e8f0 !important;
+}
+
+/* Day columns */
+.crpu-dark-mode .day,
+.crpu-dark-mode [class*="day-column"],
+.crpu-dark-mode [class*="calendar-day"],
+.crpu-dark-mode [class*="simulcast-day"] {
+    background-color: transparent !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Day headers (LUN, MAR, etc.) */
+.crpu-dark-mode .specific-date,
+.crpu-dark-mode [class*="day-header"],
+.crpu-dark-mode [class*="day-of-week"],
+.crpu-dark-mode .day h2,
+.crpu-dark-mode .day h3,
+.crpu-dark-mode [class*="date-label"] {
+    color: #FF6B35 !important;
+}
+
+/* Episode cards */
+.crpu-dark-mode article.js-release,
+.crpu-dark-mode [class*="release-card"],
+.crpu-dark-mode [class*="episode-card"] {
+    background-color: #1E293B !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.crpu-dark-mode article.js-release:hover,
+.crpu-dark-mode [class*="release-card"]:hover {
+    background-color: #263548 !important;
+    border-color: rgba(255, 107, 53, 0.3) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Episode text */
+.crpu-dark-mode article.js-release *,
+.crpu-dark-mode [class*="release-card"] * {
+    color: #e2e8f0 !important;
+}
+
+.crpu-dark-mode article.js-release h1,
+.crpu-dark-mode article.js-release cite,
+.crpu-dark-mode article.js-release .season-name {
+    color: #ffffff !important;
+}
+
+.crpu-dark-mode article.js-release .episode-info,
+.crpu-dark-mode article.js-release time,
+.crpu-dark-mode article.js-release .availability-notes-text {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Episode time markers */
+.crpu-dark-mode .release-time,
+.crpu-dark-mode [class*="time-text"] {
+    color: #FF6B35 !important;
+}
+
+/* Episode thumbnails */
+.crpu-dark-mode article.js-release img {
+    border-radius: 6px;
+    opacity: 0.95;
+}
+
+/* Navigation arrows */
+.crpu-dark-mode .calendar-navigate,
+.crpu-dark-mode [class*="navigate"],
+.crpu-dark-mode [class*="arrow"] {
+    color: #FF6B35 !important;
+}
+
+/* Radio buttons and toggles */
+.crpu-dark-mode input[type="radio"],
+.crpu-dark-mode input[type="checkbox"] {
+    accent-color: #FF6B35;
+}
+
+/* Links */
+.crpu-dark-mode a {
+    color: #94a3b8;
+}
+
+.crpu-dark-mode a:hover {
+    color: #FF6B35;
+}
+
+/* General backgrounds that might be white */
+.crpu-dark-mode div[style*="background-color: rgb(255, 255, 255)"],
+.crpu-dark-mode div[style*="background: white"],
+.crpu-dark-mode div[style*="background: rgb(255, 255, 255)"],
+.crpu-dark-mode div[style*="background-color: #fff"],
+.crpu-dark-mode div[style*="background:#fff"] {
+    background-color: #0F172A !important;
+}
+
+/* Crunchyroll top nav in dark mode */
+.crpu-dark-mode .erc-header,
+.crpu-dark-mode [class*="header-content"] {
+    background-color: #0F172A !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Footer */
+.crpu-dark-mode footer,
+.crpu-dark-mode [class*="footer"] {
+    background-color: #0F172A !important;
+    color: #94a3b8 !important;
+}
+
+/* Filter bar adaptation in dark mode */
+.crpu-dark-mode .crunchyroll-power-up-calendar-filter {
+    background: linear-gradient(135deg, #1a1a3e 0%, #2d1b4e 100%);
+    border-bottom-color: rgba(255, 107, 53, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.crpu-dark-mode .crunchyroll-power-up-filter-group {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.crpu-dark-mode .crunchyroll-power-up-filter-option {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.crpu-dark-mode .crunchyroll-power-up-filter-option.active {
+    background: rgba(255, 107, 53, 0.3);
+    border-color: #FF6B35;
+    color: #FF6B35;
+}
+
+/* Scrollbar in dark mode */
+.crpu-dark-mode ::-webkit-scrollbar-track {
+    background: #0F172A;
+}
+
+.crpu-dark-mode ::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 53, 0.4);
+    border-radius: 5px;
+}
+
+.crpu-dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 107, 53, 0.6);
+}
+
+/* Smooth transition for all elements */
+.crpu-dark-mode-transition,
+.crpu-dark-mode-transition *,
+.crpu-dark-mode-transition *::before,
+.crpu-dark-mode-transition *::after {
+    transition: background-color 0.4s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
