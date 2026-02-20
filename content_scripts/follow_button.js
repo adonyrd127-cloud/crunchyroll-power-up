@@ -246,22 +246,40 @@
                 const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
                 this.isFollowing = followedAnimes.some(a => a.id === this.currentAnimeData.id);
 
+                // Create wrapper for button + note
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'inline-flex';
+                wrapper.style.flexDirection = 'column';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.margin = '8px';
+
                 // Create button element
                 this.button = document.createElement('button');
                 this.button.id = 'powerup-follow-btn';
                 this.button.className = 'powerup-follow-button';
+                this.button.style.margin = '0'; // override default margin to center with text
                 if (this.isFollowing) this.button.classList.add('active');
                 this.updateButtonContent();
 
                 // Click handler
                 this.button.addEventListener('click', () => this.toggleFollow());
 
+                // Create tooltip/note element
+                const noteInfo = document.createElement('span');
+                noteInfo.textContent = 'Asegúrate de estar en la temporada que deseas seguir.';
+                noteInfo.style.fontSize = '12px';
+                noteInfo.style.color = 'rgba(255, 255, 255, 0.6)';
+                noteInfo.style.marginTop = '4px';
+
+                wrapper.appendChild(this.button);
+                wrapper.appendChild(noteInfo);
+
                 // Insert: prefer action/button area, fallback to appending
                 const actionsArea = container.querySelector('[class*="actions"], [class*="buttons"]');
                 if (actionsArea) {
-                    actionsArea.appendChild(this.button);
+                    actionsArea.appendChild(wrapper);
                 } else {
-                    container.appendChild(this.button);
+                    container.appendChild(wrapper);
                 }
 
                 this.injected = true;

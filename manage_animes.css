@@ -436,6 +436,7 @@ body {
 
 .anime-card.has-new {
     border-color: #FF6B35;
+    border-width: 2px;
 }
 
 .anime-card-image {
@@ -579,6 +580,23 @@ body {
 
 .animes-grid.list-view .anime-card-episode {
     margin-bottom: 0;
+}
+
+.animes-grid.list-view .anime-card.has-new {
+    border-color: transparent;
+    border-left: 3px solid #FF6B35;
+    background: rgba(255, 107, 53, 0.08);
+}
+
+.list-new-badge {
+    background: #FF6B35;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-left: 8px;
+    font-weight: 800;
+    vertical-align: middle;
 }
 
 .animes-grid.list-view .anime-card-actions {
@@ -748,5 +766,58 @@ body {
 
     .logo h1 {
         font-size: 18px;
+    }
+}
+
+/* ============================================
+   RESPONSIVO
+   ============================================ */
+@media (max-width: 768px) {
+    .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .modal-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .stats-bar {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .animes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+    }
+
+    .anime-card-image {
+        height: 200px;
+    }
+
+    .animes-grid.list-view .anime-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .animes-grid.list-view .anime-card-image {
+        width: 100%;
+        height: 200px;
     }
 }

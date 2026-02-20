@@ -59,6 +59,136 @@ function clearPersistedState() {
     }
 }
 
+/**
+ * MAPA COMPLETO DE IDIOMAS DE CRUNCHYROLL
+ * Mapea códigos de idioma a identificadores normalizados
+ */
+const LANGUAGE_MAP = {
+    // Idiomas occidentales
+    'es-ES': 'spanish',
+    'es-LA': 'spanish',  // Español Latinoamérica
+    'es': 'spanish',
+    'ESES': 'spanish',
+
+    'en-US': 'english',
+    'en-GB': 'english',
+    'en': 'english',
+    'USUS': 'english',
+
+    'fr-FR': 'french',
+    'fr': 'french',
+    'FRFR': 'french',
+
+    'de-DE': 'german',
+    'de': 'german',
+    'DEDE': 'german',
+
+    'pt-BR': 'portuguese',
+    'pt-PT': 'portuguese',
+    'pt': 'portuguese',
+    'PTBR': 'portuguese',
+
+    'it-IT': 'italian',
+    'it': 'italian',
+
+    // Idiomas asiáticos
+    'ja-JP': 'japanese',
+    'ja': 'japanese',
+    'jpn': 'japanese',
+
+    'hi-IN': 'hindi',
+    'hi': 'hindi',
+    'हिंदी': 'hindi',
+
+    'te-IN': 'telugu',
+    'te': 'telugu',
+    'తెలుగు': 'telugu',
+
+    'ta-IN': 'tamil',
+    'ta': 'tamil',
+    'தமிழ்': 'tamil',
+
+    'ko-KR': 'korean',
+    'ko': 'korean',
+
+    'zh-CN': 'chinese',
+    'zh-TW': 'chinese',
+    'zh': 'chinese',
+
+    // Idiomas del medio oriente
+    'ar-SA': 'arabic',
+    'ar': 'arabic',
+
+    'tr-TR': 'turkish',
+    'tr': 'turkish',
+
+    // Otros idiomas
+    'ru-RU': 'russian',
+    'ru': 'russian',
+
+    'pl-PL': 'polish',
+    'pl': 'polish',
+
+    'nl-NL': 'dutch',
+    'nl': 'dutch',
+
+    'sv-SE': 'swedish',
+    'sv': 'swedish',
+
+    'no-NO': 'norwegian',
+    'no': 'norwegian',
+
+    'da-DK': 'danish',
+    'fi-FI': 'finnish',
+    'fi': 'finnish',
+
+    // Southeast Asian Languages
+    'th-TH': 'thai',
+    'th': 'thai',
+    'thai': 'thai',
+    'Thai': 'thai',
+
+    'id-ID': 'indonesian',
+    'id': 'indonesian',
+    'indonesian': 'indonesian',
+    'Indonesian': 'indonesian',
+
+    'ms-MY': 'malay',
+    'ms': 'malay',
+    'malay': 'malay',
+    'Malay': 'malay',
+
+    'vi-VN': 'vietnamese',
+    'vi': 'vietnamese',
+    'vietnamese': 'vietnamese',
+    'Vietnamese': 'vietnamese'
+};
+
+/**
+ * Normalizar código de idioma a identificador estándar
+ */
+function normalizeLanguageCode(langCode) {
+    if (!langCode) return 'unknown';
+
+    // Convertir a string y limpiar
+    const cleaned = String(langCode).trim();
+
+    // Buscar en el mapa
+    if (LANGUAGE_MAP[cleaned]) {
+        return LANGUAGE_MAP[cleaned];
+    }
+
+    // Intentar match case-insensitive
+    const lowerCase = cleaned.toLowerCase();
+    for (const [code, normalized] of Object.entries(LANGUAGE_MAP)) {
+        if (code.toLowerCase() === lowerCase) {
+            return normalized;
+        }
+    }
+
+    return 'unknown';
+}
+
 class CrunchyrollPowerUpCalendarFilter {
     constructor() {
         this.isEnabled = false;
@@ -67,9 +197,12 @@ class CrunchyrollPowerUpCalendarFilter {
             languages: {
                 english: true,
                 spanish: true,
+                portuguese: true,
                 french: true,
                 german: true,
-                others: true
+                italian: true,
+                russian: true,
+                others: false
             },
             inQueue: 'show', // 'only', 'show', 'hide'
             premiere: 'show' // 'only', 'show', 'hide'
@@ -256,8 +389,11 @@ class CrunchyrollPowerUpCalendarFilter {
         const languageOptions = [
             { value: 'english', label: this.getMessage('lang_english'), emoji: '🇺🇸', lang: 'english' },
             { value: 'spanish', label: this.getMessage('lang_spanish'), emoji: '🇪🇸', lang: 'spanish' },
+            { value: 'portuguese', label: this.getMessage('lang_portuguese'), emoji: '🇧🇷', lang: 'portuguese' },
             { value: 'french', label: this.getMessage('lang_french'), emoji: '🇫🇷', lang: 'french' },
             { value: 'german', label: this.getMessage('lang_german'), emoji: '🇩🇪', lang: 'german' },
+            { value: 'italian', label: this.getMessage('lang_italian'), emoji: '🇮🇹', lang: 'italian' },
+            { value: 'russian', label: this.getMessage('lang_russian'), emoji: '🇷🇺', lang: 'russian' },
             { value: 'others', label: this.getMessage('lang_others'), emoji: '🌍', lang: 'others' }
         ];
         const languageGroup = this.createLanguageFilterGroup(languageOptions);
@@ -589,19 +725,31 @@ class CrunchyrollPowerUpCalendarFilter {
     }
 
     parseEpisodeData(episode) {
-        // Get season title using correct selector
-        const seasonTitleElement = episode.querySelector('h1.season-name cite');
-        const seasonTitle = seasonTitleElement ? seasonTitleElement.textContent.trim() : episode.textContent.trim();
+        // use h1.season-name to get full text including potential dub info outside cite
+        const seasonTitleElement = episode.querySelector('h1.season-name');
 
-        console.log("🔍 Analizando episodio:", seasonTitle);
+        // Fallback: If h1.season-name doesn't exist, try cite inside it, or just use full text
+        let seasonTitle = "";
+        if (seasonTitleElement) {
+            seasonTitle = seasonTitleElement.textContent.trim();
+        } else {
+            const citeElement = episode.querySelector('cite');
+            if (citeElement) {
+                seasonTitle = citeElement.textContent.trim();
+            } else {
+                seasonTitle = episode.textContent.trim();
+            }
+        }
 
-        // Use sophisticated dub detection patterns from original repository
-        const dubData = this.detectDubLanguage(seasonTitle);
+        // Detect language using robust DOM scan
+        const language = this.detectEpisodeLanguage(episode);
+        // Determine isDubbed based on language
+        const isDubbed = language !== 'japanese';
 
-        // Check for queue status using correct selector
+        // Check for queue status
         const inQueue = episode.querySelector('.queue-flag.queued') !== null;
 
-        // Check for premiere status using correct selector
+        // Check for premiere status
         const isPremiere = episode.querySelector('.premiere-flag') !== null;
 
         // Check for progress
@@ -610,245 +758,125 @@ class CrunchyrollPowerUpCalendarFilter {
 
         return {
             title: seasonTitle,
-            isDubbed: dubData.isDub,
-            languages: dubData.languages,
+            language: language,
+            isDubbed: isDubbed,
             inQueue: inQueue,
             isPremiere: isPremiere,
             hasProgress: hasProgress
         };
     }
 
-    detectDubLanguage(title) {
-        console.log("🔍 Detectando idioma doblado para:", title);
+    detectEpisodeLanguage(episodeElement) {
+        // 1. Check data attributes (Crunchyroll often uses these)
+        const dataLang = episodeElement.getAttribute('data-audio-locale') ||
+            episodeElement.getAttribute('data-lang') ||
+            episodeElement.getAttribute('lang');
 
-        let isDub = false;
-        let languages = [];
+        if (dataLang) {
+            return normalizeLanguageCode(dataLang);
+        }
 
-        // Enhanced Spanish dub detection patterns
-        const spanishPatterns = [
-            /\(Spanish Dub\)/i,
-            /\(Español\)/i,
-            /\(Dub Español\)/i,
-            /\(Español Dub\)/i,
-            /\(Spanish\)/i,
-            /\(Castellano\)/i,
-            /\(Dub Castellano\)/i,
-            /\(Latino\)/i,
-            /\(Español Latino\)/i,
-            /\(Spanish Latino\)/i,
-            /\(Dub Latino\)/i
-        ];
-
-        // Enhanced English dub detection patterns
-        const englishPatterns = [
-            /\(English Dub\)/i,
-            /\(Dub\)$/i,
-            /\(English\)/i
-        ];
-
-        // Enhanced French dub detection patterns
-        const frenchPatterns = [
-            /\(French Dub\)/i,
-            /\(Français\)/i,
-            /\(Dub Français\)/i,
-            /\(French\)/i
-        ];
-
-        // Enhanced German dub detection patterns
-        const germanPatterns = [
-            /\(German Dub\)/i,
-            /\(Deutsch\)/i,
-            /\(Dub Deutsch\)/i,
-            /\(German\)/i
-        ];
-
-        // Enhanced Other languages dub detection patterns
-        const otherPatterns = [
-            /\(Thai\)/i,
-            /\(Hindi\)/i,
-            /\(Tamil\)/i,
-            /\(Telugu\)/i,
-            /\(Malay\)/i,
-            /\(Indonesian\)/i,
-            /\(Bahasa Indonesia\)/i,
-            /\(Chinese\)/i,
-            /\(Mandarin\)/i,
-            /\(Arabic\)/i,
-            /\(Russian\)/i,
-            /\(Portuguese\)/i,
-            /\(Italian\)/i,
-            /\(Other\)/i
-        ];
-
-
-
-        // Check for Spanish dubs
-        for (const pattern of spanishPatterns) {
-            if (pattern.test(title)) {
-                isDub = true;
-                languages.push('spanish');
-                console.log("✅ Doblaje en español detectado con patrón:", pattern);
-                break;
+        // 2. Check CSS classes
+        const classList = Array.from(episodeElement.classList);
+        for (const className of classList) {
+            if (className.includes('lang-')) {
+                return normalizeLanguageCode(className.replace('lang-', ''));
             }
         }
 
-        // Check for English dubs (only if Spanish not found)
-        if (languages.length === 0) {
-            for (const pattern of englishPatterns) {
-                if (pattern.test(title)) {
-                    isDub = true;
-                    languages.push('english');
-                    console.log("✅ Doblaje en inglés detectado con patrón:", pattern);
-                    break;
-                }
+        // 3. Check text content for parenthetical language e.g. "(Hindi)"
+        // We look at the full text content of the element
+        const text = episodeElement.textContent || '';
+
+        // Look for language in parentheses at the end or inside
+        const parenthesesMatch = text.match(/\(([^)]+)\)\s*$/) || text.match(/\(([^)]+)\)/);
+        if (parenthesesMatch) {
+            const langText = parenthesesMatch[1];
+            const normalized = normalizeLanguageCode(langText);
+
+            if (normalized !== 'unknown') {
+                return normalized;
+            }
+
+            // If unknown language in parentheses, treat as 'others' (Dubbed)
+            // But ignore common non-language terms
+            const ignoreTerms = ['Season', 'Uncut', 'Censored', 'TV', 'BD', 'OVA', 'Movie', 'Special'];
+            const isIgnore = ignoreTerms.some(term => langText.toLowerCase().includes(term.toLowerCase()));
+
+            if (!isIgnore) {
+                // Likely an unmapped language (e.g. Urdu, Tagalog)
+                return 'others';
             }
         }
 
-        // Check for French dubs (only if no other language found)
-        if (languages.length === 0) {
-            for (const pattern of frenchPatterns) {
-                if (pattern.test(title)) {
-                    isDub = true;
-                    languages.push('french');
-                    console.log("✅ Doblaje en francés detectado con patrón:", pattern);
-                    break;
-                }
-            }
+        // 4. Unicode Script Detection for non-Latin languages
+        if (/[\u0900-\u097F]/.test(text)) return 'hindi'; // Devanagari
+        if (/[\u0C00-\u0C7F]/.test(text)) return 'telugu';
+        if (/[\u0B80-\u0BFF]/.test(text)) return 'tamil';
+        if (/[\u0600-\u06FF]/.test(text)) return 'arabic';
+        if (/[\u4E00-\u9FFF]/.test(text)) return 'chinese';
+        if (/[\uAC00-\uD7AF]/.test(text)) return 'korean';
+
+        // 5. Common Codes in text
+        if (text.includes('USUS')) return 'english';
+        if (text.includes('ESES')) return 'spanish';
+        if (text.includes('FRFR')) return 'french';
+        if (text.includes('DEDE')) return 'german';
+        if (text.includes('PTBR')) return 'portuguese';
+
+        // 6. Generic "Dub" keyword fallback -> assume English 
+        if (text.match(/\bDub\b/i) || text.match(/\bDoblaje\b/i)) {
+            return 'english';
         }
 
-        // Check for German dubs (only if no other language found)
-        if (languages.length === 0) {
-            for (const pattern of germanPatterns) {
-                if (pattern.test(title)) {
-                    isDub = true;
-                    languages.push('german');
-                    console.log("✅ Doblaje en alemán detectado con patrón:", pattern);
-                    break;
-                }
-            }
-        }
-
-        // Check for Other languages dubs (only if no other language found)
-        if (languages.length === 0) {
-            for (const pattern of otherPatterns) {
-                if (pattern.test(title)) {
-                    isDub = true;
-                    languages.push('others');
-                    console.log("✅ Doblaje en otro idioma detectado con patrón:", pattern);
-                    break;
-                }
-            }
-        }
-
-        // Fallback: Original sophisticated patterns for edge cases
-        if (languages.length === 0) {
-            const patterns = [
-                // Standard dub detection
-                /^(.*) ?(?:\(([A-Z][a-z]+(?:-(?:[A-Z]{2}))?(?: ?[A-Z][a-z]+)?) Dub\))?$/,
-                // Crunchyroll Anime Awards detection
-                /^(?!.*Japanese)(.*) (?:\(([A-Z][a-z]+(?:-(?:[A-Z]{2}))?) Audio\))?$/,
-                // Anime Awards English dub
-                /^(The \d{4} Crunchyroll Anime Awards)$/
-            ];
-
-            for (const pattern of patterns) {
-                const match = title.match(pattern);
-                if (match && match[2]) {
-                    isDub = true;
-                    const lang = match[2].toLowerCase();
-                    if (lang.includes('english')) {
-                        languages.push('english');
-                    } else if (lang.includes('spanish') || lang.includes('español')) {
-                        languages.push('spanish');
-                    } else if (lang.includes('french') || lang.includes('français')) {
-                        languages.push('french');
-                    } else if (lang.includes('german') || lang.includes('deutsch')) {
-                        languages.push('german');
-                    } else {
-                        languages.push('others');
-                    }
-                    console.log("✅ Idioma detectado vía patrón alternativo:", lang, "->", languages);
-                    break;
-                }
-            }
-        }
-
-        // Final fallback: Generic dub detection
-        const lowerTitle = title.toLowerCase();
-        if ((lowerTitle.includes('dub') || lowerTitle.includes('dubbed')) && languages.length === 0) {
-            isDub = true;
-            // Default to English only if no Spanish indicators are present
-            if (!lowerTitle.includes('español') && !lowerTitle.includes('spanish') &&
-                !lowerTitle.includes('latino') && !lowerTitle.includes('castellano')) {
-                languages.push('english');
-                console.log("✅ Doblaje genérico en inglés detectado");
-            }
-        }
-
-        console.log("🎯 Resultado final - isDub:", isDub, "languages:", languages);
-        return { isDub, languages };
+        // Default: If no signals, assume Japanese (Original)
+        return 'japanese';
     }
 
     shouldShowEpisode(episodeData) {
         console.log("🔍 Comprobando si el episodio debe mostrarse:", {
             title: episodeData.title,
             isDubbed: episodeData.isDubbed,
-            languages: episodeData.languages,
+            language: episodeData.language,
             filters: this.filters
         });
 
-        // Check dubbed filter
+        // 1. Check strict Dubbed Filter (Show/Hide/Only)
         if (this.filters.dubbed === 'only' && !episodeData.isDubbed) {
-            console.log("❌ Oculto: el filtro de doblaje está en 'only' pero el episodio no está doblado");
+            console.log("❌ Oculto: filtro doblaje 'only' pero es original");
             return false;
         }
         if (this.filters.dubbed === 'hide' && episodeData.isDubbed) {
-            console.log("❌ Oculto: el filtro de doblaje está en 'hide' y el episodio está doblado");
+            console.log("❌ Oculto: filtro doblaje 'hide' pero es doblado");
             return false;
         }
 
-        // Check language filter (only applies to dubbed episodes)
-        if (episodeData.isDubbed && episodeData.languages.length > 0) {
-            // Get list of enabled languages
-            const enabledLanguages = Object.keys(this.filters.languages).filter(lang =>
-                this.filters.languages[lang] === true
-            );
+        // 2. Check Language Filter (Strict Allowlist)
+        // If it's Japanese (Original), always show it.
+        // For everything else (Dubbed, or other Originals like Hindi/Tamil), check the filter
+        if (episodeData.language !== 'japanese') {
+            const lang = episodeData.language;
 
-            console.log("🌐 Comprobación de idiomas - Idiomas del episodio:", episodeData.languages, "Idiomas habilitados:", enabledLanguages);
+            // Map language to filter key (english, spanish, portuguese, french, german, italian, russian, others)
+            let filterKey = 'others';
+            if (['english', 'spanish', 'portuguese', 'french', 'german', 'italian', 'russian'].includes(lang)) {
+                filterKey = lang;
+            }
 
-            if (enabledLanguages.length > 0) {
-                const hasAllowedLanguage = episodeData.languages.some(lang => {
-                    const isAllowed = this.filters.languages[lang] === true;
-                    console.log(`  - Idioma '${lang}' permitido:`, isAllowed);
-                    return isAllowed;
-                });
-
-                if (!hasAllowedLanguage) {
-                    console.log("❌ Oculto: ningún idioma permitido coincide con los idiomas del episodio");
-                    return false;
-                }
+            // Check if that button is enabled
+            if (!this.filters.languages[filterKey]) {
+                console.log(`❌ Oculto: idioma '${lang}' (mapped to ${filterKey}) no permitido`);
+                return false;
             }
         }
 
-        // Check in queue filter
-        if (this.filters.inQueue === 'only' && !episodeData.inQueue) {
-            console.log("❌ Oculto: el filtro 'en cola' está en 'only' pero el episodio no está en cola");
-            return false;
-        }
-        if (this.filters.inQueue === 'hide' && episodeData.inQueue) {
-            console.log("❌ Oculto: el filtro 'en cola' está en 'hide' y el episodio está en cola");
-            return false;
-        }
+        // 3. Queue Filter
+        if (this.filters.inQueue === 'only' && !episodeData.inQueue) return false;
+        if (this.filters.inQueue === 'hide' && episodeData.inQueue) return false;
 
-        // Check premiere filter
-        if (this.filters.premiere === 'only' && !episodeData.isPremiere) {
-            console.log("❌ Oculto: el filtro 'estrenos' está en 'only' pero el episodio no es estreno");
-            return false;
-        }
-        if (this.filters.premiere === 'hide' && episodeData.isPremiere) {
-            console.log("❌ Oculto: el filter 'estrenos' está en 'hide' y el episodio es estreno");
-            return false;
-        }
+        // 4. Premiere Filter
+        if (this.filters.premiere === 'only' && !episodeData.isPremiere) return false;
+        if (this.filters.premiere === 'hide' && episodeData.isPremiere) return false;
 
         console.log("✅ El episodio debe mostrarse");
         return true;
@@ -991,8 +1019,11 @@ class CrunchyrollPowerUpCalendarFilter {
             language_filter: 'Idiomas',
             lang_english: 'Inglés',
             lang_spanish: 'Español',
+            lang_portuguese: 'Portugués',
             lang_french: 'Francés',
             lang_german: 'Alemán',
+            lang_italian: 'Italiano',
+            lang_russian: 'Ruso',
             lang_others: 'Otros',
             queue_filter: 'En la cola',
             queue_only: 'Solo',

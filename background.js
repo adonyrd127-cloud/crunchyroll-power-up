@@ -135,10 +135,10 @@ chrome.runtime.onStartup.addListener(async () => {
   }
 });
 
-// Escuchar cambios de configuración
+// Escuchar cambios de configuración y storage
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'sync') {
-    console.log('Crunchyroll Power Up: La configuración cambió:', changes);
+    // console.log('Crunchyroll Power Up: La configuración cambió:', changes);
   }
 });
 
@@ -369,18 +369,9 @@ async function checkForNewEpisodes() {
  * episode count for an anime. Crunchyroll's SPA returns empty HTML
  * to service worker fetch(), so scraping doesn't work.
  */
-async function fetchLatestEpisode(animeUrl, animeTitle) {
-  try {
-    // Clean the title for search
-    const searchTitle = cleanTitleForSearch(animeTitle || '');
-    if (!searchTitle) {
-      console.warn('🔍 No se pudo limpiar el título para búsqueda');
-      return 0;
-    }
-
-    console.log(`🔍 Buscando en AniList: "${searchTitle}"`);
-
-    const query = `
+/* Helper to query AniList */
+async function queryAniList(searchTitle) {
+  const query = `
       query ($search: String) {
         Media(search: $search, type: ANIME, status_in: [RELEASING, FINISHED]) {
           title {
@@ -402,6 +393,7 @@ async function fetchLatestEpisode(animeUrl, animeTitle) {
       }
     `;
 
+  try {
     const response = await fetch('https://graphql.anilist.co', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -411,13 +403,48 @@ async function fetchLatestEpisode(animeUrl, animeTitle) {
       })
     });
 
-    if (!response.ok) throw new Error(`AniList API HTTP ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      throw new Error(`AniList API HTTP ${response.status}`);
+    }
 
     const result = await response.json();
-    const media = result?.data?.Media;
+    return result?.data?.Media || null;
+  } catch (error) {
+    console.warn(`Query AniList error for "${searchTitle}":`, error);
+    return null;
+  }
+}
+
+/**
+ * Uses AniList GraphQL API (free, no auth required) to get the latest
+ * episode count for an anime. Crunchyroll's SPA returns empty HTML
+ * to service worker fetch(), so scraping doesn't work.
+ */
+async function fetchLatestEpisode(animeUrl, animeTitle) {
+  try {
+    // Clean the title for search
+    const searchTitle = cleanTitleForSearch(animeTitle || '');
+    if (!searchTitle) {
+      console.warn('🔍 No se pudo limpiar el título para búsqueda');
+      return 0;
+    }
+
+    console.log(`🔍 Buscando en AniList: "${searchTitle}"`);
+    let media = await queryAniList(searchTitle);
+
+    // Retry Logic: If not found, try stripping subtitle (after colon)
+    if (!media && searchTitle.includes(':')) {
+      const shortTitle = searchTitle.split(':')[0].trim();
+      // Ensure short title is meaningful (len >= 3)
+      if (shortTitle.length >= 3) {
+        console.log(`🔍 Reintentando búsqueda con título corto: "${shortTitle}"`);
+        media = await queryAniList(shortTitle);
+      }
+    }
 
     if (!media) {
-      console.warn(`🔍 AniList: No se encontró "${searchTitle}"`);
+      console.warn(`🔍 AniList: No se encontró "${searchTitle}" ni variantes.`);
       return 0;
     }
 

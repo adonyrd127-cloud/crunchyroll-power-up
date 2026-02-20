@@ -149,11 +149,6 @@ function loadConfiguration() {
         console.log("🟠 Desmarcado = Modo manual (false)");
         console.log("🔍 Filtro de Calendario:", result.calendarFilter ? "HABILITADO" : "DESHABILITADO");
 
-        // Calendar dark mode
-        const calendarDarkModeCheckbox = document.getElementById('calendarDarkMode');
-        if (calendarDarkModeCheckbox) {
-            calendarDarkModeCheckbox.checked = result.calendarDarkMode || false;
-        }
     });
 }
 
@@ -205,15 +200,6 @@ function setupEventListeners() {
             enabled: this.checked
         });
     });
-
-    // NEW: Calendar Dark Mode checkbox
-    const calendarDarkModeCheckbox = document.getElementById('calendarDarkMode');
-    if (calendarDarkModeCheckbox) {
-        calendarDarkModeCheckbox.addEventListener('change', function () {
-            chrome.storage.sync.set({ calendarDarkMode: this.checked });
-            console.log("🌙 Popup: Modo Oscuro del Calendario cambiado a:", this.checked);
-        });
-    }
 
     console.log("🟠 Popup: Event listeners configurados");
 
@@ -391,16 +377,28 @@ function createAnimeItem(anime) {
     item.className = 'anime-item';
     item.dataset.animeId = anime.id;
 
+    const hasNew = anime.newEpisodes > 0 || anime.hasNewEpisode;
+    let badgeHtml = '';
+
+    if (hasNew) {
+        item.classList.add('has-new');
+        let countText = anime.newEpisodes > 0 ? anime.newEpisodes : '!';
+        badgeHtml = `<div class="anime-new-badge-thumb">${countText}</div>`;
+    }
+
     item.innerHTML = `
-        <img
-            src="${anime.thumbnail || 'icons/icono chrome.png'}"
-            alt="${anime.title || 'Anime'}"
-            class="anime-thumb"
-            onerror="this.src='icons/icono chrome.png'"
-        >
+        <div class="anime-thumb-container">
+            <img
+                src="${anime.thumbnail || 'icons/icono chrome.png'}"
+                alt="${anime.title || 'Anime'}"
+                class="anime-thumb"
+                onerror="this.src='icons/icono chrome.png'"
+            >
+            ${badgeHtml}
+        </div>
         <div class="anime-info">
             <h3 class="anime-title" title="${anime.title || ''}">${anime.title || 'Sin título'}</h3>
-            <p class="ep-status">Episodio ${anime.lastEpisode || '?'}</p>
+            <p class="ep-status ${hasNew ? 'new-ep' : ''}">Episodio ${anime.lastEpisode || '?'}</p>
         </div>
         <div class="anime-actions">
             <button class="btn-watch" data-url="${anime.url}" title="Ver anime">▶️</button>

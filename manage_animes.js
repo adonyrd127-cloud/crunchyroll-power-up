@@ -15,17 +15,14 @@ let searchQuery = '';
 
 // ============================================
 // INITIALIZATION
-// ============================================
-
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Manage Animes: Inicializando...');
 
     await loadAllAnimes();
     setupEventListeners();
-    applyFiltersAndSearch();
-
-    // Hide loading state
-    document.getElementById('loadingState').style.display = 'none';
+    // The following lines are removed as per instruction:
+    // applyFiltersAndSearch();
+    // document.getElementById('loadingState').style.display = 'none';
 });
 
 // ============================================
@@ -36,13 +33,14 @@ async function loadAllAnimes() {
     try {
         const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
         allAnimes = followedAnimes;
-        filteredAnimes = [...allAnimes];
 
         console.log(`✅ ${allAnimes.length} animes cargados`);
+        applyFiltersAndSearch();
         updateStats();
 
     } catch (error) {
         console.error('Error cargando animes:', error);
+        document.getElementById('animesGrid').innerHTML = '<p class="error">Error al cargar los animes.</p>';
     }
 }
 
@@ -247,7 +245,9 @@ function createAnimeCard(anime) {
     card.className = 'anime-card';
     card.dataset.animeId = anime.id;
 
-    const hasNew = anime.hasNewEpisode || false;
+    const hasNew = anime.newEpisodes > 0 || anime.hasNewEpisode;
+    let countText = anime.newEpisodes > 0 ? anime.newEpisodes : 'NUEVO';
+
     if (hasNew) {
         card.classList.add('has-new');
     }
@@ -260,13 +260,15 @@ function createAnimeCard(anime) {
                     alt="${anime.title || 'Anime'}"
                     onerror="this.src='icons/icono chrome.png'"
                 >
-                ${hasNew ? '<div class="anime-card-badge">NUEVO</div>' : ''}
             </div>
             <div class="anime-card-content">
                 <div class="anime-card-info">
-                    <h3 class="anime-card-title" title="${anime.title || ''}">${anime.title || 'Sin título'}</h3>
+                    <h3 class="anime-card-title" title="${anime.title || ''}">
+                        ${anime.title || 'Sin título'}
+                        ${hasNew ? `<span class="list-new-badge">${countText}</span>` : ''}
+                    </h3>
                     <p class="anime-card-episode ${hasNew ? 'new-ep' : ''}">
-                        Episodio ${anime.lastEpisode || '?'}${hasNew ? ' 🆕' : ''}
+                        Episodio ${anime.lastEpisode || '?'}
                     </p>
                 </div>
                 <div class="anime-card-actions">
@@ -283,12 +285,12 @@ function createAnimeCard(anime) {
                     alt="${anime.title || 'Anime'}"
                     onerror="this.src='icons/icono chrome.png'"
                 >
-                ${hasNew ? '<div class="anime-card-badge">NUEVO</div>' : ''}
+                ${hasNew ? `<div class="anime-card-badge">${countText}</div>` : ''}
             </div>
             <div class="anime-card-content">
                 <h3 class="anime-card-title" title="${anime.title || ''}">${anime.title || 'Sin título'}</h3>
                 <p class="anime-card-episode ${hasNew ? 'new-ep' : ''}">
-                    Episodio ${anime.lastEpisode || '?'}${hasNew ? ' 🆕' : ''}
+                    Episodio ${anime.lastEpisode || '?'}
                 </p>
                 <div class="anime-card-actions">
                     <button class="anime-card-btn watch" data-url="${anime.url}">▶️ Ver</button>
