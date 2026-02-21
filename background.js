@@ -1,6 +1,9 @@
 // Extensión Crunchyroll Power Up - Script de Fondo
 // Author: Ing. Adony R.
 
+// Load RSS parser module
+importScripts('rss-parser.js');
+
 // Configuración predeterminada compatible con el formato del repositorio original
 // Configuración predeterminada simplificada (camelCase)
 const defaultSettings = {
@@ -83,6 +86,14 @@ chrome.runtime.onInstalled.addListener(async () => {
     // Guardar configuración fusionada y limpia
     await chrome.storage.sync.set(mergedSettings);
     console.log('Crunchyroll Power Up: Configuración inicializada:', mergedSettings);
+
+    // === MIGRACIÓN DE SYNC A LOCAL PARA FOLLOWEDANIMES ===
+    const syncData = await chrome.storage.sync.get('followedAnimes');
+    if (syncData.followedAnimes) {
+      console.log('Crunchyroll Power Up: Migrando followedAnimes de sync a local...', syncData.followedAnimes.length);
+      await chrome.storage.local.set({ followedAnimes: syncData.followedAnimes });
+      await chrome.storage.sync.remove('followedAnimes');
+    }
 
     // === ANIME TRACKING: Initialize alarm & default notification settings ===
     chrome.alarms.create('checkNewEpisodes', {
@@ -309,9 +320,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 async function checkForNewEpisodes() {
   try {
-    const storage = await chrome.storage.sync.get(['followedAnimes', 'notificationSettings']);
-    const followedAnimes = storage.followedAnimes || [];
-    const settings = storage.notificationSettings || {};
+    const [localStorage, syncStorage] = await Promise.all([
+      chrome.storage.local.get('followedAnimes'),
+      chrome.storage.sync.get('notificationSettings')
+    ]);
+    const followedAnimes = localStorage.followedAnimes || [];
+    const settings = syncStorage.notificationSettings || {};
 
     if (!settings.enabled || !settings.notifyNewEpisode) {
       console.log('🔔 Notificaciones deshabilitadas');
@@ -328,32 +342,115 @@ async function checkForNewEpisodes() {
       return;
     }
 
-    console.log(`🔍 Verificando ${followedAnimes.length} anime(s)...`);
+    console.log(`🔍 Verificando ${followedAnimes.length} anime(s) [Híbrido RSS + AniList]...`);
     let updatesFound = 0;
 
-    for (const anime of followedAnimes) {
-      try {
-        const latestEpisode = await fetchLatestEpisode(anime.url, anime.title);
+    // === PHASE 1: Fetch RSS (primary source) ===
+    const rssResult = await getOrFetchRSS();
+    const rssItems = rssResult.items;
+    const rssOk = !rssResult.error;
+    const aliases = await getTitleAliases();
 
-        if (latestEpisode > anime.lastEpisode) {
-          console.log(`✨ NUEVO: ${anime.title}: Ep.${anime.lastEpisode} → Ep.${latestEpisode}`);
-          await sendEpisodeNotification(anime, latestEpisode);
-          anime.lastEpisode = latestEpisode;
-          updatesFound++;
-        } else {
-          console.log(`✓ Sin cambios: ${anime.title} (Ep.${anime.lastEpisode})`);
+    // Track API health status
+    const apiStatus = {
+      rss: rssOk ? 'ok' : 'error',
+      rssError: rssResult.error || null,
+      anilist: 'ok',    // Will be updated below if it fails
+      lastCheck: Date.now()
+    };
+
+    // === PHASE 2: Check each anime (Batched in parallel) ===
+    const BATCH_SIZE = 5;
+    let anilistErrorCount = 0;
+
+    for (let i = 0; i < followedAnimes.length; i += BATCH_SIZE) {
+      const batch = followedAnimes.slice(i, i + BATCH_SIZE);
+
+      const batchPromises = batch.map(async (anime) => {
+        try {
+          let latestEpisode = 0;
+          let detectionSource = 'stale';
+          let rssEpisodeUrl = null;
+
+          // --- Try RSS first (primary) ---
+          if (rssItems.length > 0) {
+            const rssEpisodes = getEpisodesForAnime(anime.title, rssItems, followedAnimes, aliases);
+
+            if (rssEpisodes.length > 0) {
+              const newestRss = rssEpisodes[0]; // Already sorted desc
+              latestEpisode = newestRss.episodeNumber;
+              rssEpisodeUrl = newestRss.link;
+              detectionSource = 'rss';
+              console.log(`🟢 RSS match: ${anime.title} → Ep.${latestEpisode}`);
+            }
+          }
+
+          // --- Fallback to AniList if no RSS match ---
+          if (detectionSource !== 'rss') {
+            try {
+              const anilistLatest = await fetchLatestEpisode(anime.url, anime.title, anime.lastEpisode || 0);
+              if (anilistLatest > 0) {
+                latestEpisode = anilistLatest;
+                detectionSource = 'anilist';
+                console.log(`🟡 AniList fallback: ${anime.title} → Ep.${latestEpisode}`);
+              }
+            } catch (anilistErr) {
+              console.warn(`⚠️ AniList error for ${anime.title}:`, anilistErr.message);
+              anilistErrorCount++;
+            }
+          }
+
+          // --- If AniList says it aired > 2 hours ago, notify anyway ---
+          if (detectionSource === 'anilist' && anime.nextAiringEpisode?.airingAt) {
+            const airedAgo = Date.now() / 1000 - anime.nextAiringEpisode.airingAt;
+            if (airedAgo > 7200 && latestEpisode <= anime.lastEpisode) {
+              // Schedule says it should have aired > 2h ago but episode count hasn't changed
+              // Force set to next episode to trigger notification
+              latestEpisode = anime.nextAiringEpisode.episode;
+              detectionSource = 'anilist';
+              console.log(`🟡 AniList schedule override: ${anime.title} → Ep.${latestEpisode} (aired ${Math.round(airedAgo / 3600)}h ago)`);
+            }
+          }
+
+          // --- Update anime data ---
+          anime.detectionSource = detectionSource;
+          if (rssEpisodeUrl) anime.rssEpisodeUrl = rssEpisodeUrl;
+
+          if (latestEpisode > anime.lastEpisode) {
+            const diff = latestEpisode - anime.lastEpisode;
+
+            if (anime.newEpisodes !== diff || anime.notifiedLatest !== latestEpisode) {
+              console.log(`✨ NUEVO: ${anime.title}: Ep.${anime.lastEpisode} → Ep.${latestEpisode} (Diff: ${diff}) [${detectionSource}]`);
+              if (anime.notifiedLatest !== latestEpisode) {
+                await sendEpisodeNotification(anime, latestEpisode, detectionSource);
+              }
+              anime.newEpisodes = diff;
+              anime.notifiedLatest = latestEpisode;
+              updatesFound++;
+            } else {
+              console.log(`✓ Sin cambios: ${anime.title} (Ep.${anime.lastEpisode} + ${diff} nuevos) [${detectionSource}]`);
+            }
+          }
+          anime.lastChecked = Date.now();
+
+        } catch (error) {
+          console.error(`Error verificando ${anime.title}:`, error);
         }
-        anime.lastChecked = Date.now();
+      });
 
-      } catch (error) {
-        console.error(`Error verificando ${anime.title}:`, error);
-      }
+      await Promise.all(batchPromises);
     }
 
-    await chrome.storage.sync.set({ followedAnimes });
+    // Update AniList health status
+    if (anilistErrorCount > followedAnimes.length / 2) {
+      apiStatus.anilist = 'error';
+    }
+
+    // Save everything
+    await chrome.storage.local.set({ followedAnimes, apiStatus });
     console.log(updatesFound > 0
-      ? `🎉 ${updatesFound} nuevo(s) episodio(s) encontrado(s)!`
-      : '✓ Verificación completada. Sin nuevos episodios.');
+      ? `🎉 ${updatesFound} nuevo(s) episodio(s) encontrado(s)! [RSS: ${apiStatus.rss}, AniList: ${apiStatus.anilist}]`
+      : `✓ Verificación completada. Sin nuevos episodios. [RSS: ${apiStatus.rss}, AniList: ${apiStatus.anilist}]`);
 
   } catch (error) {
     console.error('Error en checkForNewEpisodes:', error);
@@ -370,37 +467,40 @@ async function checkForNewEpisodes() {
  * to service worker fetch(), so scraping doesn't work.
  */
 /* Helper to query AniList */
-async function queryAniList(searchTitle) {
-  const query = `
+async function queryAniList(searchTitle, format = null) {
+  let query;
+  let variables = { search: searchTitle };
+
+  if (format) {
+    query = `
+      query ($search: String, $format: MediaFormat) {
+        Media(search: $search, type: ANIME, status_in: [RELEASING, FINISHED], format: $format) {
+          title { romaji english }
+          episodes
+          nextAiringEpisode { episode }
+          status
+          airingSchedule(notYetAired: false, perPage: 1) { nodes { episode } }
+        }
+      }`;
+    variables.format = format;
+  } else {
+    query = `
       query ($search: String) {
         Media(search: $search, type: ANIME, status_in: [RELEASING, FINISHED]) {
-          title {
-            romaji
-            english
-          }
+          title { romaji english }
           episodes
-          nextAiringEpisode {
-            episode
-            airingAt
-          }
+          nextAiringEpisode { episode }
           status
-          airingSchedule(notYetAired: false, perPage: 1) {
-            nodes {
-              episode
-            }
-          }
+          airingSchedule(notYetAired: false, perPage: 1) { nodes { episode } }
         }
-      }
-    `;
+      }`;
+  }
 
   try {
     const response = await fetch('https://graphql.anilist.co', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query,
-        variables: { search: searchTitle }
-      })
+      body: JSON.stringify({ query, variables })
     });
 
     if (!response.ok) {
@@ -418,66 +518,69 @@ async function queryAniList(searchTitle) {
 
 /**
  * Uses AniList GraphQL API (free, no auth required) to get the latest
- * episode count for an anime. Crunchyroll's SPA returns empty HTML
- * to service worker fetch(), so scraping doesn't work.
+ * episode count for an anime.
  */
-async function fetchLatestEpisode(animeUrl, animeTitle) {
+async function fetchLatestEpisode(animeUrl, animeTitle, currentLastEpisode = 0) {
   try {
     // Clean the title for search
     const searchTitle = cleanTitleForSearch(animeTitle || '');
     if (!searchTitle) {
-      console.warn('🔍 No se pudo limpiar el título para búsqueda');
       return 0;
     }
 
-    console.log(`🔍 Buscando en AniList: "${searchTitle}"`);
-    let media = await queryAniList(searchTitle);
+    console.log(`🔍 Buscando en AniList: "${searchTitle}" (Prioridad TV)`);
+    let media = await queryAniList(searchTitle, 'TV');
 
-    // Retry Logic: If not found, try stripping subtitle (after colon)
+    // If no TV show found with the long title, try short title (TV)
     if (!media && searchTitle.includes(':')) {
       const shortTitle = searchTitle.split(':')[0].trim();
-      // Ensure short title is meaningful (len >= 3)
       if (shortTitle.length >= 3) {
-        console.log(`🔍 Reintentando búsqueda con título corto: "${shortTitle}"`);
-        media = await queryAniList(shortTitle);
+        console.log(`🔍 Reintentando búsqueda con título corto: "${shortTitle}" (TV)`);
+        media = await queryAniList(shortTitle, 'TV');
       }
     }
 
+    // If STILL no TV show, try broad search (any format)
     if (!media) {
-      console.warn(`🔍 AniList: No se encontró "${searchTitle}" ni variantes.`);
-      return 0;
+      console.log(`🔍 Reintentando búsqueda general (cualquier formato) para "${searchTitle}"`);
+      media = await queryAniList(searchTitle);
+      // And fallback to short title broad search if needed
+      if (!media && searchTitle.includes(':')) {
+        const shortTitle = searchTitle.split(':')[0].trim();
+        if (shortTitle.length >= 3) {
+          media = await queryAniList(shortTitle);
+        }
+      }
     }
 
-    console.log(`🔍 AniList resultado: "${media.title?.romaji || media.title?.english}"`,
-      `| Status: ${media.status}`,
-      `| Episodes: ${media.episodes || '?'}`,
-      `| Next: Ep.${media.nextAiringEpisode?.episode || '?'}`);
-
-    // Determine latest aired episode
     let latestEpisode = 0;
 
-    // If there's a next airing episode, the latest aired is episode - 1
-    if (media.nextAiringEpisode?.episode) {
-      latestEpisode = media.nextAiringEpisode.episode - 1;
-    }
-    // If the show is FINISHED, use total episodes
-    else if (media.status === 'FINISHED' && media.episodes) {
-      latestEpisode = media.episodes;
-    }
-    // Try airing schedule
-    else if (media.airingSchedule?.nodes?.length > 0) {
-      latestEpisode = media.airingSchedule.nodes[0].episode;
-    }
-    // Fallback to total episodes
-    else if (media.episodes) {
-      latestEpisode = media.episodes;
+    if (media) {
+      console.log(`🔍 AniList resultado: "${media.title?.romaji || media.title?.english}"`,
+        `| Status: ${media.status}`,
+        `| Episodes: ${media.episodes || '?'}`,
+        `| Next: Ep.${media.nextAiringEpisode?.episode || '?'}`);
+
+      // Determine latest aired episode
+      if (media.nextAiringEpisode?.episode) {
+        latestEpisode = media.nextAiringEpisode.episode - 1;
+      }
+      else if (media.status === 'FINISHED' && media.episodes) {
+        latestEpisode = media.episodes;
+      }
+      else if (media.airingSchedule?.nodes?.length > 0) {
+        latestEpisode = media.airingSchedule.nodes[0].episode;
+      }
+      else if (media.episodes) {
+        latestEpisode = media.episodes;
+      }
     }
 
-    console.log(`🔍 Último episodio determinado: ${latestEpisode}`);
+    console.log(`🔍 Último episodio final determinado: ${latestEpisode}`);
     return latestEpisode;
 
   } catch (error) {
-    console.error('Error en fetchLatestEpisode (AniList):', error);
+    console.error('Error en fetchLatestEpisode:', error);
     return 0;
   }
 }
@@ -490,9 +593,11 @@ function cleanTitleForSearch(title) {
   return title
     .replace(/^Watch\s+/i, '')             // Remove "Watch " prefix
     .replace(/\s*[-–—]\s*Crunchyroll.*$/i, '') // Remove " - Crunchyroll"
-    .replace(/\s*\((?:Dub|Sub|English|Spanish|Español|Japanese).*?\)/gi, '') // Remove (Dub), (Sub), etc.
+    .replace(/\s*\((?:Dub|Sub|English|Spanish|Español|Japanese|Latino).*?\)/gi, '') // Remove (Dub), (Sub), etc.
     .replace(/\s*(?:Dub|Sub)\s*$/i, '')    // Remove trailing Dub/Sub
     .replace(/\s*Season\s*\d+\s*$/i, '')   // Remove "Season N" for better search
+    .replace(/[-–—]/g, ' ')                // Replace hyphens/dashes with spaces for better AniList matching
+    .replace(/\s+/g, ' ')                  // Collapse multiple spaces into one
     .trim();
 }
 
@@ -500,16 +605,17 @@ function cleanTitleForSearch(title) {
 // ANIME TRACKING: NOTIFICATIONS
 // ============================================
 
-async function sendEpisodeNotification(anime, newEpisode) {
+async function sendEpisodeNotification(anime, newEpisode, source = 'anilist') {
   const notificationId = `episode-${anime.id}-${newEpisode}-${Date.now()}`;
+  const sourceLabel = source === 'rss' ? '🟢 Confirmado en Crunchyroll' : '🟡 Según AniList';
 
   try {
     await chrome.notifications.create(notificationId, {
       type: 'basic',
       iconUrl: anime.thumbnail || chrome.runtime.getURL('icons/icono chrome.png'),
-      title: '🆕 ¡Nuevo episodio disponible!',
-      message: `${anime.title} — Episodio ${newEpisode}`,
-      contextMessage: 'Crunchyroll Power Up',
+      title: '🎬 ¡Nuevo episodio disponible!',
+      message: `${anime.title} — Episodio ${newEpisode} ya está en Crunchyroll`,
+      contextMessage: sourceLabel,
       buttons: [
         { title: '▶️ Ver ahora' },
         { title: '⏰ Ver después' }
@@ -518,17 +624,21 @@ async function sendEpisodeNotification(anime, newEpisode) {
       priority: 2
     });
 
+    // Use RSS direct URL if available, otherwise fall back to anime page URL
+    const watchUrl = (source === 'rss' && anime.rssEpisodeUrl) ? anime.rssEpisodeUrl : anime.url;
+
     await chrome.storage.local.set({
       [`notification_${notificationId}`]: {
         animeId: anime.id,
         animeTitle: anime.title,
-        animeUrl: anime.url,
+        animeUrl: watchUrl,
         episodeNumber: newEpisode,
+        source: source,
         timestamp: Date.now()
       }
     });
 
-    console.log(`✅ Notificación enviada: ${anime.title} Ep.${newEpisode}`);
+    console.log(`✅ Notificación enviada: ${anime.title} Ep.${newEpisode} [${source}]`);
   } catch (error) {
     console.error('Error enviando notificación:', error);
   }

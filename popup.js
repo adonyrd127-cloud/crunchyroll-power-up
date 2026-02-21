@@ -1,85 +1,15 @@
-// Script del popup para Crunchy+ Plus v1.6.32 - soporte i18n + Filtro de calendario
-console.log("Crunchyroll Power Up Popup: Script cargado");
-
-// Función i18n para obtener mensajes localizados
-function getMessage(key) {
-    try {
-        if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
-            return chrome.i18n.getMessage(key) || `__MSG_${key}__`;
-        }
-        return `__MSG_${key}__`;
-    } catch (error) {
-        console.warn("🟠 Error en i18n.getMessage:", error);
-        return `__MSG_${key}__`;
-    }
-}
-
-// Función para reemplazar marcadores i18n en el documento
-function replaceI18nPlaceholders() {
-    console.log("🌐 Reemplazando marcadores i18n...");
-
-    // Set the correct language attribute
-    let currentLocale = 'en';
-    try {
-        if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getUILanguage) {
-            currentLocale = chrome.i18n.getUILanguage();
-        } else {
-            currentLocale = navigator.language || 'en';
-        }
-    } catch (error) {
-        console.warn("🟠 Error en i18n.getUILanguage:", error);
-        currentLocale = navigator.language || 'en';
-    }
-    document.documentElement.lang = currentLocale.startsWith('es') ? 'es' : 'en';
-    console.log("🌐 Idioma establecido en:", document.documentElement.lang, "basado en la configuración regional:", currentLocale);
-
-    // Obtener todos los nodos de texto y atributos que puedan contener __MSG_key__
-    const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-    );
-
-    const textNodes = [];
-    let node;
-    while (node = walker.nextNode()) {
-        if (node.nodeValue.includes('__MSG_')) {
-            textNodes.push(node);
-        }
-    }
-
-    // Reemplazar contenido de texto
-    textNodes.forEach(textNode => {
-        textNode.nodeValue = textNode.nodeValue.replace(/__MSG_(\w+)__/g, (match, key) => {
-            return getMessage(key);
-        });
+// ═══════════════════════════════════════ TABS
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + target)?.classList.add('active');
     });
+});
 
-    // Reemplazar atributo title
-    document.title = document.title.replace(/__MSG_(\w+)__/g, (match, key) => {
-        return getMessage(key);
-    });
-
-    // Reemplazar otros atributos que puedan contener claves i18n
-    const elementsWithI18n = document.querySelectorAll('[title*="__MSG_"], [alt*="__MSG_"], [placeholder*="__MSG_"]');
-    elementsWithI18n.forEach(element => {
-        ['title', 'alt', 'placeholder'].forEach(attr => {
-            if (element.hasAttribute(attr)) {
-                const value = element.getAttribute(attr);
-                if (value.includes('__MSG_')) {
-                    element.setAttribute(attr, value.replace(/__MSG_(\w+)__/g, (match, key) => {
-                        return getMessage(key);
-                    }));
-                }
-            }
-        });
-    });
-
-    console.log("🌐 Marcadores i18n reemplazados");
-}
-
-// Configuración por defecto simple (camelCase standardized)
+// ═══════════════════════════════════════ CONFIG
 const DEFAULT_CONFIG = {
     autoSkipIntro: false,
     autoSkipRecap: false,
@@ -87,480 +17,281 @@ const DEFAULT_CONFIG = {
     theaterMode: false,
     nextEpisodeDate: true,
     calendarFilter: false,
-    miniPlayerEnabled: false
+    miniPlayerEnabled: false,
+    showSkipButtons: true,
 };
 
-// Elementos del DOM
-let skipIntroCheckbox, skipRecapCheckbox, skipEndingCheckbox;
-let theaterModeCheckbox, nextEpisodeDateCheckbox, calendarFilterCheckbox, miniPlayerCheckbox;
-
-// Inicializar popup
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("🟠 Popup: DOM cargado, inicializando...");
-
-    // PRIMERO: Reemplazar marcadores i18n
-    replaceI18nPlaceholders();
-
-    // Obtener referencias a los elementos
-    skipIntroCheckbox = document.getElementById('skipIntro');
-    skipRecapCheckbox = document.getElementById('skipRecap');
-    skipEndingCheckbox = document.getElementById('skipEnding');
-    theaterModeCheckbox = document.getElementById('theaterMode');
-    nextEpisodeDateCheckbox = document.getElementById('nextEpisodeDate');
-    calendarFilterCheckbox = document.getElementById('calendarFilter');
-    miniPlayerCheckbox = document.getElementById('miniPlayer');
-
-    // Cargar configuración guardada
-    loadConfiguration();
-
-    // Agregar event listeners
-    setupEventListeners();
-
-    // === ANIME TRACKING: Initialize section ===
-    initFollowedAnimesSection();
-
-    // === SKIP BUTTONS SETTING ===
-    initSkipButtonsSetting();
-
-    console.log("🟠 Popup: Inicialización completa");
-});
-
-// Cargar configuración desde storage
-function loadConfiguration() {
-    console.log("🟠 Popup: Cargando configuración...");
-
-    chrome.storage.sync.get(DEFAULT_CONFIG, function (result) {
-        console.log("🟠 Popup: Configuración cargada:", result);
-
-        // Configuración estandarizada (booleana)
-        skipIntroCheckbox.checked = result.autoSkipIntro;
-        skipRecapCheckbox.checked = result.autoSkipRecap;
-        skipEndingCheckbox.checked = result.autoSkipEnding;
-
-        // Para otras opciones: usar valor booleano directo
-        theaterModeCheckbox.checked = result.theaterMode;
-        nextEpisodeDateCheckbox.checked = result.nextEpisodeDate;
-        calendarFilterCheckbox.checked = result.calendarFilter;
-        miniPlayerCheckbox.checked = result.miniPlayerEnabled;
-
-        console.log("🟠 Popup: Checkboxes configurados");
-        console.log("🟠 ✅ LÓGICA ESTANDARIZADA:");
-        console.log("🟠 Marcado = Salto automático (true)");
-        console.log("🟠 Desmarcado = Modo manual (false)");
-        console.log("🔍 Filtro de Calendario:", result.calendarFilter ? "HABILITADO" : "DESHABILITADO");
-
-    });
-}
-
-// Configurar event listeners
-function setupEventListeners() {
-    console.log("🟠 Popup: Configurando listeners de eventos...");
-
-    // Skip checkboxes con lógica booleana directa
-    skipIntroCheckbox.addEventListener('change', function () {
-        saveConfig('autoSkipIntro', this.checked);
-        console.log("🟠 Popup: Skip Intro cambiado a:", this.checked);
-    });
-
-    skipRecapCheckbox.addEventListener('change', function () {
-        saveConfig('autoSkipRecap', this.checked);
-        console.log("🟠 Popup: Skip Recap cambiado a:", this.checked);
-    });
-
-    skipEndingCheckbox.addEventListener('change', function () {
-        saveConfig('autoSkipEnding', this.checked);
-        console.log("🟠 Popup: Skip Ending cambiado a:", this.checked);
-    });
-
-    // Otras casillas
-    theaterModeCheckbox.addEventListener('change', function () {
-        saveConfig('theaterMode', this.checked);
-        console.log("🟠 Popup: Theater Mode cambiado a:", this.checked);
-    });
-
-    nextEpisodeDateCheckbox.addEventListener('change', function () {
-        saveConfig('nextEpisodeDate', this.checked);
-        console.log("🟠 Popup: Next Episode Date cambiado a:", this.checked);
-    });
-
-    // NEW: Calendar Filter checkbox
-    calendarFilterCheckbox.addEventListener('change', function () {
-        saveConfig('calendarFilter', this.checked);
-        console.log("🔍 Popup: Filtro de Calendario cambiado a:", this.checked);
-    });
-
-    // NEW: Mini Player checkbox
-    miniPlayerCheckbox.addEventListener('change', function () {
-        saveConfig('miniPlayerEnabled', this.checked);
-        console.log("📺 Popup: Mini Reproductor cambiado a:", this.checked);
-
-        // Enviar mensaje a content script para actualizar estado
-        chrome.runtime.sendMessage({
-            type: 'MINI_PLAYER_TOGGLE',
-            enabled: this.checked
-        });
-    });
-
-    console.log("🟠 Popup: Event listeners configurados");
-
-    // Initialize UI visual state
-    initializeUIState();
-}
-
-// Guardar configuración
 function saveConfig(key, value) {
-    const config = {};
-    config[key] = value;
-
-    chrome.storage.sync.set(config, function () {
-        console.log("🟠 Popup: Config guardada:", key, "=", value);
-        if (key.includes('autoSkip')) {
-            console.log("🟠", value ? "✅ SALTO AUTOMÁTICO activado" : "🔧 MODO MANUAL activado");
-        }
-        if (key === 'calendarFilter') {
-            console.log("🔍", value ? "✅ FILTRO DE CALENDARIO activado" : "🔧 FILTRO DE CALENDARIO desactivado");
-        }
-    });
+    const obj = {};
+    obj[key] = value;
+    chrome.storage.sync.set(obj);
 }
 
-// Función de depuración disponible en la consola del popup
-window.crunchyPlusPopupDebug = function () {
-    console.log("🔍 DEPURANDO CONFIGURACIÓN DEL POPUP");
-
-    chrome.storage.sync.get(null, function (result) {
-        console.log("📊 Almacenamiento completo:", result);
-
-        Object.keys(result).forEach(key => {
-            if (key.includes('autoSkip')) {
-                console.log(`🔧 ${key}: ${result[key]}`);
-            }
+// ═══════════════════════════════════════ CHIPS
+function initChips() {
+    document.querySelectorAll('.chip').forEach(chip => {
+        const input = chip.querySelector('input[type=checkbox]');
+        if (!input) return;
+        input.addEventListener('change', () => {
+            chip.classList.toggle('active', input.checked);
         });
     });
+}
 
-    return {
-        skipIntro: skipIntroCheckbox?.checked,
-        skipRecap: skipRecapCheckbox?.checked,
-        skipEnding: skipEndingCheckbox?.checked,
-        theaterMode: theaterModeCheckbox?.checked,
-        nextEpisodeDate: nextEpisodeDateCheckbox?.checked,
-        calendarFilter: calendarFilterCheckbox?.checked,
-        miniPlayer: miniPlayerCheckbox?.checked
-    };
+// ═══════════════════════════════════════ QUICK PILLS (home tab)
+const quickPillMap = {
+    'qp-theater': 'theaterMode',
+    'qp-pip': 'miniPlayerEnabled',
+    'qp-intro': 'autoSkipIntro',
+    'qp-calendar': 'calendarFilter',
 };
 
-// Funciones para actualizar la UI de elementos visuales (movidas desde script inline)
-function updatePillButton(pill, checkbox) {
-    if (checkbox.checked) {
-        pill.classList.add('active');
-    } else {
-        pill.classList.remove('active');
-    }
+function initQuickPills(config) {
+    document.querySelectorAll('.quick-pill').forEach(pill => {
+        const key = pill.dataset.key;
+        if (config[key]) pill.classList.add('on');
+        pill.addEventListener('click', () => {
+            const current = pill.classList.contains('on');
+            pill.classList.toggle('on', !current);
+            saveConfig(key, !current);
+            // Sync with settings tab
+            const settingsCheckbox = document.getElementById(settingsCheckboxId(key));
+            if (settingsCheckbox) settingsCheckbox.checked = !current;
+
+            // Sync chips if it's autoSkipIntro
+            const chip = document.querySelector(`.chip[data-key="${key}"]`);
+            if (chip) chip.classList.toggle('active', !current);
+        });
+    });
 }
 
-function updateSwitch(switchEl, checkbox) {
-    if (checkbox.checked) {
-        switchEl.classList.add('active');
-    } else {
-        switchEl.classList.remove('active');
-    }
+function settingsCheckboxId(key) {
+    const map = {
+        theaterMode: 'theaterMode',
+        miniPlayerEnabled: 'miniPlayer',
+        autoSkipIntro: 'skipIntro',
+        calendarFilter: 'calendarFilter',
+    };
+    return map[key] || key;
 }
 
-// Initialize UI visual state
-function initializeUIState() {
-    // Obtener elementos de tipo 'pill' (botones)
-    const introPill = document.getElementById('intro-pill');
-    const recapPill = document.getElementById('recap-pill');
-    const endingPill = document.getElementById('ending-pill');
-
-    // Obtener elementos tipo switch
-    const theaterSwitch = document.getElementById('theater-switch');
-    const episodeSwitch = document.getElementById('episode-switch');
-    const calendarFilterSwitch = document.getElementById('calendar-filter-switch');
-    const miniPlayerSwitch = document.getElementById('mini-player-switch');
-
-    // Añadir listeners para actualizar la UI
-    if (skipIntroCheckbox) {
-        skipIntroCheckbox.addEventListener('change', () => updatePillButton(introPill, skipIntroCheckbox));
-    }
-    if (skipRecapCheckbox) {
-        skipRecapCheckbox.addEventListener('change', () => updatePillButton(recapPill, skipRecapCheckbox));
-    }
-    if (skipEndingCheckbox) {
-        skipEndingCheckbox.addEventListener('change', () => updatePillButton(endingPill, skipEndingCheckbox));
-    }
-    if (theaterModeCheckbox) {
-        theaterModeCheckbox.addEventListener('change', () => updateSwitch(theaterSwitch, theaterModeCheckbox));
-    }
-    if (nextEpisodeDateCheckbox) {
-        nextEpisodeDateCheckbox.addEventListener('change', () => updateSwitch(episodeSwitch, nextEpisodeDateCheckbox));
-    }
-    if (calendarFilterCheckbox) {
-        calendarFilterCheckbox.addEventListener('change', () => updateSwitch(calendarFilterSwitch, calendarFilterCheckbox));
-    }
-    if (miniPlayerCheckbox) {
-        miniPlayerCheckbox.addEventListener('change', () => updateSwitch(miniPlayerSwitch, miniPlayerCheckbox));
-    }
-
-    // Inicializar el estado visual una vez cargada la configuración
-    setTimeout(() => {
-        if (introPill && skipIntroCheckbox) updatePillButton(introPill, skipIntroCheckbox);
-        if (recapPill && skipRecapCheckbox) updatePillButton(recapPill, skipRecapCheckbox);
-        if (endingPill && skipEndingCheckbox) updatePillButton(endingPill, skipEndingCheckbox);
-        if (theaterSwitch && theaterModeCheckbox) updateSwitch(theaterSwitch, theaterModeCheckbox);
-        if (episodeSwitch && nextEpisodeDateCheckbox) updateSwitch(episodeSwitch, nextEpisodeDateCheckbox);
-        if (calendarFilterSwitch && calendarFilterCheckbox) updateSwitch(calendarFilterSwitch, calendarFilterCheckbox);
-        if (miniPlayerSwitch && miniPlayerCheckbox) updateSwitch(miniPlayerSwitch, miniPlayerCheckbox);
-    }, 100);
+// ═══════════════════════════════════════ TOGGLES
+function bindToggle(checkboxId, storageKey, onChangeFn) {
+    const el = document.getElementById(checkboxId);
+    if (!el) return;
+    el.addEventListener('change', () => {
+        saveConfig(storageKey, el.checked);
+        if (onChangeFn) onChangeFn(el.checked);
+        // Sync quick pills
+        const pill = document.querySelector(`.quick-pill[data-key="${storageKey}"]`);
+        if (pill) pill.classList.toggle('on', el.checked);
+    });
 }
 
-// ============================================
-// ANIME TRACKING: POPUP SECTION
-// ============================================
+// ═══════════════════════════════════════ LOAD CONFIG
+function loadConfig() {
+    chrome.storage.sync.get(DEFAULT_CONFIG, config => {
+        // Chips (skip)
+        const ci = document.getElementById('skipIntro');
+        const cr = document.getElementById('skipRecap');
+        const ce = document.getElementById('skipEnding');
+        if (ci) { ci.checked = config.autoSkipIntro; document.getElementById('chip-intro')?.classList.toggle('active', config.autoSkipIntro); }
+        if (cr) { cr.checked = config.autoSkipRecap; document.getElementById('chip-recap')?.classList.toggle('active', config.autoSkipRecap); }
+        if (ce) { ce.checked = config.autoSkipEnding; document.getElementById('chip-ending')?.classList.toggle('active', config.autoSkipEnding); }
 
-async function initFollowedAnimesSection() {
-    console.log('📺 Popup: Inicializando sección de animes seguidos...');
-    await loadFollowedAnimes();
-    await loadNotificationSettings();
-    setupFollowedAnimesListeners();
+        // Toggles
+        setToggle('showSkipButtons', config.showSkipButtons);
+        setToggle('theaterMode', config.theaterMode);
+        setToggle('miniPlayer', config.miniPlayerEnabled);
+        setToggle('calendarFilter', config.calendarFilter);
+        setToggle('nextEpisodeDate', config.nextEpisodeDate);
+
+        // Quick pills
+        initQuickPills(config);
+    });
 }
 
+function setToggle(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.checked = value;
+}
+
+// ═══════════════════════════════════════ ANIMES
 async function loadFollowedAnimes() {
-    try {
-        const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
+    const { followedAnimes = [] } = await chrome.storage.local.get('followedAnimes');
 
-        const animeList = document.getElementById('animeList');
-        const emptyState = document.getElementById('emptyState');
-        const totalFollowed = document.getElementById('totalFollowed');
-        const manageBtn = document.getElementById('openManageAnimesBtn');
-        const countBadge = document.getElementById('animeCountBadge');
+    // Stats
+    const newCount = followedAnimes.filter(a => a.newEpisodes > 0 || a.hasNewEpisode).length;
+    document.getElementById('stat-siguiendo').textContent = followedAnimes.length;
+    document.getElementById('stat-nuevos').textContent = newCount;
 
-        if (!animeList || !emptyState || !totalFollowed) return;
+    // Tab badge
+    const badge = document.getElementById('new-badge');
+    if (newCount > 0) { badge.textContent = newCount; badge.style.display = 'flex'; }
+    else badge.style.display = 'none';
 
-        totalFollowed.textContent = followedAnimes.length;
+    // Home preview (3 max)
+    renderAnimeList('home-anime-list', 'home-empty', followedAnimes.slice(0, 3), true);
 
-        if (followedAnimes.length === 0) {
-            animeList.style.display = 'none';
-            emptyState.style.display = 'block';
-            if (manageBtn) manageBtn.style.display = 'none';
+    // Following tab (all)
+    renderAnimeList('following-list', 'following-empty', followedAnimes, false);
+
+    // Manage btn
+    const manageBtn = document.getElementById('manageBtn');
+    const manageBadge = document.getElementById('manageBadge');
+    if (manageBtn) {
+        manageBtn.style.display = followedAnimes.length > 0 ? 'flex' : 'none';
+        if (manageBadge) manageBadge.textContent = followedAnimes.length;
+    }
+}
+
+function renderAnimeList(listId, emptyId, animes, compact) {
+    const container = document.getElementById(listId);
+    const empty = document.getElementById(emptyId);
+    if (!container) return;
+
+    if (animes.length === 0) {
+        container.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+    }
+
+    if (empty) empty.style.display = 'none';
+
+    container.innerHTML = '';
+    const sorted = [...animes].sort((a, b) => (b.addedDate || 0) - (a.addedDate || 0));
+
+    sorted.forEach(anime => {
+        const hasNew = anime.newEpisodes > 0 || anime.hasNewEpisode;
+        const newLabel = hasNew ? `<span class="ep-new-label">✨ ${anime.newEpisodes || 1} ep nuevo${anime.newEpisodes > 1 ? 's' : ''}</span>` : `Ep ${anime.lastEpisode || '?'}`;
+
+        // Source indicator dot
+        const source = anime.detectionSource || '';
+        const sourceClass = source === 'rss' ? 'rss' : source === 'anilist' ? 'anilist' : source === 'stale' ? 'stale' : '';
+        const sourceTooltip = source === 'rss' ? 'Confirmado vía RSS' : source === 'anilist' ? 'Estimado vía AniList' : source === 'stale' ? 'Sin datos recientes' : '';
+        const sourceDot = sourceClass ? `<span class="source-dot ${sourceClass}" title="${sourceTooltip}"></span>` : '';
+
+        if (compact) {
+            // Home preview style
+            const el = document.createElement('div');
+            el.className = `anime-preview-item${hasNew ? ' has-new' : ''}`;
+            el.innerHTML = `
+                <div class="ap-thumb-wrap">
+                    <img src="${anime.thumbnail || 'icons/icono chrome.png'}" class="ap-thumb" onerror="this.src='icons/icono chrome.png'">
+                    ${hasNew ? `
+                    <div class="shimmer"></div>
+                    <div class="badge-count" style="top: -6px; right: -6px;">${anime.newEpisodes || '!'}</div>
+                    ` : ''}
+                </div>
+                <div class="ap-info">
+                    <div class="ap-title" title="${anime.title || ''}">${anime.title || 'Sin título'}${sourceDot}</div>
+                    <div class="ap-ep">${newLabel}</div>
+                </div>
+                <div class="ap-actions">
+                    <button class="btn-sm btn-play" data-url="${anime.url}">▶</button>
+                    <button class="btn-sm btn-ghost" data-unfollow="${anime.id}">🔕</button>
+                </div>
+            `;
+            container.appendChild(el);
+        } else {
+            // Full following style
+            const el = document.createElement('div');
+            el.className = `full-anime-item${hasNew ? ' has-new' : ''}`;
+            el.innerHTML = `
+                <div style="position: relative; flex-shrink: 0;" class="fa-thumb-wrap">
+                    <img src="${anime.thumbnail || 'icons/icono chrome.png'}" class="fa-thumb" onerror="this.src='icons/icono chrome.png'">
+                    ${hasNew ? `
+                    <div class="shimmer"></div>
+                    <div class="new-ribbon">NUEVO</div>
+                    <div class="badge-count" style="top: -6px; right: -6px;">${anime.newEpisodes || '!'}</div>
+                    ` : ''}
+                </div>
+                <div class="fa-info">
+                    <div class="fa-title" title="${anime.title || ''}">${anime.title || 'Sin título'}${sourceDot}</div>
+                    <div class="fa-ep">${newLabel}</div>
+                </div>
+                <div class="fa-actions">
+                    <button class="btn-sm btn-play" data-url="${anime.url}">▶</button>
+                    <button class="btn-sm btn-ghost" data-unfollow="${anime.id}">🔕</button>
+                </div>
+            `;
+            container.appendChild(el);
+        }
+    });
+}
+// Delegated click on animes
+document.addEventListener('click', async e => {
+    const playBtn = e.target.closest('.btn-play');
+    if (playBtn) {
+        const url = playBtn.dataset.url;
+        if (url) {
+            chrome.tabs.create({ url });
+
+            // Decrementar newEpisodes y avanzar progreso tal como el modal
+            const { followedAnimes = [] } = await chrome.storage.local.get('followedAnimes');
+            const animeIndex = followedAnimes.findIndex(a => a.url === url);
+            if (animeIndex !== -1) {
+                const anime = followedAnimes[animeIndex];
+                const oldNewEps = anime.newEpisodes || 0;
+
+                anime.newEpisodes = Math.max(0, oldNewEps - 1);
+
+                if (oldNewEps > 0) {
+                    anime.lastEpisode = (anime.lastEpisode || 0) + 1;
+                }
+                if (anime.newEpisodes === 0) {
+                    anime.notified = true;
+                }
+
+                followedAnimes[animeIndex] = anime;
+                await chrome.storage.local.set({ followedAnimes });
+                // El renderizado se actualizará si hay listener, o recargamos:
+                loadFollowedAnimes();
+            }
             return;
         }
-
-        animeList.style.display = 'flex';
-        emptyState.style.display = 'none';
-        animeList.innerHTML = '';
-
-        // Sort: most recently added first
-        followedAnimes.sort((a, b) => (b.addedDate || 0) - (a.addedDate || 0));
-
-        // Show only first 3 as preview
-        const previewAnimes = followedAnimes.slice(0, 3);
-
-        for (const anime of previewAnimes) {
-            animeList.appendChild(createAnimeItem(anime));
-        }
-
-        // Show manage button with count
-        if (manageBtn) {
-            manageBtn.style.display = 'flex';
-        }
-        if (countBadge) {
-            countBadge.textContent = followedAnimes.length;
-        }
-
-    } catch (error) {
-        console.error('Error cargando animes seguidos:', error);
-    }
-}
-
-function createAnimeItem(anime) {
-    const item = document.createElement('div');
-    item.className = 'anime-item';
-    item.dataset.animeId = anime.id;
-
-    const hasNew = anime.newEpisodes > 0 || anime.hasNewEpisode;
-    let badgeHtml = '';
-
-    if (hasNew) {
-        item.classList.add('has-new');
-        let countText = anime.newEpisodes > 0 ? anime.newEpisodes : '!';
-        badgeHtml = `<div class="anime-new-badge-thumb">${countText}</div>`;
     }
 
-    item.innerHTML = `
-        <div class="anime-thumb-container">
-            <img
-                src="${anime.thumbnail || 'icons/icono chrome.png'}"
-                alt="${anime.title || 'Anime'}"
-                class="anime-thumb"
-                onerror="this.src='icons/icono chrome.png'"
-            >
-            ${badgeHtml}
-        </div>
-        <div class="anime-info">
-            <h3 class="anime-title" title="${anime.title || ''}">${anime.title || 'Sin título'}</h3>
-            <p class="ep-status ${hasNew ? 'new-ep' : ''}">Episodio ${anime.lastEpisode || '?'}</p>
-        </div>
-        <div class="anime-actions">
-            <button class="btn-watch" data-url="${anime.url}" title="Ver anime">▶️</button>
-            <button class="btn-unfollow" data-id="${anime.id}" title="Dejar de seguir">🔕</button>
-        </div>
-    `;
-
-    return item;
-}
-
-async function loadNotificationSettings() {
-    try {
-        const { notificationSettings = {} } = await chrome.storage.sync.get('notificationSettings');
-
-        const els = {
-            notifyEnabled: document.getElementById('notifyEnabled'),
-            quietHoursEnabled: document.getElementById('quietHoursEnabled'),
-            notifyNewEpisode: document.getElementById('notifyNewEpisode'),
-            soundEnabled: document.getElementById('soundEnabled'),
-        };
-
-        if (els.notifyEnabled) els.notifyEnabled.checked = notificationSettings.enabled !== false;
-        if (els.quietHoursEnabled) els.quietHoursEnabled.checked = notificationSettings.quietHoursEnabled !== false;
-        if (els.notifyNewEpisode) els.notifyNewEpisode.checked = notificationSettings.notifyNewEpisode !== false;
-        if (els.soundEnabled) els.soundEnabled.checked = notificationSettings.soundEnabled !== false;
-
-    } catch (error) {
-        console.error('Error cargando configuración de notificaciones:', error);
+    const unfollowBtn = e.target.closest('[data-unfollow]');
+    if (unfollowBtn) {
+        const id = unfollowBtn.dataset.unfollow;
+        const { followedAnimes = [] } = await chrome.storage.local.get('followedAnimes');
+        const anime = followedAnimes.find(a => a.id === id);
+        const updated = followedAnimes.filter(a => a.id !== id);
+        await chrome.storage.local.set({ followedAnimes: updated });
+        showToast(`❌ Dejaste de seguir "${anime?.title || 'el anime'}"`);
+        loadFollowedAnimes();
     }
+});
+
+// ═══════════════════════════════════════ NOTIFICATION SETTINGS
+async function loadNotifSettings() {
+    const { notificationSettings = {} } = await chrome.storage.sync.get('notificationSettings');
+    setToggle('notifyEnabled', notificationSettings.enabled !== false);
+    setToggle('notifyNewEpisode', notificationSettings.notifyNewEpisode !== false);
+    setToggle('soundEnabled', notificationSettings.soundEnabled !== false);
+    setToggle('quietHoursEnabled', notificationSettings.quietHoursEnabled !== false);
 }
 
-function setupFollowedAnimesListeners() {
-    // Manual check button
-    const manualCheckBtn = document.getElementById('manualCheckBtn');
-    if (manualCheckBtn) {
-        manualCheckBtn.addEventListener('click', () => {
-            manualCheckBtn.style.pointerEvents = 'none';
-            manualCheckBtn.textContent = '⏳';
-
-            chrome.runtime.sendMessage({ type: 'manualCheck' }, (response) => {
-                manualCheckBtn.textContent = '🔄';
-                manualCheckBtn.style.pointerEvents = 'auto';
-
-                if (response?.success) {
-                    showPopupToast('✅ Verificación completada');
-                    setTimeout(() => loadFollowedAnimes(), 800);
-                } else {
-                    showPopupToast('⚠️ Error en la verificación');
-                }
-            });
-        });
-    }
-
-    // Delegated click handlers for anime items
-    const animeList = document.getElementById('animeList');
-    if (animeList) {
-        animeList.addEventListener('click', async (e) => {
-            const watchBtn = e.target.closest('.btn-watch');
-            if (watchBtn) {
-                const url = watchBtn.dataset.url;
-                if (url) chrome.tabs.create({ url });
-                return;
-            }
-
-            const unfollowBtn = e.target.closest('.btn-unfollow');
-            if (unfollowBtn) {
-                const animeId = unfollowBtn.dataset.id;
-                if (animeId) await unfollowAnime(animeId);
-            }
-        });
-    }
-
-    // Notification settings checkboxes
-    ['notifyEnabled', 'quietHoursEnabled', 'notifyNewEpisode', 'soundEnabled'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', () => saveNotificationSettings());
-    });
+async function saveNotifSettings() {
+    const settings = {
+        enabled: document.getElementById('notifyEnabled')?.checked ?? true,
+        quietHoursEnabled: document.getElementById('quietHoursEnabled')?.checked ?? true,
+        quietHoursStart: '22:00',
+        quietHoursEnd: '08:00',
+        notifyNewEpisode: document.getElementById('notifyNewEpisode')?.checked ?? true,
+        soundEnabled: document.getElementById('soundEnabled')?.checked ?? true,
+    };
+    await chrome.storage.sync.set({ notificationSettings: settings });
+    showToast('✅ Configuración guardada');
 }
 
-async function unfollowAnime(animeId) {
-    try {
-        const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
-        const anime = followedAnimes.find(a => a.id === animeId);
-        const title = anime?.title || 'el anime';
+['notifyEnabled', 'quietHoursEnabled', 'notifyNewEpisode', 'soundEnabled'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', saveNotifSettings);
+});
 
-        const updated = followedAnimes.filter(a => a.id !== animeId);
-        await chrome.storage.sync.set({ followedAnimes: updated });
-        showPopupToast(`❌ Dejaste de seguir "${title}"`);
-        await loadFollowedAnimes();
-
-    } catch (error) {
-        console.error('Error al dejar de seguir:', error);
-        showPopupToast('❌ Error al actualizar');
-    }
-}
-
-async function saveNotificationSettings() {
-    try {
-        const settings = {
-            enabled: document.getElementById('notifyEnabled')?.checked ?? true,
-            quietHoursEnabled: document.getElementById('quietHoursEnabled')?.checked ?? true,
-            quietHoursStart: '22:00',
-            quietHoursEnd: '08:00',
-            notifyNewEpisode: document.getElementById('notifyNewEpisode')?.checked ?? true,
-            soundEnabled: document.getElementById('soundEnabled')?.checked ?? true,
-        };
-        await chrome.storage.sync.set({ notificationSettings: settings });
-        showPopupToast('✅ Configuración guardada');
-    } catch (error) {
-        console.error('Error guardando configuración:', error);
-        showPopupToast('❌ Error al guardar');
-    }
-}
-
-function showPopupToast(message) {
-    let toast = document.querySelector('.popup-toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.className = 'popup-toast';
-        document.body.appendChild(toast);
-    }
-    toast.textContent = message;
-    toast.style.display = 'block';
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 2500);
-}
-
-// ============================================
-// SKIP BUTTONS SETTING (showSkipButtons toggle)
-// ============================================
-
-function initSkipButtonsSetting() {
-    const showSkipButtonsCheckbox = document.getElementById('showSkipButtons');
-    const skipButtonsSwitch = document.getElementById('skip-buttons-switch');
-
-    if (!showSkipButtonsCheckbox) return;
-
-    // Load saved setting
-    chrome.storage.sync.get('showSkipButtons', (data) => {
-        const enabled = data.showSkipButtons !== undefined ? data.showSkipButtons : true;
-        showSkipButtonsCheckbox.checked = enabled;
-        if (skipButtonsSwitch) {
-            skipButtonsSwitch.classList.toggle('active', enabled);
-        }
-    });
-
-    // Save on change
-    showSkipButtonsCheckbox.addEventListener('change', () => {
-        const enabled = showSkipButtonsCheckbox.checked;
-        chrome.storage.sync.set({ showSkipButtons: enabled });
-        if (skipButtonsSwitch) {
-            skipButtonsSwitch.classList.toggle('active', enabled);
-        }
-        showPopupToast(enabled ? '✅ Botones de salto activados' : '🔕 Botones de salto desactivados');
-    });
-}
-
-// ============================================
-// OPEN MANAGE ANIMES MODAL (Full Screen)
-// ============================================
-
-function openManageAnimesModal() {
+// ═══════════════════════════════════════ MANAGE BTN
+document.getElementById('manageBtn')?.addEventListener('click', () => {
     chrome.windows.create({
         url: chrome.runtime.getURL('manage_animes.html'),
         type: 'popup',
@@ -569,10 +300,113 @@ function openManageAnimesModal() {
         left: 100,
         top: 50
     });
-}
-
-document.getElementById('openManageAnimesBtn')?.addEventListener('click', () => {
-    openManageAnimesModal();
 });
 
-console.log("Crunchyroll Power Up Popup: Script cargado + AniSkip Hybrid System");
+// ═══════════════════════════════════════ REFRESH BTN
+document.getElementById('refreshBtn')?.addEventListener('click', () => {
+    const icon = document.getElementById('refresh-icon');
+    icon.innerHTML = '<span class="spinning">🔄</span>';
+    chrome.runtime.sendMessage({ type: 'manualCheck' }, response => {
+        icon.textContent = '🔄';
+        if (response?.success) {
+            showToast('✅ Verificación completada');
+            setTimeout(() => loadFollowedAnimes(), 500);
+        } else {
+            showToast('⚠️ Error en verificación');
+        }
+    });
+});
+
+// ═══════════════════════════════════════ TOAST
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════ BIND ALL TOGGLES
+function bindAllToggles() {
+    bindToggle('skipIntro', 'autoSkipIntro', v => document.getElementById('chip-intro')?.classList.toggle('active', v));
+    bindToggle('skipRecap', 'autoSkipRecap', v => document.getElementById('chip-recap')?.classList.toggle('active', v));
+    bindToggle('skipEnding', 'autoSkipEnding', v => document.getElementById('chip-ending')?.classList.toggle('active', v));
+    bindToggle('showSkipButtons', 'showSkipButtons');
+    bindToggle('theaterMode', 'theaterMode');
+    bindToggle('miniPlayer', 'miniPlayerEnabled', v => {
+        chrome.runtime.sendMessage({ type: 'MINI_PLAYER_TOGGLE', enabled: v });
+    });
+    bindToggle('calendarFilter', 'calendarFilter');
+    bindToggle('nextEpisodeDate', 'nextEpisodeDate');
+}
+
+// ═══════════════════════════════════════ MISC
+function setAppVersion() {
+    const manifest = chrome.runtime.getManifest();
+    const verEl = document.getElementById('appVersion');
+    if (verEl && manifest.version) {
+        verEl.textContent = `v${manifest.version} · Power Up`;
+    }
+}
+
+function initResetBtn() {
+    const btn = document.getElementById('resetConfigBtn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres restarurar toda la configuración de la extensión por defecto? Esto no borrará tus animes seguidos.')) {
+            chrome.storage.sync.set(DEFAULT_CONFIG, () => {
+                showToast('🔄 Configuración reiniciada');
+                setTimeout(() => window.location.reload(), 800);
+            });
+        }
+    });
+}
+
+// ═══════════════════════════════════════════ API STATUS
+async function loadApiStatus() {
+    const { apiStatus } = await chrome.storage.local.get('apiStatus');
+    if (!apiStatus) return;
+
+    const rssIcon = document.getElementById('rss-status-icon');
+    const rssText = document.getElementById('rss-status-text');
+    const anilistIcon = document.getElementById('anilist-status-icon');
+    const anilistText = document.getElementById('anilist-status-text');
+    const lastCheckEl = document.getElementById('api-last-check');
+
+    if (rssIcon && rssText) {
+        if (apiStatus.rss === 'ok') {
+            rssIcon.textContent = '✅';
+            rssText.textContent = 'Activo';
+        } else {
+            rssIcon.textContent = '⚠️';
+            rssText.textContent = 'Error';
+        }
+    }
+
+    if (anilistIcon && anilistText) {
+        if (apiStatus.anilist === 'ok') {
+            anilistIcon.textContent = '✅';
+            anilistText.textContent = 'Activo';
+        } else {
+            anilistIcon.textContent = '⚠️';
+            anilistText.textContent = 'Error';
+        }
+    }
+
+    if (lastCheckEl && apiStatus.lastCheck) {
+        const ago = Math.round((Date.now() - apiStatus.lastCheck) / 60000);
+        lastCheckEl.textContent = ago < 1 ? 'Última verificación: justo ahora' : `Última verificación: hace ${ago} min`;
+    }
+}
+
+// ═══════════════════════════════════════════ INIT
+document.addEventListener('DOMContentLoaded', () => {
+    setAppVersion();
+    initChips();
+    loadConfig();
+    loadFollowedAnimes();
+    loadNotifSettings();
+    loadApiStatus();
+    bindAllToggles();
+    initResetBtn();
+});

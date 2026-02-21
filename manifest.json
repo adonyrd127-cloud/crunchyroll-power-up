@@ -19,7 +19,8 @@
     "*://graphql.anilist.co/*",
     "*://api.aniskip.com/*",
     "*://api.jikan.moe/*",
-    "https://static.crunchyroll.com/*"
+    "https://static.crunchyroll.com/*",
+    "https://feeds.feedburner.com/*"
   ],
   "icons": {
     "16": "icons/icono chrome.png",

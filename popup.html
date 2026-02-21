@@ -4,8 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>__MSG_popup_title__</title>
+    <title>Crunchy+ Plus</title>
+    <link rel="stylesheet" href="css/fonts.css">
     <style>
+        :root {
+            --orange: #FF6B35;
+            --orange-glow: rgba(255, 107, 53, 0.25);
+            --orange-soft: rgba(255, 107, 53, 0.12);
+            --bg-0: #080d18;
+            --bg-1: #0f1724;
+            --bg-2: #161f30;
+            --bg-3: #1e2a3e;
+            --bg-4: #253249;
+            --border: rgba(255, 255, 255, 0.07);
+            --text-1: #ffffff;
+            --text-2: #8fa8cc;
+            --text-3: #4d6380;
+            --green: #22c55e;
+            --blue: #3b82f6;
+            --red: #ef4444;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,801 +33,1363 @@
 
         body {
             width: 380px;
-            min-height: 520px;
-            background: #0b1120;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.5;
+            height: 580px;
+            background: var(--bg-0);
+            color: var(--text-1);
+            font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* ─── HEADER ─── */
         .header {
-            padding: 24px 20px 20px 20px;
-            text-align: center;
-            background: #0b1120;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-
-        .logo {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #ffffff;
-            margin: 0;
-        }
-
-        .subtitle {
-            font-size: 13px;
-            color: #8b9dc3;
-            margin-top: 4px;
-        }
-
-        .content {
-            padding: 0 20px 20px 20px;
-        }
-
-        .section-header {
-            font-size: 16px;
-            font-weight: 600;
-            color: #ff6b35;
-            margin-bottom: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .feature-card {
-            background: #1a2332;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid #2a3441;
-        }
-
-        .feature-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-
-        .feature-icon {
-            width: 20px;
-            height: 20px;
-            color: #ff6b35;
-            flex-shrink: 0;
-        }
-
-        .feature-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-            flex: 1;
-        }
-
-        .feature-description {
-            font-size: 12px;
-            color: #8b9dc3;
-            margin-bottom: 12px;
-            line-height: 1.4;
-            margin-left: 32px;
-        }
-
-        .feature-controls {
-            margin-left: 32px;
-        }
-
-        .pill-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .pill-button {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: #2a3441;
-            border: 1px solid #3a4551;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #8b9dc3;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .pill-button:hover {
-            background: #3a4551;
-            border-color: #4a5561;
-        }
-
-        .pill-button.active {
-            background: #ff6b35;
-            border-color: #ff6b35;
-            color: #ffffff;
-        }
-
-        .pill-button input[type="checkbox"] {
-            display: none;
-        }
-
-        .switch-container {
+            padding: 16px 18px 12px;
+            background: var(--bg-1);
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
-        .switch-label {
-            font-size: 14px;
-            color: #ffffff;
-            font-weight: 500;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .switch {
-            position: relative;
-            width: 44px;
-            height: 24px;
-            background: #2a3441;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            box-shadow: 0 0 14px var(--orange-glow);
         }
 
-        .switch.active {
-            background: #ff6b35;
+        .brand-text .name {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            line-height: 1;
         }
 
-        .switch-thumb {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            background: #ffffff;
-            border-radius: 50%;
-            transition: transform 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        .brand-text .name span {
+            color: var(--orange);
         }
 
-        .switch.active .switch-thumb {
-            transform: translateX(20px);
+        .brand-text .tag {
+            font-size: 10px;
+            color: var(--text-3);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-top: 2px;
         }
 
-        .switch input[type="checkbox"] {
-            display: none;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 16px 20px;
-            color: #8b9dc3;
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            border-radius: 20px;
+            padding: 4px 10px;
             font-size: 11px;
-            border-top: 1px solid #2a3441;
-            background: #0b1120;
-        }
-
-        .version {
-            color: #ff6b35;
+            color: var(--green);
             font-weight: 600;
         }
 
-        /* Icons using CSS */
-        .icon-play::before {
-            content: "▶";
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
 
-        .icon-theater::before {
-            content: "⛶";
-        }
+        @keyframes pulse {
 
-        .icon-calendar::before {
-            content: "📅";
-        }
-
-        .icon-filter::before {
-            content: "🔍";
-        }
-
-        .icon-pip::before {
-            content: "📺";
-        }
-
-        /* Responsive */
-        @media (max-width: 400px) {
-            body {
-                width: 350px;
+            0%,
+            100% {
+                opacity: 1;
             }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* ─── TAB CONTENT ─── */
+        .tab-content-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tab-pane {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            padding: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-4) transparent;
+        }
+
+        .tab-pane::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .tab-pane::-webkit-scrollbar-thumb {
+            background: var(--bg-4);
+            border-radius: 2px;
+        }
+
+        .tab-pane.active {
+            display: flex;
+        }
+
+        /* ─── BOTTOM TABS ─── */
+        .tab-bar {
+            display: flex;
+            background: var(--bg-1);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 4px 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-3);
+            font-family: 'Outfit', sans-serif;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .tab-btn .tab-icon {
+            font-size: 18px;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--orange);
+        }
+
+        .tab-btn.active .tab-icon {
+            transform: translateY(-1px);
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: var(--orange);
+            border-radius: 0 0 3px 3px;
+            transform: scaleX(0);
+            transition: transform 0.2s;
+        }
+
+        .tab-btn.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-badge {
+            position: absolute;
+            top: 6px;
+            right: 20px;
+            background: var(--orange);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            min-width: 14px;
+            height: 14px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+        }
+
+        /* ─── SECTION LABEL ─── */
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-3);
+            padding: 2px 0 6px;
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* ─── TOGGLE ROW ─── */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .toggle-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toggle-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-desc {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-4);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle input:checked+.toggle-track {
+            background: var(--orange);
+        }
+
+        .toggle input:checked+.toggle-track::after {
+            transform: translateX(18px);
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 10px 0;
+        }
+
+        /* ─── PILL CHIPS ─── */
+        .chip-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-2);
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .chip input {
+            display: none;
+        }
+
+        .chip:hover {
+            border-color: var(--orange);
+            color: var(--text-1);
+        }
+
+        .chip.active {
+            background: var(--orange-soft);
+            border-color: var(--orange);
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        /* ─── HOME TAB ─── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--orange);
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-3);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Quick Toggles in Home */
+        .quick-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .quick-pill {
+            flex: 1;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-2);
+        }
+
+        .quick-pill .qicon {
+            font-size: 20px;
+        }
+
+        .quick-pill:hover {
+            border-color: var(--orange);
+            color: var(--text-1);
+        }
+
+        .quick-pill.on {
+            background: var(--orange-soft);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* Anime preview */
+        .anime-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: var(--bg-3);
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .anime-preview-item:hover {
+            background: var(--bg-4);
+        }
+
+        .anime-preview-item.has-new {
+            border-left: 2px solid var(--orange);
+            padding-left: 8px;
+        }
+
+        .ap-thumb-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .ap-thumb {
+            width: 38px;
+            height: 54px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: var(--bg-4);
+            display: block;
+        }
+
+        .ap-new-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--orange);
+            color: white;
+            font-size: 9px;
+            font-weight: 800;
+            min-width: 14px;
+            height: 14px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+            border: 1.5px solid var(--bg-2);
+        }
+
+        .ap-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ap-title {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ap-ep {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .ap-ep.new {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        .ap-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .btn-sm {
+            border: none;
+            border-radius: 6px;
+            padding: 5px 9px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+
+        .btn-play {
+            background: var(--orange);
+            color: white;
+        }
+
+        .btn-play:hover {
+            background: #ff7d4d;
+        }
+
+        .btn-ghost {
+            background: var(--bg-4);
+            color: var(--text-2);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+        }
+
+        /* ─── FOLLOWED TAB ─── */
+        .full-anime-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .full-anime-item:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .full-anime-item.has-new {
+            border-left: 2px solid var(--orange);
+        }
+
+        .fa-thumb {
+            width: 44px;
+            height: 62px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: var(--bg-4);
+            flex-shrink: 0;
+        }
+
+        .fa-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .fa-title {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fa-ep {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .fa-ep.new {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        /* ─── NEW EPISODE BADGING SYSTEM (POPUP) ─── */
+        .anime-preview-item.has-new,
+        .full-anime-item.has-new {
+            border: 2px solid var(--orange);
+            animation: pulse-border 2.5s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes pulse-border {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4), 0 0 10px rgba(255, 107, 53, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2), 0 0 20px rgba(255, 107, 53, 0.3);
+            }
+        }
+
+        .shimmer {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer-slide 3.5s ease-in-out infinite;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer-slide {
+            0% {
+                left: -100%;
+            }
+
+            40%,
+            100% {
+                left: 150%;
+            }
+        }
+
+        .new-ribbon {
+            position: absolute;
+            top: 8px;
+            left: -22px;
+            background: linear-gradient(90deg, #FF6B35, #e74c3c);
+            color: white;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            padding: 3px 24px;
+            transform: rotate(-45deg);
+            z-index: 5;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.5);
+            animation: banner-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes banner-glow {
+
+            0%,
+            100% {
+                opacity: 0.9;
+            }
+
+            50% {
+                opacity: 1;
+                filter: brightness(1.2);
+            }
+        }
+
+        .badge-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
+            animation: badge-pulse 1.8s ease-in-out infinite;
+            border: 2px solid var(--bg-2);
+            z-index: 10;
+        }
+
+        @keyframes badge-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6);
+            }
+
+            50% {
+                transform: scale(1.15);
+                box-shadow: 0 0 0 4px rgba(231, 76, 60, 0);
+            }
+        }
+
+        .ep-new-label {
+            color: #2ecc71;
+            font-weight: 700;
+            font-size: 11px;
+            animation: ep-blink 2s ease-in-out infinite;
+        }
+
+        @keyframes ep-blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        /* ─── END BADGING ─── */
+
+        /* ─── SOURCE INDICATORS ─── */
+        .source-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 5px;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        .source-dot.rss {
+            background: #2ecc71;
+            box-shadow: 0 0 4px rgba(46, 204, 113, 0.5);
+        }
+
+        .source-dot.anilist {
+            background: #f1c40f;
+            box-shadow: 0 0 4px rgba(241, 196, 15, 0.5);
+        }
+
+        .source-dot.stale {
+            background: #e74c3c;
+            box-shadow: 0 0 4px rgba(231, 76, 60, 0.5);
+        }
+
+        .source-label {
+            font-size: 9px;
+            color: var(--text-3);
+            margin-left: 3px;
+            font-weight: 500;
+        }
+
+        /* ─── API STATUS BAR ─── */
+        .api-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 8px 12px;
+            margin-top: 12px;
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-3);
+        }
+
+        .api-status-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .api-status-item .status-icon {
+            font-size: 12px;
+        }
+
+        .api-status-item .status-name {
+            font-weight: 700;
+            color: var(--text-2);
+        }
+
+        .api-last-check {
+            font-size: 9px;
+            color: var(--text-3);
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        /* ─── END SOURCE ─── */
+
+        .fa-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        /* Manage button */
+        .manage-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--blue), #60a5fa);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+            letter-spacing: 0.2px;
+        }
+
+        .manage-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .manage-badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 30px 16px;
+            color: var(--text-3);
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            opacity: 0.4;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* ─── SETTINGS TAB ─── */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--orange-soft);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .card-subtitle {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 1px;
+        }
+
+        /* AniSkip badge */
+        .aniskip-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 8px;
+            padding: 7px 10px;
+            margin-bottom: 10px;
+            font-size: 11px;
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .aniskip-badge span:last-child {
+            color: var(--text-3);
+            font-weight: 400;
+            font-size: 10px;
+        }
+
+        /* Levels indicator */
+        .levels-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 10px;
+            color: var(--text-3);
+        }
+
+        .level-chip {
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-2);
+        }
+
+        .level-arrow {
+            color: var(--text-3);
+        }
+
+        /* ─── NOTIF TAB ─── */
+        .notif-setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .notif-setting-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .notif-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-1);
+        }
+
+        .notif-sublabel {
+            font-size: 10px;
+            color: var(--text-3);
+            margin-top: 1px;
+        }
+
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            color: var(--text-1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Check animation for refresh */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinning {
+            display: inline-block;
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
 
 <body>
+
+    <!-- ═══════════════════════════════════ HEADER ═══ -->
     <div class="header">
-        <div class="logo-container">
-            <img src="icons/icono chrome.png" alt="Logo" class="logo">
-            <div>
-                <div class="title">__MSG_app_title__</div>
-                <div class="subtitle">__MSG_app_subtitle__</div>
+        <div class="brand">
+            <img src="icons/icono chrome.png" alt="Logo" class="brand-logo">
+            <div class="brand-text">
+                <div class="name">Crunchy<span>+</span> Plus</div>
+                <div class="tag" id="appVersion">v1.6.32 · Power Up</div>
             </div>
+        </div>
+        <div class="header-status">
+            <div class="status-dot"></div>
+            Activo
         </div>
     </div>
 
-    <div class="content">
-        <div class="section-header">__MSG_core_features__</div>
+    <!-- ═══════════════════════════════ TAB CONTENT ═══ -->
+    <div class="tab-content-wrapper">
 
-        <div class="feature-card">
-            <div class="feature-header">
-                <div class="feature-icon icon-play">▶</div>
-                <div class="feature-title">__MSG_auto_skip_title__</div>
-            </div>
-            <div class="feature-description">
-                __MSG_auto_skip_description__
-            </div>
+        <!-- ───────── TAB: INICIO ───────── -->
+        <div class="tab-pane active" id="tab-home">
 
-            <!-- AniSkip Badge -->
-            <div style="
-                background: rgba(76, 175, 80, 0.1);
-                padding: 10px 12px;
-                border-radius: 8px;
-                margin-bottom: 12px;
-                border-left: 3px solid #4CAF50;
-            ">
-                <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.9);">
-                    ✨ <strong>Powered by AniSkip</strong> — Timestamps precisos de la comunidad
-                </p>
-                <p style="margin: 4px 0 0 0; font-size: 11px; color: rgba(255,255,255,0.5);">
-                    Fallback: Detección heurística → Configuración manual
-                </p>
-            </div>
-
-            <div class="feature-controls">
-                <div class="pill-buttons">
-                    <label class="pill-button" id="intro-pill">
-                        <input type="checkbox" id="skipIntro" />
-                        <span>🟠</span>
-                        <span>__MSG_intro_label__</span>
-                    </label>
-                    <label class="pill-button" id="recap-pill">
-                        <input type="checkbox" id="skipRecap" />
-                        <span>🔄</span>
-                        <span>__MSG_recap_label__</span>
-                    </label>
-                    <label class="pill-button" id="ending-pill">
-                        <input type="checkbox" id="skipEnding" />
-                        <span>🔚</span>
-                        <span>__MSG_ending_label__</span>
-                    </label>
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-siguiendo">0</div>
+                    <div class="stat-lbl">Siguiendo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-nuevos">0</div>
+                    <div class="stat-lbl">Nuevos Eps</div>
+                </div>
+                <div class="stat-card" style="cursor:pointer" id="refreshBtn" title="Verificar ahora">
+                    <div class="stat-num" id="refresh-icon">🔄</div>
+                    <div class="stat-lbl">Actualizar</div>
                 </div>
             </div>
 
-            <!-- Show manual buttons toggle -->
-            <div class="feature-controls" style="margin-top: 8px;">
-                <div class="switch-container">
-                    <span class="switch-label" style="font-size: 12px;">Mostrar botones de salto manuales</span>
-                    <label class="switch" id="skip-buttons-switch">
-                        <input type="checkbox" id="showSkipButtons" checked />
-                        <div class="switch-thumb"></div>
-                    </label>
+            <!-- Quick toggles -->
+            <div class="section-label">Accesos Rápidos</div>
+            <div class="quick-row">
+                <div class="quick-pill" id="qp-theater" data-key="theaterMode">
+                    <span class="qicon">⛶</span>
+                    <span>Teatro</span>
+                </div>
+                <div class="quick-pill" id="qp-pip" data-key="miniPlayerEnabled">
+                    <span class="qicon">📺</span>
+                    <span>PiP</span>
+                </div>
+                <div class="quick-pill" id="qp-intro" data-key="autoSkipIntro">
+                    <span class="qicon">⏭</span>
+                    <span>Skip Intro</span>
+                </div>
+                <div class="quick-pill" id="qp-calendar" data-key="calendarFilter">
+                    <span class="qicon">📅</span>
+                    <span>Filtro</span>
                 </div>
             </div>
 
-            <!-- Info box -->
-            <div style="
-                background: rgba(33, 150, 243, 0.08);
-                padding: 10px;
-                border-radius: 6px;
-                margin-top: 10px;
-            ">
-                <p style="font-size: 11px; color: rgba(255,255,255,0.6); margin: 0; line-height: 1.5;">
-                    💡 <strong style="color: rgba(255,255,255,0.8);">3 Niveles:</strong>
-                    1. AniSkip (precisos) →
-                    2. Detección automática →
-                    3. Manual
-                </p>
+            <!-- Recientes -->
+            <div class="section-label">Vistos Recientemente</div>
+            <div id="home-anime-list">
+                <!-- populated by JS -->
             </div>
+
+            <div id="home-empty" class="empty-state" style="display:none">
+                <div class="empty-icon">📺</div>
+                <p>No sigues ningún anime aún.<br>Visita una página de anime y presiona "Seguir".</p>
+                <div style="margin-top: 15px;">
+                    <a href="https://www.crunchyroll.com/" target="_blank"
+                        style="display: inline-block; background: var(--orange); color: white; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-size: 11px; font-weight: 700;">Abrir
+                        Crunchyroll 🌐</a>
+                </div>
+            </div>
+
         </div>
 
-        <div class="feature-card">
-            <div class="feature-header">
-                <div class="feature-icon icon-theater">⛶</div>
-                <div class="feature-title">__MSG_theater_mode_title__</div>
-            </div>
-            <div class="feature-description">
-                __MSG_theater_mode_description__
-            </div>
-            <div class="feature-controls">
-                <div class="switch-container">
-                    <span class="switch-label">__MSG_enable_theater_mode__</span>
-                    <label class="switch" id="theater-switch">
-                        <input type="checkbox" id="theaterMode" />
-                        <div class="switch-thumb"></div>
-                    </label>
+        <!-- ───────── TAB: SIGUIENDO ───────── -->
+        <div class="tab-pane" id="tab-following">
+
+            <div id="following-list"><!-- JS fills this --></div>
+
+            <div id="following-empty" class="empty-state" style="display:none">
+                <div class="empty-icon">🎌</div>
+                <p>Aún no sigues ningún anime.<br>¡Visita Crunchyroll y empieza a seguir!</p>
+                <div style="margin-top: 15px;">
+                    <a href="https://www.crunchyroll.com/" target="_blank"
+                        style="display: inline-block; background: var(--orange); color: white; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-size: 11px; font-weight: 700;">Abrir
+                        Crunchyroll 🌐</a>
                 </div>
             </div>
+
+            <button class="manage-btn" id="manageBtn" style="display:none">
+                <span>📋</span>
+                <span>Administrar Todos</span>
+                <span class="manage-badge" id="manageBadge">0</span>
+                <span>→</span>
+            </button>
+
         </div>
 
-        <div class="feature-card">
-            <div class="feature-header">
-                <div class="feature-icon icon-calendar">📅</div>
-                <div class="feature-title">__MSG_next_episode_title__</div>
-            </div>
-            <div class="feature-description">
-                __MSG_next_episode_description__
-            </div>
-            <div class="feature-controls">
-                <div class="switch-container">
-                    <span class="switch-label">__MSG_show_next_episode__</span>
-                    <label class="switch" id="episode-switch">
-                        <input type="checkbox" id="nextEpisodeDate" />
-                        <div class="switch-thumb"></div>
+        <!-- ───────── TAB: FUNCIONES ───────── -->
+        <div class="tab-pane" id="tab-settings">
+
+            <!-- Auto Skip -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">⏭</div>
+                    <div>
+                        <div class="card-title">Auto Skip</div>
+                        <div class="card-subtitle">Saltar intro, recap y créditos</div>
+                    </div>
+                </div>
+
+                <div class="aniskip-badge">
+                    <span>✦ Powered by AniSkip</span>
+                    <span>Fallback: heurístico → manual</span>
+                </div>
+
+                <div class="chip-group">
+                    <label class="chip" id="chip-intro" data-key="autoSkipIntro">
+                        <input type="checkbox" id="skipIntro"> 🟠 Intro
+                    </label>
+                    <label class="chip" id="chip-recap" data-key="autoSkipRecap">
+                        <input type="checkbox" id="skipRecap"> 🔄 Recap
+                    </label>
+                    <label class="chip" id="chip-ending">
+                        <input type="checkbox" id="skipEnding"> 🔚 Ending
+                    </label>
+                </div>
+
+                <div class="levels-row">
+                    <span class="level-chip">AniSkip</span>
+                    <span class="level-arrow">→</span>
+                    <span class="level-chip">Heurístico</span>
+                    <span class="level-arrow">→</span>
+                    <span class="level-chip">Manual</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-title">Botones manuales</div>
+                        <div class="toggle-desc">Mostrar botones de salto en el reproductor</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="showSkipButtons" checked>
+                        <div class="toggle-track"></div>
                     </label>
                 </div>
             </div>
+
+            <!-- Pantalla -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🖥</div>
+                    <div>
+                        <div class="card-title">Pantalla & Reproducción</div>
+                        <div class="card-subtitle">Modos de visualización</div>
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-title">⛶ Modo Teatro</div>
+                        <div class="toggle-desc">Amplía el reproductor a ancho completo</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="theaterMode">
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-title">📺 Mini Reproductor (PiP)</div>
+                        <div class="toggle-desc">Ventana flotante premium estilo PiP</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="miniPlayer">
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Calendario -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📅</div>
+                    <div>
+                        <div class="card-title">Calendario & Episodios</div>
+                        <div class="card-subtitle">Filtros y fechas de estreno</div>
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-title">🔍 Filtro de Calendario</div>
+                        <div class="toggle-desc">Filtra por idioma (sub/dub)</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="calendarFilter">
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-title">📆 Próximo Episodio</div>
+                        <div class="toggle-desc">Muestra fecha del siguiente episodio</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="nextEpisodeDate">
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <div style="text-align: center; margin-top: 15px; margin-bottom: 5px;">
+                <button id="resetConfigBtn" class="btn-sm btn-ghost"
+                    title="Restaurar toda la configuración de la extensión a sus valores por defecto">
+                    🔄 Reiniciar preferencias
+                </button>
+            </div>
+
         </div>
 
-        <div class="feature-card">
-            <div class="feature-header">
-                <div class="feature-icon icon-filter">🔍</div>
-                <div class="feature-title">__MSG_calendar_filter_title__</div>
-            </div>
-            <div class="feature-description">
-                __MSG_calendar_filter_description__
-            </div>
-            <div class="feature-controls">
-                <div class="switch-container">
-                    <span class="switch-label">__MSG_enable_calendar_filter__</span>
-                    <label class="switch" id="calendar-filter-switch">
-                        <input type="checkbox" id="calendarFilter" />
-                        <div class="switch-thumb"></div>
+        <!-- ───────── TAB: NOTIFICACIONES ───────── -->
+        <div class="tab-pane" id="tab-notifs">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔔</div>
+                    <div>
+                        <div class="card-title">Notificaciones</div>
+                        <div class="card-subtitle">Alertas de nuevos episodios</div>
+                    </div>
+                </div>
+
+                <div class="notif-setting-row">
+                    <div>
+                        <div class="notif-label">Activar notificaciones</div>
+                        <div class="notif-sublabel">Notificar cuando salgan nuevos eps</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="notifyEnabled" checked>
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+
+                <div class="notif-setting-row">
+                    <div>
+                        <div class="notif-label">Nuevos episodios</div>
+                        <div class="notif-sublabel">Alerta al detectar un ep nuevo</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="notifyNewEpisode" checked>
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+
+                <div class="notif-setting-row">
+                    <div>
+                        <div class="notif-label">Sonido</div>
+                        <div class="notif-sublabel">Reproducir sonido al notificar</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="soundEnabled" checked>
+                        <div class="toggle-track"></div>
                     </label>
                 </div>
             </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌙</div>
+                    <div>
+                        <div class="card-title">Modo No Molestar</div>
+                        <div class="card-subtitle">Silenciar en horario nocturno</div>
+                    </div>
+                </div>
+
+                <div class="notif-setting-row">
+                    <div>
+                        <div class="notif-label">No molestar</div>
+                        <div class="notif-sublabel">Silenciar de 22:00 a 08:00</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="quietHoursEnabled" checked>
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Watch Party -->
+            <div class="card" style="display:none">
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div>
+                        <div class="card-title">Watch Party</div>
+                        <div class="card-subtitle">Ver anime con amigos en tiempo real</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-top:2px">
+                    <button class="btn-sm btn-play" style="flex:1; padding: 9px; font-size:12px" id="createPartyBtn">
+                        ＋ Crear Sala
+                    </button>
+                    <button class="btn-sm btn-ghost" style="flex:1; padding: 9px; font-size:12px" id="joinPartyBtn">
+                        🔗 Unirse
+                    </button>
+                </div>
+
+                <div id="party-status"
+                    style="display:none; margin-top:10px; background:var(--bg-3); border-radius:8px; padding:8px 10px;">
+                    <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600;">
+                        <span style="color:var(--green)">● En vivo</span>
+                        <span style="color:var(--text-3)">·</span>
+                        <span id="party-members">0 miembros</span>
+                        <button id="copyCodeBtn"
+                            style="margin-left:auto; background:var(--orange-soft); border:1px solid var(--orange); border-radius:6px; padding:2px 8px; font-size:10px; color:var(--orange); cursor:pointer; font-weight:700; font-family:Outfit,sans-serif;">
+                            Copiar código
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Status Bar -->
+            <div class="card" style="margin-top: 12px;">
+                <div class="card-header">
+                    <div class="card-icon">📡</div>
+                    <div>
+                        <div class="card-title">Estado de Fuentes</div>
+                        <div class="card-subtitle">Salud de las APIs de detección</div>
+                    </div>
+                </div>
+                <div class="api-status-bar" id="api-status-bar">
+                    <div class="api-status-item">
+                        <span class="status-icon" id="rss-status-icon">⏳</span>
+                        <span class="status-name">RSS</span>
+                        <span id="rss-status-text">Sin datos</span>
+                    </div>
+                    <div class="api-status-item">
+                        <span class="status-icon" id="anilist-status-icon">⏳</span>
+                        <span class="status-name">AniList</span>
+                        <span id="anilist-status-text">Sin datos</span>
+                    </div>
+                </div>
+                <div class="api-last-check" id="api-last-check">Aún no verificado</div>
+            </div>
+
         </div>
 
-        <div class="feature-card">
-            <div class="feature-header">
-                <div class="feature-icon icon-pip">📺</div>
-                <div class="feature-title">__MSG_mini_player_title__</div>
-            </div>
-            <div class="feature-description">
-                __MSG_mini_player_description__
-            </div>
-            <div class="feature-controls">
-                <div class="switch-container">
-                    <span class="switch-label">__MSG_enable_mini_player__</span>
-                    <label class="switch" id="mini-player-switch">
-                        <input type="checkbox" id="miniPlayer" />
-                        <div class="switch-thumb"></div>
-                    </label>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- ============================================ -->
-    <!-- SECCIÓN DE ANIMES SEGUIDOS                   -->
-    <!-- ============================================ -->
-    <style>
-        /* Anime Tracking Section */
-        .followed-section {
-            margin-top: 8px;
-        }
-
-        .followed-section .section-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .followed-section .section-icon {
-            font-size: 18px;
-        }
-
-        .stats-summary {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 14px;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #FF6B35;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .icon-button {
-            background: rgba(255, 107, 53, 0.2);
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.25s;
-        }
-
-        .icon-button:hover {
-            background: rgba(255, 107, 53, 0.4);
-            transform: rotate(180deg);
-        }
-
-        .anime-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 260px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        /* Manage All Button */
-        .manage-all-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #2196F3 0%, #42A5F5 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 14px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
-            margin-top: 12px;
-        }
-
-        .manage-all-btn:hover {
-            background: linear-gradient(135deg, #42A5F5 0%, #64B5F6 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
-        }
-
-        .manage-all-btn:active {
-            transform: translateY(0);
-        }
-
-        .manage-all-btn .btn-arrow {
-            font-size: 16px;
-            transition: transform 0.3s;
-        }
-
-        .manage-all-btn:hover .btn-arrow {
-            transform: translateX(4px);
-        }
-
-        .anime-count-badge {
-            background: rgba(255, 255, 255, 0.25);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .anime-list::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .anime-list::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-        }
-
-        .anime-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 107, 53, 0.5);
-            border-radius: 3px;
-        }
-
-        .anime-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #1a2332;
-            border-radius: 10px;
-            padding: 10px 12px;
-            border: 1px solid #2a3441;
-            transition: all 0.25s;
-            border-left: 3px solid transparent;
-        }
-
-        .anime-item:hover {
-            background: rgba(255, 107, 53, 0.08);
-            transform: translateX(3px);
-        }
-
-        .anime-item.has-new {
-            border-left-color: #FF6B35;
-            background: rgba(255, 107, 53, 0.12);
-        }
-
-        .anime-thumb {
-            width: 46px;
-            height: 64px;
-            object-fit: cover;
-            border-radius: 6px;
-            flex-shrink: 0;
-            background: #2a3441;
-        }
-
-        .anime-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .anime-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: white;
-            margin: 0 0 3px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .ep-status {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            margin: 0;
-        }
-
-        .ep-status.new-ep {
-            color: #FF6B35;
-            font-weight: 600;
-        }
-
-        .new-badge {
-            background: #FF6B35;
-            color: white;
-            padding: 1px 5px;
-            border-radius: 4px;
-            font-size: 10px;
-            margin-left: 4px;
-            font-weight: 700;
-        }
-
-        .anime-thumb-container {
-            position: relative;
-            flex-shrink: 0;
-            line-height: 0;
-        }
-
-        .anime-new-badge-thumb {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #FF6B35;
-            color: white;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            border: 2px solid #1a2332;
-            z-index: 2;
-        }
-
-        .anime-actions {
-            display: flex;
-            gap: 5px;
-            flex-shrink: 0;
-        }
-
-        .btn-watch {
-            background: linear-gradient(135deg, #FF6B35, #FF8C5A);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 5px 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-watch:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
-        }
-
-        .btn-unfollow {
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 6px;
-            padding: 5px 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-unfollow:hover {
-            background: rgba(255, 59, 48, 0.2);
-            border-color: rgba(255, 59, 48, 0.5);
-            color: #ff453a;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 30px 16px;
-        }
-
-        .empty-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            opacity: 0.5;
-        }
-
-        .empty-state p {
-            color: rgba(255, 255, 255, 0.5);
-            margin: 6px 0;
-            font-size: 13px;
-        }
-
-        .empty-hint {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.35);
-            max-width: 260px;
-            margin: 8px auto 0;
-        }
-
-        .notif-settings {
-            margin-top: 18px;
-            padding-top: 16px;
-            border-top: 1px solid #2a3441;
-        }
-
-        .notif-settings h3 {
-            font-size: 13px;
-            color: white;
-            margin: 0 0 12px;
-            font-weight: 600;
-        }
-
-        .setting-row {
-            margin-bottom: 10px;
-        }
-
-        .setting-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 13px;
-            transition: color 0.2s;
-        }
-
-        .setting-label:hover {
-            color: white;
-        }
-
-        .setting-label input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: #FF6B35;
-        }
-
-        .popup-toast {
-            position: fixed;
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #FF6B35, #FF8C5A);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
-            z-index: 10000;
-            display: none;
-            animation: popupSlideUp 0.3s ease;
-        }
-
-        @keyframes popupSlideUp {
-            from {
-                transform: translateX(-50%) translateY(60px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-    </style>
-
-    <div class="content followed-section">
-        <div class="section-header">
-            <span class="section-icon">📺</span>
-            <span>ANIMES SEGUIDOS</span>
-        </div>
-
-        <div class="stats-summary">
-            <div class="stat-item">
-                <span class="stat-number" id="totalFollowed">0</span>
-                <span class="stat-label">Siguiendo</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="newEpisodes">0</span>
-                <span class="stat-label">Nuevos</span>
-            </div>
-            <div class="stat-item">
-                <button id="manualCheckBtn" class="icon-button" title="Verificar ahora">🔄</button>
-            </div>
-        </div>
-
-        <div class="anime-list" id="animeList"></div>
-
-        <div class="empty-state" id="emptyState" style="display:none;">
-            <div class="empty-icon">📺</div>
-            <p>No estás siguiendo ningún anime</p>
-            <p class="empty-hint">Visita la página de un anime y haz click en "Seguir Anime" para recibir notificaciones
-                de nuevos episodios.</p>
-        </div>
-
-        <!-- Botón Administrar Todos -->
-        <button id="openManageAnimesBtn" class="manage-all-btn" style="display: none;">
-            <span>📋</span>
-            <span>Administrar Todos los Animes</span>
-            <span class="anime-count-badge" id="animeCountBadge">0</span>
-            <span class="btn-arrow">→</span>
+    <!-- ═══════════════════════════════════ TAB BAR ═══ -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="home">
+            <span class="tab-icon">🏠</span>
+            <span>Inicio</span>
         </button>
+        <button class="tab-btn" data-tab="following">
+            <span class="tab-icon">📺</span>
+            <span>Siguiendo</span>
+            <span class="tab-badge" id="new-badge" style="display:none">0</span>
+        </button>
+        <button class="tab-btn" data-tab="settings">
+            <span class="tab-icon">⚙️</span>
+            <span>Funciones</span>
+        </button>
+        <button class="tab-btn" data-tab="notifs">
+            <span class="tab-icon">🔔</span>
+            <span>Alertas</span>
+        </button>
+    </div>
 
-        <div class="notif-settings">
-            <h3>⚙️ Configuración de Notificaciones</h3>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="notifyEnabled"
-                        checked><span>Activar notificaciones</span></label></div>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="quietHoursEnabled"
-                        checked><span>Modo "No molestar" (22:00 - 08:00)</span></label></div>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="notifyNewEpisode"
-                        checked><span>Notificar nuevos episodios</span></label></div>
-            <div class="setting-row"><label class="setting-label"><input type="checkbox" id="soundEnabled"
-                        checked><span>Sonido en notificaciones</span></label></div>
-        </div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
-        <div class="notif-settings">
-        </div>
-
-        <div class="footer">
-            __MSG_app_title__ <span class="version">v1.6.32</span> — __MSG_footer_text__
-        </div>
-
-        <script src="popup.js"></script>
+    <script src="popup.js"></script>
 </body>
 
 </html>
