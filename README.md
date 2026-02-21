@@ -22,10 +22,11 @@
 - **Filtros de calendario**: Organiza y filtra el contenido del calendario de emisión
 - **Fechas de emisión**: Muestra la fecha del próximo episodio directamente en la página
 
-### 🔔 Sistema de Seguimiento de Animes (NUEVO)
-- **Botón de seguir**: Botón "Seguir Anime" inyectado en páginas de series en Crunchyroll
-- **Detección automática de nuevos episodios**: Verificación cada 30 minutos usando la API de AniList (gratuita, sin autenticación)
-- **Notificaciones de escritorio**: Alertas con botones "Ver ahora" / "Ver después" cuando sale un nuevo episodio
+### 🔔 Sistema de Seguimiento de Animes Inteligente (Híbrido)
+- **Detección en tiempo real**: Utiliza el feed RSS oficial de Crunchyroll como fuente primaria para avisar de nuevos episodios al instante.
+- **Fallback con AniList**: Respaldo automático con la API de AniList en caso de que un episodio no aparezca en el RSS, asegurando fiabilidad total.
+- **Indicadores de fuente**: Visualiza de dónde proviene la información de un anime (🟢 RSS, 🟡 AniList, 🔴 Sin datos recientes).
+- **Notificaciones directas**: Alertas con botones "Ver ahora" / "Ver después" que abren el episodio directamente desde la notificación.
 - **Panel de gestión en el popup**: Lista de animes seguidos con thumbnails, estado de episodios y acciones rápidas
 - **Configuración de notificaciones**: Activar/desactivar, horario de "No molestar" (22:00-08:00), sonido
 - **Verificación manual**: Botón 🔄 para comprobar nuevos episodios al instante
@@ -58,6 +59,7 @@ crunchyroll-power-up/
 │   ├── miniplayer.js          # Mini reproductor flotante
 │   ├── pipControl.js          # Control Picture-in-Picture
 │   └── screenSizeButtons.js   # Botones de tamaño de pantalla
+├── rss-parser.js              # Módulo parser independiente para el feed RSS
 ├── utils/
 │   └── aniskip.js             # Integración con AniSkip API
 ├── css/                       # Hojas de estilo adicionales
@@ -79,9 +81,10 @@ crunchyroll-power-up/
 
 ## 🌐 APIs Utilizadas
 
-- **AniList GraphQL** (`graphql.anilist.co`) — Detectar nuevos episodios de animes en emisión (gratuita, sin auth)
-- **AniSkip API** — Obtener timestamps de intros/endings para salto automático
-- **Chrome Extensions API** — Storage, Notifications, Alarms, Tabs
+- **Crunchyroll RSS Feed** (`feeds.feedburner.com/crunchyroll/rss/anime`) — Detección inmediata y precisa de nuevos episodios (Fuente primaria).
+- **AniList GraphQL** (`graphql.anilist.co`) — Metadatos y respaldo de calendario para animes en emisión (Fuente secundaria).
+- **AniSkip API** — Obtener timestamps de intros/endings para salto automático.
+- **Chrome Extensions API** — Storage, Notifications, Alarms, Tabs.
 
 ## 🔧 Versión
 
