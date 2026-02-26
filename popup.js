@@ -345,7 +345,7 @@ function setAppVersion() {
     const manifest = chrome.runtime.getManifest();
     const verEl = document.getElementById('appVersion');
     if (verEl && manifest.version) {
-        verEl.textContent = `v${manifest.version} · Power Up`;
+        verEl.textContent = `v${manifest.version}`;
     }
 }
 

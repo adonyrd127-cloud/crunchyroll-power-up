@@ -117,6 +117,8 @@
             this.isFollowing = false;
             this.injected = false;
             this.lastUrl = location.href;
+            this._injectionInterval = null;
+            this._watchdogInterval = null;
         }
 
         init() {
@@ -128,6 +130,7 @@
             // Try to inject on current page
             if (this.isSeriesPage()) {
                 this.scheduleInjection();
+                this.startWatchdog();
             }
 
             // Watch for SPA navigation via URL changes
@@ -164,38 +167,85 @@
             if (this.isSeriesPage()) {
                 console.log('🔔 CPU Follow: Navegación a página de serie detectada');
                 this.scheduleInjection();
+                this.startWatchdog();
+            } else {
+                this.stopWatchdog();
             }
         }
 
         cleanup() {
             const existing = document.getElementById('powerup-follow-btn');
-            if (existing) existing.remove();
+            if (existing) {
+                // Remove the wrapper (parent) too
+                const wrapper = existing.parentElement;
+                if (wrapper && wrapper !== document.body) wrapper.remove();
+                else existing.remove();
+            }
             this.button = null;
             this.injected = false;
+            if (this._injectionInterval) {
+                clearInterval(this._injectionInterval);
+                this._injectionInterval = null;
+            }
+        }
+
+        // Watchdog: re-injects the button if Crunchyroll's React re-render
+        // destroyed the container where the button was attached
+        startWatchdog() {
+            this.stopWatchdog();
+            this._watchdogInterval = setInterval(() => {
+                if (!this.isSeriesPage()) {
+                    this.stopWatchdog();
+                    return;
+                }
+                // If we previously injected but the button is no longer in the DOM
+                const btn = document.getElementById('powerup-follow-btn');
+                if (!btn && this.injected) {
+                    console.log('🔔 CPU Follow: Botón desapareció del DOM — re-inyectando...');
+                    this.injected = false;
+                    this.button = null;
+                    this.scheduleInjection();
+                }
+            }, 2000);
+        }
+
+        stopWatchdog() {
+            if (this._watchdogInterval) {
+                clearInterval(this._watchdogInterval);
+                this._watchdogInterval = null;
+            }
         }
 
         scheduleInjection() {
+            // Prevent duplicate intervals
+            if (this._injectionInterval) {
+                clearInterval(this._injectionInterval);
+            }
+
             // Wait for the page to render the hero section
             let attempts = 0;
             const maxAttempts = 25;
 
-            const check = setInterval(async () => {
+            this._injectionInterval = setInterval(async () => {
                 attempts++;
                 if (attempts > maxAttempts) {
-                    clearInterval(check);
+                    clearInterval(this._injectionInterval);
+                    this._injectionInterval = null;
                     console.warn('🔔 CPU Follow: No se encontró contenedor tras', maxAttempts, 'intentos');
                     return;
                 }
 
                 // Don't inject twice
                 if (document.getElementById('powerup-follow-btn')) {
-                    clearInterval(check);
+                    clearInterval(this._injectionInterval);
+                    this._injectionInterval = null;
                     return;
                 }
 
                 const container = this.findContainer();
                 if (container) {
-                    clearInterval(check);
+                    clearInterval(this._injectionInterval);
+                    this._injectionInterval = null;
                     await this.createButton(container);
                 }
             }, 500);
@@ -243,7 +293,7 @@
                 }
 
                 // Check if already following
-                const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
+                const { followedAnimes = [] } = await chrome.storage.local.get('followedAnimes');
                 this.isFollowing = followedAnimes.some(a => a.id === this.currentAnimeData.id);
 
                 // Create wrapper for button + note
@@ -301,12 +351,12 @@
 
         async toggleFollow() {
             try {
-                const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
+                const { followedAnimes = [] } = await chrome.storage.local.get('followedAnimes');
 
                 if (this.isFollowing) {
                     // ---- Unfollow ----
                     const updated = followedAnimes.filter(a => a.id !== this.currentAnimeData.id);
-                    await chrome.storage.sync.set({ followedAnimes: updated });
+                    await chrome.storage.local.set({ followedAnimes: updated });
                     this.isFollowing = false;
                     this.button.classList.remove('active');
                     this.updateButtonContent();
@@ -322,7 +372,7 @@
                         lastChecked: Date.now()
                     };
                     followedAnimes.push(newAnime);
-                    await chrome.storage.sync.set({ followedAnimes });
+                    await chrome.storage.local.set({ followedAnimes });
                     this.isFollowing = true;
                     this.button.classList.add('active');
                     this.updateButtonContent();

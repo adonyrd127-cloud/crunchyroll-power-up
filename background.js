@@ -4,6 +4,13 @@
 // Load RSS parser module
 importScripts('rss-parser.js');
 
+// Load AniList sync modules
+importScripts(
+  'js/anilist/anilist-auth.js',
+  'js/anilist/anilist-api.js',
+  'js/anilist/anilist-sync.js'
+);
+
 // Configuración predeterminada compatible con el formato del repositorio original
 // Configuración predeterminada simplificada (camelCase)
 const defaultSettings = {
@@ -274,6 +281,125 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error('Error en verificación manual:', err);
         sendResponse({ success: false, error: err.message });
       });
+      return true;
+
+    // Cache for per-tab page info (from main frame DOM extraction)
+    case 'anilist_page_info': {
+      // Store episode info sent by the tracker in the main frame
+      const tabId = sender.tab?.id;
+      if (tabId) {
+        if (!globalThis._tabPageInfo) globalThis._tabPageInfo = {};
+        globalThis._tabPageInfo[tabId] = {
+          episodeNumber: message.episodeNumber || 0,
+          seriesTitle: message.seriesTitle || '',
+          timestamp: Date.now()
+        };
+        console.log(`[AniList] Cached page info for tab ${tabId}:`, globalThis._tabPageInfo[tabId]);
+      }
+      sendResponse({ success: true });
+      break;
+    }
+
+    case 'anilist_save_token':
+      AniListAuth.saveToken(message.token)
+        .then(viewer => {
+          sendResponse({ success: true, viewer });
+        })
+        .catch(error => {
+          console.error('[AniList] Error guardando token:', error);
+          sendResponse({ success: false, error: error.message });
+        });
+      return true;
+
+    case 'anilist_logout':
+      AniListAuth.logout()
+        .then(() => sendResponse({ success: true }))
+        .catch(error => sendResponse({ success: false, error: error.message }));
+      return true;
+
+    case 'anilist_episode_progress': {
+      // Extract episode info from tab URL (since content script may be in cross-origin iframe)
+      const tabUrl = sender.tab?.url || '';
+      const tabTitle = sender.tab?.title || '';
+      const tabId = sender.tab?.id;
+
+      // Check cached page info from main frame DOM
+      const cachedInfo = (globalThis._tabPageInfo && tabId) ? globalThis._tabPageInfo[tabId] : null;
+
+      console.log('[AniList] Tab info:', { url: tabUrl, title: tabTitle, cached: cachedInfo });
+
+      // Extract seriesId from URL: /watch/XXXXXXX/... or /es/watch/XXXXXXX/...
+      const idMatch = tabUrl.match(/\/watch\/([A-Z0-9]+)/i);
+      const seriesId = message.seriesId || (idMatch ? idMatch[1] : '');
+
+      // Episode number: prefer cached (from DOM), then URL, then title
+      let episodeNumber = message.episodeNumber || (cachedInfo?.episodeNumber) || 0;
+      if (!episodeNumber) {
+        const epMatch = tabUrl.match(/episode[s]?[-_]?(\d+)/i);
+        if (epMatch) episodeNumber = parseInt(epMatch[1], 10);
+      }
+      if (!episodeNumber) {
+        const epShort = tabUrl.match(/\/e[-_]?(\d+)/i);
+        if (epShort) episodeNumber = parseInt(epShort[1], 10);
+      }
+      // Fallback: extract from tab title
+      // Crunchyroll uses formats like: "E4 –", "Episode 4", "Episodio 4", "Ep 4", "Ep. 4", "Cap 4"
+      if (!episodeNumber && tabTitle) {
+        const patterns = [
+          /\bS\d+\s*E(\d+)\b/i,              // S1E4
+          /\bEp\.?\s*(\d+)\b/i,              // Ep.4, Ep 4
+          /\bE(\d+)\s*[-–—]/i,               // E4 –  (before dash)
+          /\bE(\d+)\s/i,                      // E4 followed by space
+          /\b(?:Episode|Episodio)\s+(\d+)/i,  // Episode 4, Episodio 4
+          /\b(?:Cap[íi]tulo|Cap\.?)\s*(\d+)/i // Capítulo 4, Cap 4, Cap. 4
+        ];
+        for (const pattern of patterns) {
+          const m = tabTitle.match(pattern);
+          if (m) {
+            episodeNumber = parseInt(m[1], 10);
+            console.log(`[AniList] Episodio extraído del título: ${episodeNumber} (patrón: ${pattern})`);
+            break;
+          }
+        }
+      }
+
+      // Series title: prefer cached (from DOM), then tab title
+      let seriesTitle = message.seriesTitle || (cachedInfo?.seriesTitle) || '';
+      if (!seriesTitle && tabTitle) {
+        seriesTitle = tabTitle
+          .replace(/\s*[-–—]\s*(Watch|Ver|Crunchyroll).*$/i, '')
+          .replace(/\s*(Episode|Episodio)\s*\d+.*/i, '')
+          .replace(/\s*[-–—]\s*Vi.*$/i, '')
+          .trim();
+      }
+
+      if (!seriesId) {
+        console.warn('[AniList] No se pudo extraer seriesId de la URL:', tabUrl);
+        sendResponse({ success: false, error: 'No seriesId' });
+        return true;
+      }
+
+      console.log(`[AniList] Progreso detectado: "${seriesTitle}" Ep.${episodeNumber} (ID: ${seriesId})`);
+
+      AniListSync.handleEpisodeProgress({
+        seriesId,
+        seriesTitle,
+        episodeNumber,
+        currentTime: message.currentTime,
+        duration: message.duration
+      }).then(() => {
+        sendResponse({ success: true });
+      }).catch(error => {
+        console.error('[AniList] Error en episode progress:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+      return true;
+    }
+
+    case 'anilist_manual_sync':
+      AniListSync.syncAllWatched()
+        .then(result => sendResponse({ success: true, ...result }))
+        .catch(error => sendResponse({ success: false, error: error.message }));
       return true;
 
     default:

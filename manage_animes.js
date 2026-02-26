@@ -20,9 +20,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadAllAnimes();
     setupEventListeners();
-    // The following lines are removed as per instruction:
-    // applyFiltersAndSearch();
-    // document.getElementById('loadingState').style.display = 'none';
+
+    // Listen for background updates to refresh UI live
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.followedAnimes) {
+            allAnimes = changes.followedAnimes.newValue || [];
+            applyFiltersAndSearch();
+        }
+    });
 });
 
 // ============================================
@@ -31,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadAllAnimes() {
     try {
-        const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
+        const { followedAnimes = [] } = await chrome.storage.local.get('followedAnimes');
         allAnimes = followedAnimes;
 
         console.log(`✅ ${allAnimes.length} animes cargados`);
@@ -138,6 +143,34 @@ function setupEventListeners() {
         document.getElementById('animesGrid').classList.add('list-view');
         renderAnimes();
     });
+
+    // Optimización 2: Event Delegation (Un solo listener para TODAS las tarjetas)
+    document.getElementById('animesGrid')?.addEventListener('click', async (e) => {
+        const watchBtn = e.target.closest('.watch');
+        const unfollowBtn = e.target.closest('.unfollow');
+
+        if (watchBtn) {
+            e.stopPropagation();
+            const animeUrl = watchBtn.dataset.url;
+
+            // Encontrar el animeID a partir de la tarjeta padre
+            const card = watchBtn.closest('.anime-card');
+            const animeId = card ? card.dataset.animeId : null;
+
+            if (animeId) {
+                await onClickVer(animeId);
+            }
+        }
+        else if (unfollowBtn) {
+            e.stopPropagation();
+            const animeId = unfollowBtn.dataset.id;
+            const cardElement = unfollowBtn.closest('.anime-card');
+
+            if (animeId) {
+                await unfollowAnime(animeId, cardElement);
+            }
+        }
+    });
 }
 
 // ============================================
@@ -205,12 +238,22 @@ function sortAnimes() {
             break;
         case 'new':
             filteredAnimes.sort((a, b) => {
-                if (a.hasNewEpisode && !b.hasNewEpisode) return -1;
-                if (!a.hasNewEpisode && b.hasNewEpisode) return 1;
-                return (b.addedDate || 0) - (a.addedDate || 0);
+                const aNew = a.newEpisodes || 0;
+                const bNew = b.newEpisodes || 0;
+                if (bNew !== aNew) return bNew - aNew;
+                return (b.lastChecked || 0) - (a.lastChecked || 0);
             });
             break;
     }
+
+    // Always sort items with new episodes first
+    filteredAnimes.sort((a, b) => {
+        const aNew = a.newEpisodes || 0;
+        const bNew = b.newEpisodes || 0;
+        if (aNew > 0 && bNew === 0) return -1;
+        if (bNew > 0 && aNew === 0) return 1;
+        return 0; // preserve current sorting for equal items
+    });
 }
 
 // ============================================
@@ -233,11 +276,17 @@ function renderAnimes() {
     // Clear grid
     grid.innerHTML = '';
 
+    // Optimización 3: Document Fragment para redibujado instantáneo (0 reflows)
+    const fragment = document.createDocumentFragment();
+
     // Create cards
     filteredAnimes.forEach(anime => {
         const card = createAnimeCard(anime);
-        grid.appendChild(card);
+        fragment.appendChild(card);
     });
+
+    // Inyección atómica al DOM real
+    grid.appendChild(fragment);
 }
 
 function createAnimeCard(anime) {
@@ -245,11 +294,40 @@ function createAnimeCard(anime) {
     card.className = 'anime-card';
     card.dataset.animeId = anime.id;
 
-    const hasNew = anime.newEpisodes > 0 || anime.hasNewEpisode;
-    let countText = anime.newEpisodes > 0 ? anime.newEpisodes : 'NUEVO';
+    const newEps = anime.newEpisodes || 0;
+    const hasNew = newEps > 0;
 
     if (hasNew) {
         card.classList.add('has-new');
+    }
+
+    let overlayHtml = '';
+    let pillHtml = '';
+    let newEpisodesTextHtml = '';
+
+    if (hasNew) {
+        overlayHtml = `
+            <div class="shimmer"></div>
+            <div class="new-ribbon">NUEVO</div>
+        `;
+        pillHtml = `
+            <div class="new-pill-wrapper">
+                <div class="new-pill">
+                    🆕 <span>+${newEps} ep${newEps > 1 ? 's' : ''}</span>
+                </div>
+                <div class="badge-count">${newEps}</div>
+            </div>
+        `;
+        newEpisodesTextHtml = `
+            <span class="ep-seen">Visto hasta: Ep. ${Math.floor(anime.lastEpisode || 0)}</span>
+            <span class="ep-new-label">✨ Ep. ${Math.floor(anime.lastEpisode || 0) + newEps} disponible${newEps > 1 ? 's' : ''}!</span>
+        `;
+    } else {
+        newEpisodesTextHtml = `
+            <p class="anime-card-episode">
+                Episodio ${Math.floor(anime.lastEpisode) || '?'}
+            </p>
+        `;
     }
 
     if (currentView === 'list') {
@@ -260,16 +338,15 @@ function createAnimeCard(anime) {
                     alt="${anime.title || 'Anime'}"
                     onerror="this.src='icons/icono chrome.png'"
                 >
+                ${overlayHtml}
             </div>
             <div class="anime-card-content">
                 <div class="anime-card-info">
                     <h3 class="anime-card-title" title="${anime.title || ''}">
                         ${anime.title || 'Sin título'}
-                        ${hasNew ? `<span class="list-new-badge">${countText}</span>` : ''}
+                        ${hasNew ? `<span class="list-new-badge">${newEps}</span>` : ''}
                     </h3>
-                    <p class="anime-card-episode ${hasNew ? 'new-ep' : ''}">
-                        Episodio ${anime.lastEpisode || '?'}
-                    </p>
+                    ${newEpisodesTextHtml}
                 </div>
                 <div class="anime-card-actions">
                     <button class="anime-card-btn watch" data-url="${anime.url}">▶️ Ver</button>
@@ -285,13 +362,12 @@ function createAnimeCard(anime) {
                     alt="${anime.title || 'Anime'}"
                     onerror="this.src='icons/icono chrome.png'"
                 >
-                ${hasNew ? `<div class="anime-card-badge">${countText}</div>` : ''}
+                ${overlayHtml}
+                ${pillHtml}
             </div>
             <div class="anime-card-content">
                 <h3 class="anime-card-title" title="${anime.title || ''}">${anime.title || 'Sin título'}</h3>
-                <p class="anime-card-episode ${hasNew ? 'new-ep' : ''}">
-                    Episodio ${anime.lastEpisode || '?'}
-                </p>
+                ${newEpisodesTextHtml}
                 <div class="anime-card-actions">
                     <button class="anime-card-btn watch" data-url="${anime.url}">▶️ Ver</button>
                     <button class="anime-card-btn unfollow" data-id="${anime.id}">🔕 Dejar</button>
@@ -300,20 +376,8 @@ function createAnimeCard(anime) {
         `;
     }
 
-    // Event listeners
-    card.querySelector('.watch')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const url = e.currentTarget.dataset.url;
-        if (url) {
-            chrome.tabs.create({ url });
-        }
-    });
-
-    card.querySelector('.unfollow')?.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const animeId = e.currentTarget.dataset.id;
-        await unfollowAnime(animeId, card);
-    });
+    // Nota: Eliminamos los múltiples addEventListeners individuales de las tarjetas (watch / unfollow)
+    // Ya que ahora utilizamos el sistema de 'Event Delegation' directo sobre el contenedor en setupEventListeners()
 
     return card;
 }
@@ -321,6 +385,38 @@ function createAnimeCard(anime) {
 // ============================================
 // ACTIONS
 // ============================================
+
+async function onClickVer(animeId) {
+    const data = await chrome.storage.local.get('followedAnimes');
+    const followedAnimesArray = data.followedAnimes || [];
+
+    // Convert array to searchable object or find index
+    const index = followedAnimesArray.findIndex(a => a.id === animeId);
+    if (index === -1) return;
+
+    const anime = followedAnimesArray[index];
+    chrome.tabs.create({ url: anime.url });
+
+    // Decrement newEpisodes (min 0) and increment lastEpisode
+    const oldNewEps = anime.newEpisodes || 0;
+    const newCount = Math.max(0, oldNewEps - 1);
+
+    anime.newEpisodes = newCount;
+    // Only increase last episode if there was actually a new episode watched
+    if (oldNewEps > 0) {
+        anime.lastEpisode = (anime.lastEpisode || 0) + 1;
+    }
+
+    if (anime.newEpisodes === 0) {
+        anime.notified = true;
+    }
+
+    // Update storage
+    followedAnimesArray[index] = anime;
+    await chrome.storage.local.set({ followedAnimes: followedAnimesArray });
+
+    // We don't need to manually re-render, the storage.onChanged will catch it!
+}
 
 async function unfollowAnime(animeId, cardElement) {
     const anime = allAnimes.find(a => a.id === animeId);
@@ -331,9 +427,9 @@ async function unfollowAnime(animeId, cardElement) {
     }
 
     try {
-        const { followedAnimes = [] } = await chrome.storage.sync.get('followedAnimes');
+        const { followedAnimes = [] } = await chrome.storage.local.get('followedAnimes');
         const updated = followedAnimes.filter(a => a.id !== animeId);
-        await chrome.storage.sync.set({ followedAnimes: updated });
+        await chrome.storage.local.set({ followedAnimes: updated });
 
         // Animate card removal
         if (cardElement) {
@@ -365,8 +461,31 @@ function updateStats() {
     document.getElementById('totalAnimesCount').textContent = allAnimes.length;
     document.getElementById('displayedAnimesCount').textContent = filteredAnimes.length;
 
-    const newCount = allAnimes.filter(a => a.hasNewEpisode).length;
-    document.getElementById('newEpisodesCount').textContent = newCount;
+    // Calculate total new episodes
+    const totalNew = allAnimes.reduce((sum, a) => sum + (a.newEpisodes || 0), 0);
+    const newEpisodesCountEl = document.getElementById('newEpisodesCount');
+
+    newEpisodesCountEl.textContent = totalNew;
+    if (totalNew > 0) {
+        newEpisodesCountEl.style.color = '#e74c3c';
+        newEpisodesCountEl.style.fontWeight = '800';
+    } else {
+        newEpisodesCountEl.style.color = 'white';
+        newEpisodesCountEl.style.fontWeight = '700';
+    }
+
+    // Update global badge
+    const globalBadge = document.getElementById('globalNewBadge');
+    const globalCountEl = document.getElementById('globalNewCount');
+
+    if (globalBadge && globalCountEl) {
+        if (totalNew > 0) {
+            globalCountEl.textContent = totalNew;
+            globalBadge.style.display = 'flex';
+        } else {
+            globalBadge.style.display = 'none';
+        }
+    }
 }
 
 // ============================================

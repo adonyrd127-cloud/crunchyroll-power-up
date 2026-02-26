@@ -452,6 +452,15 @@ class SkippersHandler {
     checkSkippers() {
         if (!this.videoElement) return;
 
+        // Re-detect video if the current reference is stale/detached
+        if (!this.videoElement.isConnected || (this.videoElement.currentTime === 0 && this.videoElement.readyState === 0)) {
+            const freshVideo = document.querySelector('video');
+            if (freshVideo && freshVideo !== this.videoElement) {
+                console.log("Crunchyroll Power Up: Video re-detectado (referencia anterior estaba stale)");
+                this.videoElement = freshVideo;
+            }
+        }
+
         const currentTime = this.videoElement.currentTime;
         let activeSkipper = null;
 

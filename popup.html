@@ -1000,6 +1000,423 @@
             display: inline-block;
             animation: spin 1s linear infinite;
         }
+
+        /* ─── ANILIST SECTION ─── */
+        :root {
+            --al-blue: #02a9ff;
+            --al-blue-soft: rgba(2, 169, 255, 0.12);
+            --al-blue-glow: rgba(2, 169, 255, 0.25);
+            --al-bg-card: #161b22;
+            --al-bg-section: #0d1117;
+            --al-border: #1c2333;
+        }
+
+        #tab-anilist {
+            background: var(--al-bg-section);
+        }
+
+        .al-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 4px 0;
+        }
+
+        .al-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .al-step-num {
+            width: 28px;
+            height: 28px;
+            background: var(--al-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .al-step-text {
+            flex: 1;
+            font-size: 12px;
+            color: var(--text-2);
+            line-height: 1.5;
+        }
+
+        .al-step-text strong {
+            color: var(--text-1);
+        }
+
+        .al-link {
+            color: var(--al-blue);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .al-link:hover {
+            color: #33bbff;
+        }
+
+        .al-connect-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .al-token-input {
+            flex: 1;
+            background: var(--al-bg-card);
+            border: 1px solid var(--al-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-1);
+            font-size: 12px;
+            font-family: 'Outfit', monospace;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .al-token-input:focus {
+            border-color: var(--al-blue);
+        }
+
+        .al-token-input::placeholder {
+            color: var(--text-3);
+        }
+
+        .al-connect-btn {
+            background: var(--al-blue);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .al-connect-btn:hover {
+            background: #1ab5ff;
+            transform: translateY(-1px);
+        }
+
+        .al-connect-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .al-error {
+            color: #ef4444;
+            font-size: 11px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .al-user-card {
+            background: var(--al-bg-card);
+            border: 1px solid var(--al-border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .al-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--al-blue);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .al-avatar-fallback {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--al-blue);
+            background: linear-gradient(135deg, var(--al-blue), #0077cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .al-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .al-username {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-1);
+        }
+
+        .al-user-stat {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .al-disconnect-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .al-disconnect-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .al-toggles-card {
+            background: var(--al-bg-card);
+            border: 1px solid var(--al-border);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .al-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .al-toggle-row+.al-toggle-row {
+            border-top: 1px solid var(--al-border);
+            margin-top: 6px;
+            padding-top: 12px;
+        }
+
+        .al-toggle-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .al-toggle {
+            position: relative;
+            width: 38px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .al-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .al-toggle-track {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-4);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .al-toggle-track::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .al-toggle input:checked+.al-toggle-track {
+            background: var(--al-blue);
+        }
+
+        .al-toggle input:checked+.al-toggle-track::after {
+            transform: translateX(18px);
+        }
+
+        .al-banner {
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            animation: al-slide-in 0.3s ease;
+        }
+
+        @keyframes al-slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .al-banner.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            display: flex;
+        }
+
+        .al-banner.warning {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            color: #eab308;
+            display: flex;
+        }
+
+        .al-banner.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            display: flex;
+        }
+
+        .al-history-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-3);
+            padding: 4px 0 6px;
+        }
+
+        .al-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .al-history-item {
+            background: var(--al-bg-card);
+            border: 1px solid var(--al-border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .al-history-item:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .al-h-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .al-h-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .al-h-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .al-h-time {
+            font-size: 10px;
+            color: var(--text-3);
+            margin-top: 1px;
+        }
+
+        .al-h-badge {
+            background: var(--al-blue-soft);
+            color: var(--al-blue);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .al-h-badge.completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .al-history-empty {
+            text-align: center;
+            padding: 16px;
+            font-size: 12px;
+            color: var(--text-3);
+        }
+
+        .al-sync-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--al-blue), #0077cc);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 11px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .al-sync-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--al-blue-glow);
+        }
+
+        .al-sync-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ─── END ANILIST ─── */
     </style>
 </head>
 
@@ -1010,8 +1427,8 @@
         <div class="brand">
             <img src="icons/icono chrome.png" alt="Logo" class="brand-logo">
             <div class="brand-text">
-                <div class="name">Crunchy<span>+</span> Plus</div>
-                <div class="tag" id="appVersion">v1.6.32 · Power Up</div>
+                <div class="name">Crunchyroll <span>Power Up</span></div>
+                <div class="tag" id="appVersion" style="text-align: center;">v1.6.32</div>
             </div>
         </div>
         <div class="header-status">
@@ -1363,6 +1780,100 @@
 
         </div>
 
+        <!-- ───────── TAB: ANILIST ───────── -->
+        <div class="tab-pane" id="tab-anilist">
+
+            <!-- STATE 1: Not Connected -->
+            <div id="alConnectView">
+                <div class="card" style="background: var(--al-bg-card); border-color: var(--al-border);">
+                    <div class="card-header">
+                        <div class="card-icon" style="background: var(--al-blue-soft);">
+                            <span style="font-size: 16px;">📡</span>
+                        </div>
+                        <div>
+                            <div class="card-title">Conectar AniList</div>
+                            <div class="card-subtitle">Sincroniza tu progreso automáticamente</div>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 12px; color: var(--text-2); line-height: 1.6; margin: 8px 0 14px;">
+                        Al conectar tu cuenta, los episodios que veas en Crunchyroll se marcarán como vistos en AniList
+                        automáticamente.
+                    </p>
+
+                    <button class="al-sync-btn" id="alOAuthBtn" style="margin-bottom: 12px;">
+                        <span>🔗</span>
+                        <span>Conectar con AniList</span>
+                    </button>
+
+                    <p style="font-size: 10px; color: var(--text-3); text-align: center; line-height: 1.4;">
+                        Se abrirá AniList para que autorices la conexión.<br>
+                        El token se captura automáticamente.
+                    </p>
+
+                    <!-- Fallback: manual token input -->
+                    <details style="margin-top: 12px;">
+                        <summary style="font-size: 11px; color: var(--text-3); cursor: pointer; user-select: none;">
+                            ¿Problemas? Ingresa tu token manualmente
+                        </summary>
+                        <div style="margin-top: 8px;">
+                            <div class="al-connect-form">
+                                <input type="password" class="al-token-input" id="alTokenInput"
+                                    placeholder="Pega tu token aquí..." autocomplete="off" spellcheck="false">
+                                <button class="al-connect-btn" id="alConnectBtn">Conectar</button>
+                            </div>
+                            <div class="al-error" id="alError"></div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <!-- STATE 2: Connected -->
+            <div id="alConnectedView" style="display: none;">
+                <div class="al-user-card" id="alUserCard">
+                    <div class="al-avatar-fallback" id="alAvatarFallback">?</div>
+                    <div class="al-user-info">
+                        <div class="al-username" id="alUsername">—</div>
+                        <div class="al-user-stat" id="alUserStat">—</div>
+                    </div>
+                    <button class="al-disconnect-btn" id="alDisconnectBtn">Desconectar</button>
+                </div>
+
+                <div class="al-toggles-card">
+                    <div class="al-toggle-row">
+                        <span class="al-toggle-label">🔄 Sync automático</span>
+                        <label class="al-toggle">
+                            <input type="checkbox" id="alSyncEnabled" checked>
+                            <div class="al-toggle-track"></div>
+                        </label>
+                    </div>
+                    <div class="al-toggle-row">
+                        <span class="al-toggle-label">🔔 Notificaciones</span>
+                        <label class="al-toggle">
+                            <input type="checkbox" id="alNotifEnabled" checked>
+                            <div class="al-toggle-track"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="al-banner" id="alBanner">
+                    <span id="alBannerIcon"></span>
+                    <span id="alBannerText"></span>
+                </div>
+
+                <div class="al-history-title">Últimas sincronizaciones</div>
+                <div class="al-history-list" id="alHistoryList">
+                    <div class="al-history-empty">Sin sincronizaciones aún</div>
+                </div>
+
+                <button class="al-sync-btn" id="alSyncAllBtn">
+                    <span>🔄</span>
+                    <span>Sincronizar todo ahora</span>
+                </button>
+            </div>
+
+        </div>
+
     </div>
 
     <!-- ═══════════════════════════════════ TAB BAR ═══ -->
@@ -1384,12 +1895,17 @@
             <span class="tab-icon">🔔</span>
             <span>Alertas</span>
         </button>
+        <button class="tab-btn" data-tab="anilist">
+            <span class="tab-icon">📡</span>
+            <span>AniList</span>
+        </button>
     </div>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script src="popup.js"></script>
+    <script src="js/anilist/anilist-popup.js"></script>
 </body>
 
 </html>
